@@ -6,6 +6,8 @@ namespace Aggregator.Persistence
     /// <summary>
     /// Interface for an event store implementation.
     /// </summary>
+    /// <typeparam name="TIdentifier">The identifier type.</typeparam>
+    /// <typeparam name="TEventBase">The event base type.</typeparam>
     public interface IEventStore<TIdentifier, TEventBase>
         where TIdentifier : IEquatable<TIdentifier>
     {
