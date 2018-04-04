@@ -6,6 +6,6 @@ namespace Aggregator.Internal
     internal interface IAggregateRootInitializer<TIdentifier, TEventBase>
         where TIdentifier : IEquatable<TIdentifier>
     {
-        void Initialize(TIdentifier identifier, int expectedRevision, IEnumerable<TEventBase> events = null);
+        void Initialize(TIdentifier identifier, long expectedVersion, IEnumerable<TEventBase> events = null);
     }
 }

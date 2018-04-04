@@ -8,7 +8,7 @@ namespace Aggregator.Internal
     {
         TIdentifier Identifier { get; }
 
-        int ExpectedRevision { get; }
+        long ExpectedVersion { get; }
 
         bool HasChanges { get; }
 

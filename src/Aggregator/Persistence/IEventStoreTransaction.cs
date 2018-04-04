@@ -23,10 +23,10 @@ namespace Aggregator.Persistence
         /// <summary>
         /// Store events for a specific aggregate root.
         /// </summary>
-        /// <param name="identifier">The identifier of the aggregate root.</param>
-        /// <param name="expectedRevision">The expected revision of the aggregate root.</param>
+        /// <param name="identifier">The aggregate identifier.</param>
+        /// <param name="expectedVersion">The expected version.</param>
         /// <param name="events">The events to store for the aggregate root.</param>
         /// <returns>An awaitable <see cref="Task"/>.</returns>
-        Task StoreAggregateRootEvents(TIdentifier identifier, int expectedRevision, IEnumerable<TEventBase> events);
+        Task StoreEvents(TIdentifier identifier, long expectedVersion, IEnumerable<TEventBase> events);
     }
 }

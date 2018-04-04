@@ -26,17 +26,17 @@ namespace Aggregator
         public TIdentifier Identifier { get; private set; }
 
         /// <summary>
-        /// The aggregate roots expected event revision.
+        /// The aggregate roots expected event version.
         /// </summary>
-        public int ExpectedRevision { get; private set; }
+        public long ExpectedVersion { get; private set; }
 
-        void IAggregateRootInitializer<TIdentifier, TEventBase>.Initialize(TIdentifier identifier, int expectedRevision, IEnumerable<TEventBase> events)
+        void IAggregateRootInitializer<TIdentifier, TEventBase>.Initialize(TIdentifier identifier, long expectedVersion, IEnumerable<TEventBase> events)
         {
             if (Equals(identifier, default(TIdentifier))) throw new ArgumentException("Default value not allowed", nameof(identifier));
             if (_isInitialized) throw new InvalidOperationException("Already initialized");
 
             Identifier = identifier;
-            ExpectedRevision = expectedRevision;
+            ExpectedVersion = expectedVersion;
 
             foreach (var @event in events ?? Enumerable.Empty<TEventBase>())
                 Handle(@event);
