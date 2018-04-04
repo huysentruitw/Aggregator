@@ -29,12 +29,12 @@ namespace Aggregator.Tests
         }
 
         [Test]
-        public void Initialize_PassExpectedRevision_ShouldSetExpectedRevisionProperty()
+        public void Initialize_PassExpectedVersion_ShouldSetExpectedVersionProperty()
         {
-            var expectedRevision = 13;
+            var expectedVersion = 13;
             var aggregateRoot = new Mock<FakeAggregateRoot>().Object;
-            ((IAggregateRootInitializer<string, object>)aggregateRoot).Initialize("some_id", expectedRevision);
-            Assert.That(aggregateRoot.ExpectedRevision, Is.EqualTo(expectedRevision));
+            ((IAggregateRootInitializer<string, object>)aggregateRoot).Initialize("some_id", expectedVersion);
+            Assert.That(aggregateRoot.ExpectedVersion, Is.EqualTo(expectedVersion));
         }
 
         [Test]
