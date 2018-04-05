@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -20,18 +21,22 @@ namespace Aggregator.Command
     {
         private readonly ConcurrentDictionary<Type, MethodInfo> _executeMethodCache = new ConcurrentDictionary<Type, MethodInfo>();
         private readonly ICommandHandlingScopeFactory _commandHandlingScopeFactory;
+        private readonly IEventDispatcher<TEventBase> _eventDispatcher;
         private readonly IEventStore<TIdentifier, TEventBase> _eventStore;
 
         /// <summary>
         /// Constructs a new <see cref="CommandProcessor{TIdentifier, TCommandBase, TEventBase}"/> instance.
         /// </summary>
         /// <param name="commandHandlingScopeFactory">The command handling scope factory.</param>
+        /// <param name="eventDispatcher">The event dispatcher.</param>
         /// <param name="eventStore">The event store.</param>
         public CommandProcessor(
             ICommandHandlingScopeFactory commandHandlingScopeFactory,
+            IEventDispatcher<TEventBase> eventDispatcher,
             IEventStore<TIdentifier, TEventBase> eventStore)
         {
             _commandHandlingScopeFactory = commandHandlingScopeFactory ?? throw new ArgumentNullException(nameof(commandHandlingScopeFactory));
+            _eventDispatcher = eventDispatcher ?? throw new ArgumentNullException(nameof(eventDispatcher));
             _eventStore = eventStore ?? throw new ArgumentNullException(nameof(eventStore));
         }
 
@@ -56,16 +61,23 @@ namespace Aggregator.Command
 
             await ((Task)executeMethod.Invoke(this, new object[] { command, context })).ConfigureAwait(false);
 
-            if (!unitOfWork.HasChanges) return;
+            if (!unitOfWork.HasChanges)
+            {
+                await _eventDispatcher.Dispatch(Array.Empty<TEventBase>(), context).ConfigureAwait(false);
+                return;
+            }
 
             using (var transaction = _eventStore.BeginTransaction(context))
             {
+                var storedEvents = new List<TEventBase>();
+
                 try
                 {
                     foreach (var aggregateRoot in unitOfWork.GetChanges())
                     {
                         var events = aggregateRoot.GetChanges();
                         await transaction.StoreEvents(aggregateRoot.Identifier, aggregateRoot.ExpectedVersion, events).ConfigureAwait(false);
+                        storedEvents.AddRange(events);
                     }
 
                     transaction.Commit();
@@ -75,6 +87,8 @@ namespace Aggregator.Command
                     transaction.Rollback();
                     throw;
                 }
+
+                await _eventDispatcher.Dispatch(storedEvents.ToArray(), context).ConfigureAwait(false);
             }
         }
 
