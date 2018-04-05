@@ -1,7 +1,7 @@
 using System;
 using Aggregator.Command;
 
-namespace Aggregator.Persistence
+namespace Aggregator.Event
 {
     /// <summary>
     /// Interface for an event store implementation.
