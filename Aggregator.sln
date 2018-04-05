@@ -15,7 +15,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aggregator.Tests", "tests\A
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aggregator.Autofac", "src\Aggregator.Autofac\Aggregator.Autofac.csproj", "{3F60B76C-F9BD-46AD-A660-56114CE1FA48}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aggregator.Autofac.Tests", "tests\Aggregator.Autofac.Tests\Aggregator.Autofac.Tests.csproj", "{B41B1F12-61AE-4A68-B852-4CF254818D0A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aggregator.Autofac.Tests", "tests\Aggregator.Autofac.Tests\Aggregator.Autofac.Tests.csproj", "{B41B1F12-61AE-4A68-B852-4CF254818D0A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aggregator.Persistence.EventStore", "src\Aggregator.Persistence.EventStore\Aggregator.Persistence.EventStore.csproj", "{2D02142C-687E-4995-92AF-D5C12ED87D98}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{B41B1F12-61AE-4A68-B852-4CF254818D0A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B41B1F12-61AE-4A68-B852-4CF254818D0A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B41B1F12-61AE-4A68-B852-4CF254818D0A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2D02142C-687E-4995-92AF-D5C12ED87D98}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2D02142C-687E-4995-92AF-D5C12ED87D98}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2D02142C-687E-4995-92AF-D5C12ED87D98}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2D02142C-687E-4995-92AF-D5C12ED87D98}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

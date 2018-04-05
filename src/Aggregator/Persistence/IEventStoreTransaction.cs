@@ -13,12 +13,12 @@ namespace Aggregator.Persistence
         /// <summary>
         /// Commit the transaction.
         /// </summary>
-        void Commit();
+        Task Commit();
 
         /// <summary>
         /// Rollback the transaction.
         /// </summary>
-        void Rollback();
+        Task Rollback();
 
         /// <summary>
         /// Store events for a specific aggregate root.
