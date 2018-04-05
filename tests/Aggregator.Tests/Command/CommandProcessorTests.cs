@@ -220,7 +220,7 @@ namespace Aggregator.Tests.Command
 
             var processor = new CommandProcessor<string, object, object>(_commandHandlingScopeFactory.Object, _eventDispatcherMock.Object, _eventStoreMock.Object);
             await processor.Process(new CommandA());
-            _eventDispatcherMock.Verify(x => x.Dispatch(Array.Empty<object>(), It.IsAny<CommandHandlingContext>()), Times.Once);
+            _eventDispatcherMock.Verify(x => x.Dispatch(Array.Empty<object>()), Times.Once);
         }
 
         [Test]
@@ -228,8 +228,8 @@ namespace Aggregator.Tests.Command
         {
             object[] dispatchedEvents = null;
             _eventDispatcherMock
-                .Setup(x => x.Dispatch(It.IsAny<object[]>(), It.IsAny<CommandHandlingContext>()))
-                .Callback<object[], CommandHandlingContext>((events, _) => dispatchedEvents = events)
+                .Setup(x => x.Dispatch(It.IsAny<object[]>()))
+                .Callback<object[]>(events => dispatchedEvents = events)
                 .Returns(Task.CompletedTask);
 
             var transactionMock = new Mock<IEventStoreTransaction<string, object>>();
@@ -245,7 +245,7 @@ namespace Aggregator.Tests.Command
             var processor = new CommandProcessor<string, object, object>(_commandHandlingScopeFactory.Object, _eventDispatcherMock.Object, _eventStoreMock.Object);
             await processor.Process(new CommandA());
 
-            _eventDispatcherMock.Verify(x => x.Dispatch(It.IsAny<object[]>(), It.IsAny<CommandHandlingContext>()), Times.Once);
+            _eventDispatcherMock.Verify(x => x.Dispatch(It.IsAny<object[]>()), Times.Once);
             Assert.That(dispatchedEvents, Is.Not.Null);
             Assert.That(dispatchedEvents, Has.Length.EqualTo(2));
             Assert.That(dispatchedEvents[0], Is.InstanceOf<FakeEvent2>());
