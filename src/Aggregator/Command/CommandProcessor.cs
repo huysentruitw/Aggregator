@@ -81,11 +81,11 @@ namespace Aggregator.Command
                         storedEvents.AddRange(events);
                     }
 
-                    transaction.Commit();
+                    await transaction.Commit().ConfigureAwait(false);
                 }
                 catch
                 {
-                    transaction.Rollback();
+                    await transaction.Rollback().ConfigureAwait(false);
                     throw;
                 }
 
