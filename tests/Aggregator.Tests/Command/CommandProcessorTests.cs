@@ -6,6 +6,7 @@ using Aggregator.Command;
 using Aggregator.Event;
 using Aggregator.Exceptions;
 using Aggregator.Internal;
+using Aggregator.Persistence;
 using Moq;
 using NUnit.Framework;
 

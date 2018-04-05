@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Aggregator.Event;
 using Aggregator.Exceptions;
 using Aggregator.Internal;
+using Aggregator.Persistence;
 
 namespace Aggregator.Command
 {
