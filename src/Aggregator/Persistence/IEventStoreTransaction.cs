@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Aggregator.Event
+namespace Aggregator.Persistence
 {
     /// <summary>
     /// Interface for an event store transaction.
