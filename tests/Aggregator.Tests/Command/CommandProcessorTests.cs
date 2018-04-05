@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Aggregator.Command;
+using Aggregator.Event;
 using Aggregator.Exceptions;
 using Aggregator.Internal;
-using Aggregator.Persistence;
 using Moq;
 using NUnit.Framework;
 
