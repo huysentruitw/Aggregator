@@ -1,27 +1,27 @@
 using System;
 using System.Linq;
-using Aggregator.Command;
+using Aggregator.Event;
 using Autofac;
 
 namespace Aggregator.Autofac
 {
     /// <summary>
-    /// Autofac implementation of <see cref="ICommandHandlingScope{TCommand}"/>.
+    /// Autofac implementation of <see cref="IEventHandlingScope{TEvent}"/>.
     /// </summary>
-    /// <typeparam name="TCommand">The command type.</typeparam>
-    public class CommandHandlingScope<TCommand> : ICommandHandlingScope<TCommand>
+    /// <typeparam name="TEvent">The event type.</typeparam>
+    public class EventHandlingScope<TEvent> : IEventHandlingScope<TEvent>
     {
         private readonly ILifetimeScope _ownedLifetimeScope;
         private readonly Type[] _handlerTypes;
 
-        internal CommandHandlingScope(ILifetimeScope ownedLifetimeScope, Type[] handlerTypes)
+        internal EventHandlingScope(ILifetimeScope ownedLifetimeScope, Type[] handlerTypes)
         {
             _ownedLifetimeScope = ownedLifetimeScope ?? throw new ArgumentNullException(nameof(ownedLifetimeScope));
             _handlerTypes = handlerTypes ?? throw new ArgumentNullException(nameof(handlerTypes));
         }
 
         /// <summary>
-        /// Disposes this command handling scope.
+        /// Disposes this event handling scope.
         /// </summary>
         public void Dispose()
         {
@@ -29,12 +29,12 @@ namespace Aggregator.Autofac
         }
 
         /// <summary>
-        /// Gets all known handlers for the given command type.
+        /// Gets all known handlers for the given event type.
         /// </summary>
-        /// <returns>All known handlers for the given command type.</returns>
-        public ICommandHandler<TCommand>[] ResolveHandlers()
+        /// <returns>All known handlers for the given event type.</returns>
+        public IEventHandler<TEvent>[] ResolveHandlers()
             => _handlerTypes
-                .Select(type => (ICommandHandler<TCommand>)_ownedLifetimeScope.Resolve(type))
+                .Select(type => (IEventHandler<TEvent>)_ownedLifetimeScope.Resolve(type))
                 .ToArray();
     }
 }

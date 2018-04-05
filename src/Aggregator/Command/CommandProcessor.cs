@@ -64,7 +64,7 @@ namespace Aggregator.Command
 
             if (!unitOfWork.HasChanges)
             {
-                await _eventDispatcher.Dispatch(Array.Empty<TEventBase>(), context).ConfigureAwait(false);
+                await _eventDispatcher.Dispatch(Array.Empty<TEventBase>()).ConfigureAwait(false);
                 return;
             }
 
@@ -89,7 +89,7 @@ namespace Aggregator.Command
                     throw;
                 }
 
-                await _eventDispatcher.Dispatch(storedEvents.ToArray(), context).ConfigureAwait(false);
+                await _eventDispatcher.Dispatch(storedEvents.ToArray()).ConfigureAwait(false);
             }
         }
 
