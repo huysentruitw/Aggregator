@@ -57,6 +57,25 @@ namespace Aggregator.Command
             await ((Task)executeMethod.Invoke(this, new object[] { command, context })).ConfigureAwait(false);
 
             if (!unitOfWork.HasChanges) return;
+
+            using (var transaction = _eventStore.BeginTransaction(context))
+            {
+                try
+                {
+                    foreach (var aggregateRoot in unitOfWork.GetChanges())
+                    {
+                        var events = aggregateRoot.GetChanges();
+                        await transaction.StoreEvents(aggregateRoot.Identifier, aggregateRoot.ExpectedVersion, events).ConfigureAwait(false);
+                    }
+
+                    transaction.Commit();
+                }
+                catch
+                {
+                    transaction.Rollback();
+                    throw;
+                }
+            }
         }
 
         private async Task Execute<TCommand>(TCommand command, CommandHandlingContext context)
