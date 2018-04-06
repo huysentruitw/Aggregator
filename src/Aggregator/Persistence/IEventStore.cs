@@ -26,7 +26,7 @@ namespace Aggregator.Persistence
         /// <param name="identifier">The aggregate root identifier.</param>
         /// <param name="minimumVersion">The minimum version.</param>
         /// <returns>The events starting at minimumVersion.</returns>
-        Task<IEnumerable<TEventBase>> GetEvents(TIdentifier identifier, long minimumVersion = 1);
+        Task<TEventBase[]> GetEvents(TIdentifier identifier, long minimumVersion = 0);
 
         /// <summary>
         /// Begins a disposable transaction.
