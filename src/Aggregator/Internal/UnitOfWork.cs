@@ -2,6 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using Aggregator.Exceptions;
 
 namespace Aggregator.Internal
 {
@@ -15,7 +16,7 @@ namespace Aggregator.Internal
         {
             if (aggregateRoot == null) throw new ArgumentNullException(nameof(aggregateRoot));
             if (!_changes.TryAdd(aggregateRoot.Identifier, aggregateRoot))
-                throw new InvalidOperationException($"Aggregate root with identifier '{aggregateRoot.Identifier}' already attached");
+                throw new AggregateRootAlreadyAttachedException<TIdentifier>(aggregateRoot.Identifier);
         }
 
         public bool TryGet(TIdentifier identifier, out IAggregateRootChangeTracker<TIdentifier, TEventBase> aggregateRoot)

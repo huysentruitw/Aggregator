@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using Aggregator.Exceptions;
 using Aggregator.Internal;
 using Moq;
 using NUnit.Framework;
@@ -26,8 +27,8 @@ namespace Aggregator.Tests.Internal
 
             var unitOfWork = new UnitOfWork<string, object>();
             unitOfWork.Attach(aggregateRoot);
-            var ex = Assert.Throws<InvalidOperationException>(() => unitOfWork.Attach(aggregateRoot));
-            Assert.That(ex.Message, Is.EqualTo($"Aggregate root with identifier '{identifier}' already attached"));
+            var ex = Assert.Throws<AggregateRootAlreadyAttachedException<string>>(() => unitOfWork.Attach(aggregateRoot));
+            Assert.That(ex.Message, Is.EqualTo($"Exception for aggregate root with identifier '{identifier}': Aggregate root already attached"));
         }
 
         [Test]
