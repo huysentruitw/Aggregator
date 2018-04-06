@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -48,7 +48,7 @@ namespace Aggregator.Persistence.EventStore
 
         public async Task StoreEvents(TIdentifier identifier, long expectedVersion, IEnumerable<TEventBase> events)
         {
-            var transaction = await _connection.StartTransactionAsync(identifier.ToString(), expectedVersion).ConfigureAwait(false);
+            var transaction = await _connection.StartTransactionAsync(identifier.ToString(), expectedVersion - 1).ConfigureAwait(false);
             _pendingTransactions.Enqueue(transaction);
 
             var eventData = events
