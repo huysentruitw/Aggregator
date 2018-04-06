@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using Aggregator.Command;
 using EventStore.ClientAPI;
 using Newtonsoft.Json;
@@ -28,6 +30,16 @@ namespace Aggregator.Persistence.EventStore
         {
             _connection.Close();
             _connection.Dispose();
+        }
+
+        public Task<bool> Contains(TIdentifier identifier)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IEnumerable<TEventBase>> GetEvents(TIdentifier identifier, long minimumVersion = 1)
+        {
+            throw new NotImplementedException();
         }
 
         public IEventStoreTransaction<TIdentifier, TEventBase> BeginTransaction(CommandHandlingContext context)
