@@ -82,6 +82,13 @@ namespace Aggregator.Tests
         }
 
         [Test]
+        public void Register_RegisterForSameEventTwice_ShouldThrowException()
+        {
+            var ex = Assert.Throws<HandlerForEventAlreadyRegisteredException<string>>(() => new RegisterTwiceAggregateRoot());
+            Assert.That(ex.Message, Does.Contain("Handler for event EventA already registered"));
+        }
+
+        [Test]
         public void Apply_PassKnownEvent_ShouldHandleEvent()
         {
             var aggregateRootMock = new Mock<FakeAggregateRoot>();
@@ -159,5 +166,14 @@ namespace Aggregator.Tests
         public class EventB { }
 
         public class EventC { }
+
+        public class RegisterTwiceAggregateRoot : AggregateRoot<string, object>
+        {
+            public RegisterTwiceAggregateRoot()
+            {
+                Register<EventA>(_ => { });
+                Register<EventA>(_ => { });
+            }
+        }
     }
 }
