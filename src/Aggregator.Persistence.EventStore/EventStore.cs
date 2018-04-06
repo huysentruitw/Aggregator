@@ -32,9 +32,10 @@ namespace Aggregator.Persistence.EventStore
             _connection.Dispose();
         }
 
-        public Task<bool> Contains(TIdentifier identifier)
+        public async Task<bool> Contains(TIdentifier identifier)
         {
-            throw new NotImplementedException();
+            var result = await _connection.ReadEventAsync(identifier.ToString(), 0, false).ConfigureAwait(false);
+            return result.Status == EventReadStatus.Success;
         }
 
         public Task<IEnumerable<TEventBase>> GetEvents(TIdentifier identifier, long minimumVersion = 1)
