@@ -81,6 +81,8 @@ namespace Aggregator.Command
                         storedEvents.AddRange(events);
                     }
 
+                    await _eventDispatcher.Dispatch(storedEvents.ToArray()).ConfigureAwait(false);
+
                     await transaction.Commit().ConfigureAwait(false);
                 }
                 catch
@@ -88,8 +90,6 @@ namespace Aggregator.Command
                     await transaction.Rollback().ConfigureAwait(false);
                     throw;
                 }
-
-                await _eventDispatcher.Dispatch(storedEvents.ToArray()).ConfigureAwait(false);
             }
         }
 
