@@ -17,7 +17,7 @@ namespace Aggregator.Command
     /// <typeparam name="TIdentifier">The identifier type.</typeparam>
     /// <typeparam name="TCommandBase">The command base type.</typeparam>
     /// <typeparam name="TEventBase">The event base type.</typeparam>
-    public sealed class CommandProcessor<TIdentifier, TCommandBase, TEventBase>
+    public class CommandProcessor<TIdentifier, TCommandBase, TEventBase>
         where TIdentifier : IEquatable<TIdentifier>
     {
         private readonly ConcurrentDictionary<Type, MethodInfo> _executeMethodCache = new ConcurrentDictionary<Type, MethodInfo>();
@@ -56,7 +56,7 @@ namespace Aggregator.Command
             context.SetUnitOfWork(unitOfWork);
 
             var executeMethod = _executeMethodCache.GetOrAdd(command.GetType(), type =>
-                GetType()
+                typeof(CommandProcessor<TIdentifier, TCommandBase, TEventBase>)
                     .GetMethod(nameof(Execute), BindingFlags.NonPublic | BindingFlags.Instance)
                     .MakeGenericMethod(type));
 
