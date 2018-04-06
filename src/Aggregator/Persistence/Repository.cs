@@ -53,7 +53,7 @@ namespace Aggregator.Persistence
         public Task<TAggregateRoot> Create(TIdentifier identifier)
         {
             var aggregateRoot = new TAggregateRoot();
-            ((IAggregateRootInitializer<TIdentifier, TEventBase>)aggregateRoot).Initialize(identifier, 1);
+            ((IAggregateRootInitializer<TIdentifier, TEventBase>)aggregateRoot).Initialize(identifier, 0);
             _unitOfWork.Attach(aggregateRoot);
             return Task.FromResult(aggregateRoot);
         }
@@ -73,7 +73,7 @@ namespace Aggregator.Persistence
                 throw new AggregateRootNotFoundException<TIdentifier>(identifier);
 
             var aggregateRoot = new TAggregateRoot();
-            ((IAggregateRootInitializer<TIdentifier, TEventBase>)aggregateRoot).Initialize(identifier, 1, events);
+            ((IAggregateRootInitializer<TIdentifier, TEventBase>)aggregateRoot).Initialize(identifier, events.Length, events);
             _unitOfWork.Attach(aggregateRoot);
             return aggregateRoot;
         }
