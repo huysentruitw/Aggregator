@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using Aggregator.Command;
 using Aggregator.Event;
 using Autofac;
@@ -11,6 +12,7 @@ namespace Aggregator.Autofac
     /// <typeparam name="TIdentifier">The identifier type.</typeparam>
     /// <typeparam name="TCommandBase">The command base type.</typeparam>
     /// <typeparam name="TEventBase">The event base type.</typeparam>
+    [ExcludeFromCodeCoverage]
     public class AggregatorModule<TIdentifier, TCommandBase, TEventBase> : Module
         where TIdentifier : IEquatable<TIdentifier>
     {
