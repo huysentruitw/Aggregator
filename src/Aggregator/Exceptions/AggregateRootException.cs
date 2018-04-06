@@ -15,16 +15,6 @@ namespace Aggregator.Exceptions
             : base(message)
         {
         }
-
-        /// <summary>
-        /// Constructs a <see cref="AggregateRootException"/> instance with a message and inner exception.
-        /// </summary>
-        /// <param name="message">The message.</param>
-        /// <param name="innerException">The inner exception.</param>
-        protected AggregateRootException(string message, Exception innerException)
-            : base(message, innerException)
-        {
-        }
     }
 
     /// <summary>
@@ -41,18 +31,6 @@ namespace Aggregator.Exceptions
         /// <param name="message">The message.</param>
         protected AggregateRootException(TIdentifier identifier, string message)
             : base(BuildMessage(identifier, message))
-        {
-            Identifier = identifier;
-        }
-
-        /// <summary>
-        /// Constructs a <see cref="AggregateRootException{TIdentifier}"/> instance with a message and inner exception.
-        /// </summary>
-        /// <param name="identifier">The identifier.</param>
-        /// <param name="message">The message.</param>
-        /// <param name="innerException">The inner exception.</param>
-        protected AggregateRootException(TIdentifier identifier, string message, Exception innerException)
-            : base(BuildMessage(identifier, message), innerException)
         {
             Identifier = identifier;
         }
