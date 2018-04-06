@@ -112,7 +112,7 @@ namespace Aggregator.Tests.Persistence
         public void Get_UnknownAggregateRoot_ShouldThrowException()
         {
             var unknownIdentifier = Guid.NewGuid().ToString("N");
-            _eventStoreMock.Setup(x => x.GetEvents(unknownIdentifier, 1)).ReturnsAsync(Enumerable.Empty<object>());
+            _eventStoreMock.Setup(x => x.GetEvents(unknownIdentifier, 1)).ReturnsAsync(Array.Empty<object>());
             var repository = new Repository<string, object, FakeAggregateRoot>(_eventStoreMock.Object, _commandHandlingContext);
             var ex = Assert.ThrowsAsync<AggregateRootNotFoundException<string>>(() => repository.Get(unknownIdentifier));
             Assert.That(ex.Identifier, Is.EqualTo(unknownIdentifier));

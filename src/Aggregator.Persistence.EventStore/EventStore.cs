@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Threading.Tasks;
 using Aggregator.Command;
 using EventStore.ClientAPI;
@@ -38,9 +39,22 @@ namespace Aggregator.Persistence.EventStore
             return result.Status == EventReadStatus.Success;
         }
 
-        public Task<IEnumerable<TEventBase>> GetEvents(TIdentifier identifier, long minimumVersion = 1)
+        public async Task<TEventBase[]> GetEvents(TIdentifier identifier, long minimumVersion = 0)
         {
-            throw new NotImplementedException();
+            var result = new List<TEventBase>();
+            StreamEventsSlice currentSlice;
+            var nextSliceStart = minimumVersion;
+            do
+            {
+                currentSlice = await _connection.ReadStreamEventsForwardAsync(identifier.ToString(), minimumVersion, 200, false).ConfigureAwait(false);
+                foreach (var recordedEvent in currentSlice.Events)
+                {
+                    var eventJsonData = Encoding.UTF8.GetString(recordedEvent.Event.Data);
+                    result.Add(JsonConvert.DeserializeObject<TEventBase>(eventJsonData, _jsonSerializerSettings));
+                }
+            }
+            while (!currentSlice.IsEndOfStream);
+            return result.ToArray();
         }
 
         public IEventStoreTransaction<TIdentifier, TEventBase> BeginTransaction(CommandHandlingContext context)
