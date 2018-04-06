@@ -207,6 +207,33 @@ namespace Aggregator.Tests.Command
         }
 
         [Test]
+        public void Process_DispatchThrowsException_ShouldRollbackTransactionAndRethrowException()
+        {
+            _eventDispatcherMock
+                .Setup(x => x.Dispatch(It.IsAny<object[]>()))
+                .Callback(() => throw new InvalidOperationException("Dispatch failed"));
+
+            var transactionMock = new Mock<IEventStoreTransaction<string, object>>();
+            _eventStoreMock
+                .Setup(x => x.BeginTransaction(It.IsAny<CommandHandlingContext>()))
+                .Returns(transactionMock.Object);
+
+            _commandHandlingScopeFactory
+                .Setup(x => x.BeginScopeFor<CommandA>(It.IsAny<CommandHandlingContext>()))
+                .Returns<CommandHandlingContext>(context => new FakeCommandHandlingScope(context, x => x.DoSomething()));
+
+            var processor = new CommandProcessor<string, object, object>(_commandHandlingScopeFactory.Object, _eventDispatcherMock.Object, _eventStoreMock.Object);
+            var ex = Assert.ThrowsAsync<InvalidOperationException>(() => processor.Process(new CommandA()));
+            Assert.That(ex.Message, Is.EqualTo("Dispatch failed"));
+
+            _eventStoreMock.Verify(x => x.BeginTransaction(It.IsAny<CommandHandlingContext>()), Times.Once);
+
+            transactionMock.Verify(x => x.Commit(), Times.Never);
+            transactionMock.Verify(x => x.Rollback(), Times.Once);
+            transactionMock.Verify(x => x.Dispose(), Times.Once);
+        }
+
+        [Test]
         public async Task Process_NoChangedAggregateRootsInUnitOfWork_ShouldDispatchEmptyEventsArray()
         {
             var scopeMock = new Mock<ICommandHandlingScope<CommandA>>();
