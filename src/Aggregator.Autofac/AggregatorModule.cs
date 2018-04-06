@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using Aggregator.Command;
 using Aggregator.Event;
+using Aggregator.Persistence;
 using Autofac;
 
 namespace Aggregator.Autofac
@@ -25,6 +26,7 @@ namespace Aggregator.Autofac
             builder.RegisterType<ReflectionCommandHandlerTypeLocator>().As<ICommandHandlerTypeLocator>().SingleInstance();
             builder.RegisterType<CommandHandlingScopeFactory>().As<ICommandHandlingScopeFactory>().SingleInstance();
             builder.RegisterType<CommandProcessor<TIdentifier, TCommandBase, TEventBase>>().AsSelf().SingleInstance();
+            builder.RegisterGeneric(typeof(Repository<,,>)).AsImplementedInterfaces().InstancePerLifetimeScope();
 
             builder.RegisterType<ReflectionEventHandlerTypeLocator>().As<IEventHandlerTypeLocator>().SingleInstance();
             builder.RegisterType<EventHandlingScopeFactory>().As<IEventHandlingScopeFactory>().SingleInstance();
