@@ -66,11 +66,12 @@ namespace Aggregator.Persistence
         /// Creates a new aggregate root.
         /// </summary>
         /// <param name="identifier">The identifier.</param>
+        /// <param name="aggregateRootFactory">Optional aggregate root factory.</param>
         /// <returns>The new aggregate root.</returns>
         /// <exception cref="AggregateRootNotFoundException{TIdentifier}"></exception>
-        public Task<TAggregateRoot> Create(TIdentifier identifier)
+        public Task<TAggregateRoot> Create(TIdentifier identifier, Func<TAggregateRoot> aggregateRootFactory = null)
         {
-            var aggregateRoot = new TAggregateRoot();
+            var aggregateRoot = aggregateRootFactory?.Invoke() ?? new TAggregateRoot();
             ((IAggregateRootInitializer<TIdentifier, TEventBase>)aggregateRoot).Initialize(identifier, 0);
             _unitOfWork.Attach(aggregateRoot);
             return Task.FromResult(aggregateRoot);

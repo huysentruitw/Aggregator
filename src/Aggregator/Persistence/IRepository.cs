@@ -33,7 +33,8 @@ namespace Aggregator.Persistence
         /// Creates a new aggregate root.
         /// </summary>
         /// <param name="identifier">The identifier.</param>
+        /// <param name="aggregateRootFactory">Optional aggregate root factory.</param>
         /// <returns>The new aggregate root.</returns>
-        Task<TAggregateRoot> Create(TIdentifier identifier);
+        Task<TAggregateRoot> Create(TIdentifier identifier, Func<TAggregateRoot> aggregateRootFactory = null);
     }
 }
