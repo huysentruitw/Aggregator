@@ -42,20 +42,20 @@ namespace Aggregator.Tests.Command
         [Test]
         public void Constructor_PassInvalidArguments_ShouldThrowException()
         {
-            var ex = Assert.Throws<ArgumentNullException>(() => new CommandProcessor<string, object, object>(null, _eventDispatcherMock.Object, _eventStoreMock.Object));
+            var ex = Assert.Throws<ArgumentNullException>(() => new CommandProcessor(null, _eventDispatcherMock.Object, _eventStoreMock.Object));
             Assert.That(ex.ParamName, Is.EqualTo("commandHandlingScopeFactory"));
 
-            ex = Assert.Throws<ArgumentNullException>(() => new CommandProcessor<string, object, object>(_commandHandlingScopeFactory.Object, null, _eventStoreMock.Object));
+            ex = Assert.Throws<ArgumentNullException>(() => new CommandProcessor(_commandHandlingScopeFactory.Object, null, _eventStoreMock.Object));
             Assert.That(ex.ParamName, Is.EqualTo("eventDispatcher"));
 
-            ex = Assert.Throws<ArgumentNullException>(() => new CommandProcessor<string, object, object>(_commandHandlingScopeFactory.Object, _eventDispatcherMock.Object, null));
+            ex = Assert.Throws<ArgumentNullException>(() => new CommandProcessor(_commandHandlingScopeFactory.Object, _eventDispatcherMock.Object, null));
             Assert.That(ex.ParamName, Is.EqualTo("eventStore"));
         }
 
         [Test]
         public void Process_PassNullAsCommand_ShouldThrowException()
         {
-            var processor = new CommandProcessor<string, object, object>(_commandHandlingScopeFactory.Object, _eventDispatcherMock.Object, _eventStoreMock.Object);
+            var processor = new CommandProcessor(_commandHandlingScopeFactory.Object, _eventDispatcherMock.Object, _eventStoreMock.Object);
             var ex = Assert.ThrowsAsync<ArgumentNullException>(() => processor.Process(null));
             Assert.That(ex.ParamName, Is.EqualTo("command"));
         }
@@ -64,7 +64,7 @@ namespace Aggregator.Tests.Command
         public async Task Process_PassCommand_ShouldCreateCommandHandlingScope()
         {
             _commandHandlingScopeAMock.Setup(x => x.ResolveHandlers()).Returns(new[] { new Mock<ICommandHandler<CommandA>>().Object });
-            var processor = new CommandProcessor<string, object, object>(_commandHandlingScopeFactory.Object, _eventDispatcherMock.Object, _eventStoreMock.Object);
+            var processor = new CommandProcessor(_commandHandlingScopeFactory.Object, _eventDispatcherMock.Object, _eventStoreMock.Object);
             await processor.Process(new CommandA());
             _commandHandlingScopeFactory.Verify(x => x.BeginScopeFor<CommandA>(It.IsAny<CommandHandlingContext>()), Times.Once);
         }
@@ -73,7 +73,7 @@ namespace Aggregator.Tests.Command
         public async Task Process_PassCommand_ShouldResolveHandlersInScope()
         {
             _commandHandlingScopeAMock.Setup(x => x.ResolveHandlers()).Returns(new[] { new Mock<ICommandHandler<CommandA>>().Object });
-            var processor = new CommandProcessor<string, object, object>(_commandHandlingScopeFactory.Object, _eventDispatcherMock.Object, _eventStoreMock.Object);
+            var processor = new CommandProcessor(_commandHandlingScopeFactory.Object, _eventDispatcherMock.Object, _eventStoreMock.Object);
             await processor.Process(new CommandA());
             _commandHandlingScopeAMock.Verify(x => x.ResolveHandlers(), Times.Once);
         }
@@ -92,7 +92,7 @@ namespace Aggregator.Tests.Command
             _commandHandlingScopeAMock.Setup(x => x.ResolveHandlers())
                 .Returns(handlerMocks.Select(x => x.Object).ToArray());
 
-            var processor = new CommandProcessor<string, object, object>(_commandHandlingScopeFactory.Object, _eventDispatcherMock.Object, _eventStoreMock.Object);
+            var processor = new CommandProcessor(_commandHandlingScopeFactory.Object, _eventDispatcherMock.Object, _eventStoreMock.Object);
             await processor.Process(command);
 
             handlerMocks[0].Verify(x => x.Handle(command), Times.Once);
@@ -103,7 +103,7 @@ namespace Aggregator.Tests.Command
         public void Process_PassUnhandledCommand_ShouldThrowException()
         {
             var command = new CommandB();
-            var processor = new CommandProcessor<string, object, object>(_commandHandlingScopeFactory.Object, _eventDispatcherMock.Object, _eventStoreMock.Object);
+            var processor = new CommandProcessor(_commandHandlingScopeFactory.Object, _eventDispatcherMock.Object, _eventStoreMock.Object);
             var ex = Assert.ThrowsAsync<UnhandledCommandException>(() => processor.Process(command));
             Assert.That(ex.Command, Is.EqualTo(command));
             Assert.That(ex.CommandType, Is.EqualTo(typeof(CommandB)));
@@ -122,7 +122,7 @@ namespace Aggregator.Tests.Command
                 .Setup(x => x.ResolveHandlers())
                 .Returns(new[] { new Mock<ICommandHandler<CommandA>>().Object });
 
-            var processor = new CommandProcessor<string, object, object>(_commandHandlingScopeFactory.Object, _eventDispatcherMock.Object, _eventStoreMock.Object);
+            var processor = new CommandProcessor(_commandHandlingScopeFactory.Object, _eventDispatcherMock.Object, _eventStoreMock.Object);
             await processor.Process(new CommandA());
             _eventStoreMock.Verify(x => x.BeginTransaction(It.IsAny<CommandHandlingContext>()), Times.Never);
         }
@@ -146,7 +146,7 @@ namespace Aggregator.Tests.Command
                 .Setup(x => x.BeginScopeFor<CommandA>(It.IsAny<CommandHandlingContext>()))
                 .Returns<CommandHandlingContext>(context => new FakeCommandHandlingScope(context, x => x.DoSomething()));
 
-            var processor = new CommandProcessor<string, object, object>(_commandHandlingScopeFactory.Object, _eventDispatcherMock.Object, _eventStoreMock.Object);
+            var processor = new CommandProcessor(_commandHandlingScopeFactory.Object, _eventDispatcherMock.Object, _eventStoreMock.Object);
             await processor.Process(new CommandA());
 
             _eventStoreMock.Verify(x => x.BeginTransaction(It.IsAny<CommandHandlingContext>()), Times.Once);
@@ -173,7 +173,7 @@ namespace Aggregator.Tests.Command
                 .Setup(x => x.BeginScopeFor<CommandA>(It.IsAny<CommandHandlingContext>()))
                 .Returns<CommandHandlingContext>(context => new FakeCommandHandlingScope(context, x => x.DoSomethingBad()));
 
-            var processor = new CommandProcessor<string, object, object>(_commandHandlingScopeFactory.Object, _eventDispatcherMock.Object, _eventStoreMock.Object);
+            var processor = new CommandProcessor(_commandHandlingScopeFactory.Object, _eventDispatcherMock.Object, _eventStoreMock.Object);
             Assert.ThrowsAsync<KeyNotFoundException>(() => processor.Process(new CommandA()));
 
             _eventStoreMock.Verify(x => x.BeginTransaction(It.IsAny<CommandHandlingContext>()), Times.Never);
@@ -195,7 +195,7 @@ namespace Aggregator.Tests.Command
                 .Setup(x => x.BeginScopeFor<CommandA>(It.IsAny<CommandHandlingContext>()))
                 .Returns<CommandHandlingContext>(context => new FakeCommandHandlingScope(context, x => x.DoSomething()));
 
-            var processor = new CommandProcessor<string, object, object>(_commandHandlingScopeFactory.Object, _eventDispatcherMock.Object, _eventStoreMock.Object);
+            var processor = new CommandProcessor(_commandHandlingScopeFactory.Object, _eventDispatcherMock.Object, _eventStoreMock.Object);
             var ex = Assert.ThrowsAsync<InvalidOperationException>(() => processor.Process(new CommandA()));
             Assert.That(ex.Message, Is.EqualTo("StoreEvents failed"));
 
@@ -222,7 +222,7 @@ namespace Aggregator.Tests.Command
                 .Setup(x => x.BeginScopeFor<CommandA>(It.IsAny<CommandHandlingContext>()))
                 .Returns<CommandHandlingContext>(context => new FakeCommandHandlingScope(context, x => x.DoSomething()));
 
-            var processor = new CommandProcessor<string, object, object>(_commandHandlingScopeFactory.Object, _eventDispatcherMock.Object, _eventStoreMock.Object);
+            var processor = new CommandProcessor(_commandHandlingScopeFactory.Object, _eventDispatcherMock.Object, _eventStoreMock.Object);
             var ex = Assert.ThrowsAsync<InvalidOperationException>(() => processor.Process(new CommandA()));
             Assert.That(ex.Message, Is.EqualTo("Dispatch failed"));
 
@@ -245,7 +245,7 @@ namespace Aggregator.Tests.Command
                 .Setup(x => x.ResolveHandlers())
                 .Returns(new[] { new Mock<ICommandHandler<CommandA>>().Object });
 
-            var processor = new CommandProcessor<string, object, object>(_commandHandlingScopeFactory.Object, _eventDispatcherMock.Object, _eventStoreMock.Object);
+            var processor = new CommandProcessor(_commandHandlingScopeFactory.Object, _eventDispatcherMock.Object, _eventStoreMock.Object);
             await processor.Process(new CommandA());
             _eventDispatcherMock.Verify(x => x.Dispatch(Array.Empty<object>()), Times.Once);
         }
@@ -269,7 +269,7 @@ namespace Aggregator.Tests.Command
                 .Setup(x => x.BeginScopeFor<CommandA>(It.IsAny<CommandHandlingContext>()))
                 .Returns<CommandHandlingContext>(context => new FakeCommandHandlingScope(context, x => x.DoSomething()));
 
-            var processor = new CommandProcessor<string, object, object>(_commandHandlingScopeFactory.Object, _eventDispatcherMock.Object, _eventStoreMock.Object);
+            var processor = new CommandProcessor(_commandHandlingScopeFactory.Object, _eventDispatcherMock.Object, _eventStoreMock.Object);
             await processor.Process(new CommandA());
 
             _eventDispatcherMock.Verify(x => x.Dispatch(It.IsAny<object[]>()), Times.Once);

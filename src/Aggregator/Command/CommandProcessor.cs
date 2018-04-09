@@ -12,7 +12,26 @@ using Aggregator.Persistence;
 namespace Aggregator.Command
 {
     /// <summary>
-    /// This class is responsibly for processing commands. Should be used as a singleton.
+    /// This class is responsible for processing commands where the aggregate root identifier is a <see cref="string"/> and the command/event base type is <see cref="object"/>.
+    /// Should be used as a singleton.
+    /// </summary>
+    public class CommandProcessor : CommandProcessor<string, object, object>
+    {
+        /// <summary>
+        /// Constructs a new <see cref="CommandProcessor"/> instance.
+        /// </summary>
+        /// <param name="commandHandlingScopeFactory">The command handling scope factory.</param>
+        /// <param name="eventDispatcher">The event dispatcher.</param>
+        /// <param name="eventStore">The event store.</param>
+        public CommandProcessor(ICommandHandlingScopeFactory commandHandlingScopeFactory, IEventDispatcher<object> eventDispatcher, IEventStore<string, object> eventStore)
+            : base(commandHandlingScopeFactory, eventDispatcher, eventStore)
+        {
+        }
+    }
+
+    /// <summary>
+    /// This class is responsibly for processing commands.
+    /// Should be used as a singleton.
     /// </summary>
     /// <typeparam name="TIdentifier">The identifier type.</typeparam>
     /// <typeparam name="TCommandBase">The command base type.</typeparam>
