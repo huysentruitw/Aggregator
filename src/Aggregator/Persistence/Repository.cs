@@ -8,6 +8,24 @@ using Aggregator.Internal;
 namespace Aggregator.Persistence
 {
     /// <summary>
+    /// Implementation of <see cref="IRepository{TIdentifier, TEventBase, TAggregateRoot}"/> where the identifier type is <see cref="string"/> and the command/event base type is an <see cref="object"/>.
+    /// </summary>
+    /// <typeparam name="TAggregateRoot"></typeparam>
+    public class Repository<TAggregateRoot> : Repository<string, object, TAggregateRoot>
+        where TAggregateRoot : AggregateRoot<string, object>, new()
+    {
+        /// <summary>
+        /// Creates a new <see cref="Repository{TAggregateRoot}"/> instance.
+        /// </summary>
+        /// <param name="eventStore">The event store.</param>
+        /// <param name="commandHandlingContext">The command handling context.</param>
+        public Repository(IEventStore<string, object> eventStore, CommandHandlingContext commandHandlingContext)
+            : base(eventStore, commandHandlingContext)
+        {
+        }
+    }
+
+    /// <summary>
     /// Implementation of <see cref="IRepository{TIdentifier, TEventBase, TAggregateRoot}"/>.
     /// </summary>
     /// <typeparam name="TIdentifier">The identifier type.</typeparam>
@@ -45,10 +63,10 @@ namespace Aggregator.Persistence
         }
 
         /// <summary>
-        /// Gets an aggregate root by its identifier.
+        /// Creates a new aggregate root.
         /// </summary>
         /// <param name="identifier">The identifier.</param>
-        /// <returns>The aggregate root.</returns>
+        /// <returns>The new aggregate root.</returns>
         /// <exception cref="AggregateRootNotFoundException{TIdentifier}"></exception>
         public Task<TAggregateRoot> Create(TIdentifier identifier)
         {
@@ -59,10 +77,10 @@ namespace Aggregator.Persistence
         }
 
         /// <summary>
-        /// Creates a new aggregate root.
+        /// Gets an aggregate root by its identifier.
         /// </summary>
         /// <param name="identifier">The identifier.</param>
-        /// <returns>The new aggregate root.</returns>
+        /// <returns>The aggregate root.</returns>
         public async Task<TAggregateRoot> Get(TIdentifier identifier)
         {
             if (_unitOfWork.TryGet(identifier, out var attachedAggregateRoot))
