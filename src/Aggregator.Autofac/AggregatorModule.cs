@@ -8,6 +8,25 @@ using Autofac;
 namespace Aggregator.Autofac
 {
     /// <summary>
+    /// Autofac module for the Aggregator library where aggregate root identifiers are of type <see cref="string"/> and the command/event base type is <see cref="object"/>.
+    /// </summary>
+    [ExcludeFromCodeCoverage]
+    public class AggregatorModule : AggregatorModule<string, object, object>
+    {
+        /// <summary>
+        /// Adds Aggregator related registrations to the container.
+        /// </summary>
+        /// <param name="builder">The container builder.</param>
+        protected override void Load(ContainerBuilder builder)
+        {
+            base.Load(builder);
+
+            // Registrate the non-generic overrides on top of the generic base stuff
+            builder.RegisterType<CommandProcessor>().AsSelf().SingleInstance();
+        }
+    }
+
+    /// <summary>
     /// Autofac module for the Aggregator library.
     /// </summary>
     /// <typeparam name="TIdentifier">The identifier type.</typeparam>
