@@ -2,48 +2,18 @@ using System.Threading.Tasks;
 using Aggregator;
 using Aggregator.Autofac;
 using Aggregator.Command;
-using Aggregator.Event;
 using Aggregator.Persistence;
 using Autofac;
 
 namespace TestConsole
 {
-    public class AggregatorModule : AggregatorModule<string, object, object>
-    {
-        protected override void Load(ContainerBuilder builder)
-        {
-            base.Load(builder);
-
-            builder.RegisterType<CommandProcessor>().AsSelf().SingleInstance();
-        }
-    }
-
-    public class CommandProcessor : CommandProcessor<string, object, object>
-    {
-        public CommandProcessor(ICommandHandlingScopeFactory commandHandlingScopeFactory, IEventDispatcher<object> eventDispatcher, IEventStore<string, object> eventStore)
-            : base(commandHandlingScopeFactory, eventDispatcher, eventStore)
-        {
-        }
-    }
-
-    public class EventStore : Aggregator.Persistence.EventStore.EventStore<string, object>
-    {
-        public EventStore(string connectionString) : base(connectionString)
-        {
-        }
-    }
-
-    public class AggregateRoot : AggregateRoot<string, object>
-    {
-    }
-
     class Program
     {
         static IContainer RegisterServices()
         {
             var builder = new ContainerBuilder();
             builder.RegisterModule<AggregatorModule>();
-            builder.RegisterType<EventStore>()
+            builder.RegisterType<Aggregator.Persistence.EventStore.EventStore>()
                 .AsImplementedInterfaces()
                 .WithParameter("connectionString", "ConnectTo=tcp://admin:changeit@localhost:1113; HeartBeatTimeout=500");
 
