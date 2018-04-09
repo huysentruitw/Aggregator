@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Threading.Tasks;
 using Aggregator.Command;
@@ -14,10 +15,9 @@ namespace Aggregator.Persistence.EventStore
         private readonly IEventStoreConnection _connection;
         private readonly JsonSerializerSettings _jsonSerializerSettings;
 
-        public EventStore(string connectionString)
+        public EventStore(IEventStoreConnection connection)
         {
-            _connection = EventStoreConnection.Create(connectionString);
-            _connection.ConnectAsync().Wait();
+            _connection = connection ?? throw new ArgumentNullException(nameof(connection));
 
             _jsonSerializerSettings = new JsonSerializerSettings
             {
@@ -25,6 +25,12 @@ namespace Aggregator.Persistence.EventStore
                 NullValueHandling = NullValueHandling.Ignore,
                 TypeNameHandling = TypeNameHandling.Auto
             };
+        }
+
+        [ExcludeFromCodeCoverage]
+        public EventStore(string connectionString)
+            : this(Connect(connectionString))
+        {
         }
 
         public void Dispose()
@@ -59,5 +65,13 @@ namespace Aggregator.Persistence.EventStore
 
         public IEventStoreTransaction<TIdentifier, TEventBase> BeginTransaction(CommandHandlingContext context)
             => new EventStoreTransaction<TIdentifier, TEventBase>(_connection, _jsonSerializerSettings);
+
+        [ExcludeFromCodeCoverage]
+        private static IEventStoreConnection Connect(string connectionString)
+        {
+            var connection = EventStoreConnection.Create(connectionString);
+            connection.ConnectAsync().Wait();
+            return connection;
+        }
     }
 }
