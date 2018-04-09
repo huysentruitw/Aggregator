@@ -123,7 +123,7 @@ namespace Aggregator.Tests.Persistence
         public async Task Get_KnownAggregateRoot_ShouldReturnAggregateRoot()
         {
             var knownIdentifier = Guid.NewGuid().ToString("N");
-            _eventStoreMock.Setup(x => x.GetEvents(knownIdentifier, 1)).ReturnsAsync(new object[]
+            _eventStoreMock.Setup(x => x.GetEvents(knownIdentifier, 0)).ReturnsAsync(new object[]
             {
                 new EventA(),
                 new EventB()
@@ -137,7 +137,7 @@ namespace Aggregator.Tests.Persistence
         public async Task Get_KnownAggregateRoot_ShouldAttachAggregateRootToUnitOfWork()
         {
             var knownIdentifier = Guid.NewGuid().ToString("N");
-            _eventStoreMock.Setup(x => x.GetEvents(knownIdentifier, 1)).ReturnsAsync(new object[]
+            _eventStoreMock.Setup(x => x.GetEvents(knownIdentifier, 0)).ReturnsAsync(new object[]
             {
                 new EventA(),
                 new EventB()
@@ -148,7 +148,7 @@ namespace Aggregator.Tests.Persistence
             var unitOfWork = _commandHandlingContext.GetUnitOfWork<string, object>();
             Assert.That(unitOfWork.TryGet(knownIdentifier, out var aggregateRootFromUnitOfWork), Is.True);
             Assert.That(aggregateRootFromUnitOfWork, Is.EqualTo(aggregateRootFromRepository));
-            _eventStoreMock.Verify(x => x.GetEvents(knownIdentifier, 1), Times.Once);
+            _eventStoreMock.Verify(x => x.GetEvents(knownIdentifier, 0), Times.Once);
         }
 
         [Test]
