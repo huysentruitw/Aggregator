@@ -7,6 +7,13 @@ using Aggregator.Internal;
 namespace Aggregator
 {
     /// <summary>
+    /// Base class for aggregate root entities that use a <see cref="string"/> as identifier and <see cref="object"/> as event base type.
+    /// </summary>
+    public abstract class AggregateRoot : AggregateRoot<string, object>
+    {
+    }
+
+    /// <summary>
     /// Base class for aggregate root entities.
     /// </summary>
     /// <typeparam name="TIdentifier">The identifier type.</typeparam>
