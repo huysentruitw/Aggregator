@@ -11,6 +11,12 @@ namespace Aggregator.Persistence.EventStore
 {
     public class EventStore : EventStore<string, object>
     {
+        internal EventStore(IEventStoreConnection connection)
+            : base(connection)
+        {
+        }
+
+        [ExcludeFromCodeCoverage]
         public EventStore(string connectionString)
             : base(connectionString)
         {
@@ -23,7 +29,7 @@ namespace Aggregator.Persistence.EventStore
         private readonly IEventStoreConnection _connection;
         private readonly JsonSerializerSettings _jsonSerializerSettings;
 
-        public EventStore(IEventStoreConnection connection)
+        internal EventStore(IEventStoreConnection connection)
         {
             _connection = connection ?? throw new ArgumentNullException(nameof(connection));
 
