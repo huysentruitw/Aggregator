@@ -9,6 +9,14 @@ using Newtonsoft.Json;
 
 namespace Aggregator.Persistence.EventStore
 {
+    public class EventStore : EventStore<string, object>
+    {
+        public EventStore(string connectionString)
+            : base(connectionString)
+        {
+        }
+    }
+
     public class EventStore<TIdentifier, TEventBase> : IEventStore<TIdentifier, TEventBase>, IDisposable
         where TIdentifier : IEquatable<TIdentifier>
     {
