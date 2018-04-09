@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,6 +9,7 @@ using Newtonsoft.Json;
 
 namespace Aggregator.Persistence.EventStore
 {
+    [ExcludeFromCodeCoverage] // Unable to mock EventStores StartTransactionAsync
     public class EventStoreTransaction<TIdentifier, TEventBase> : IEventStoreTransaction<TIdentifier, TEventBase>
         where TIdentifier : IEquatable<TIdentifier>
     {
