@@ -11,7 +11,7 @@ namespace Aggregator.Persistence
     /// Implementation of <see cref="IRepository{TIdentifier, TEventBase, TAggregateRoot}"/> where the identifier type is <see cref="string"/> and the command/event base type is an <see cref="object"/>.
     /// </summary>
     /// <typeparam name="TAggregateRoot"></typeparam>
-    public class Repository<TAggregateRoot> : Repository<string, object, TAggregateRoot>
+    public class Repository<TAggregateRoot> : Repository<string, object, TAggregateRoot>, IRepository<TAggregateRoot>
         where TAggregateRoot : AggregateRoot<string, object>, new()
     {
         /// <summary>

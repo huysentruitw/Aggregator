@@ -5,6 +5,15 @@ using Aggregator.Exceptions;
 namespace Aggregator.Persistence
 {
     /// <summary>
+    /// Interface for an aggregate root repository where the aggregate root identifier is a <see cref="string"/> and the command / event type is an <see cref="object"/>.
+    /// </summary>
+    /// <typeparam name="TAggregateRoot"></typeparam>
+    public interface IRepository<TAggregateRoot> : IRepository<string, object, TAggregateRoot>
+        where TAggregateRoot : AggregateRoot<string, object>, new()
+    {
+    }
+
+    /// <summary>
     /// Interface for an aggregate root repository.
     /// </summary>
     /// <typeparam name="TIdentifier">The identifier type.</typeparam>
@@ -12,7 +21,7 @@ namespace Aggregator.Persistence
     /// <typeparam name="TAggregateRoot">The aggregate root type.</typeparam>
     public interface IRepository<TIdentifier, TEventBase, TAggregateRoot>
         where TIdentifier : IEquatable<TIdentifier>
-        where TAggregateRoot : AggregateRoot<TIdentifier, TEventBase>
+        where TAggregateRoot : AggregateRoot<TIdentifier, TEventBase>, new()
     {
         /// <summary>
         /// Checks if an aggregate root with the given identifier exists.
