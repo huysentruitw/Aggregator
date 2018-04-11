@@ -15,7 +15,7 @@ namespace Aggregator.Command
     /// This class is responsible for processing commands where the aggregate root identifier is a <see cref="string"/> and the command/event base type is <see cref="object"/>.
     /// Should be used as a singleton.
     /// </summary>
-    public class CommandProcessor : CommandProcessor<string, object, object>
+    public class CommandProcessor : CommandProcessor<string, object, object>, ICommandProcessor
     {
         /// <summary>
         /// Constructs a new <see cref="CommandProcessor"/> instance.
@@ -36,7 +36,7 @@ namespace Aggregator.Command
     /// <typeparam name="TIdentifier">The identifier type.</typeparam>
     /// <typeparam name="TCommandBase">The command base type.</typeparam>
     /// <typeparam name="TEventBase">The event base type.</typeparam>
-    public class CommandProcessor<TIdentifier, TCommandBase, TEventBase>
+    public class CommandProcessor<TIdentifier, TCommandBase, TEventBase> : ICommandProcessor<TCommandBase>
         where TIdentifier : IEquatable<TIdentifier>
     {
         private readonly ConcurrentDictionary<Type, MethodInfo> _executeMethodCache = new ConcurrentDictionary<Type, MethodInfo>();

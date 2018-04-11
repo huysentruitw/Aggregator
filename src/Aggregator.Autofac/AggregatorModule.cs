@@ -22,7 +22,8 @@ namespace Aggregator.Autofac
             base.Load(builder);
 
             // Registrate the non-generic overrides on top of the generic base stuff
-            builder.RegisterType<CommandProcessor>().AsSelf().SingleInstance();
+            builder.RegisterType<CommandProcessor>().As<ICommandProcessor>().SingleInstance();
+            builder.RegisterGeneric(typeof(Repository<>)).As(typeof(IRepository<>)).InstancePerLifetimeScope();
         }
     }
 
@@ -44,8 +45,8 @@ namespace Aggregator.Autofac
         {
             builder.RegisterType<ReflectionCommandHandlerTypeLocator>().As<ICommandHandlerTypeLocator>().SingleInstance();
             builder.RegisterType<CommandHandlingScopeFactory>().As<ICommandHandlingScopeFactory>().SingleInstance();
-            builder.RegisterType<CommandProcessor<TIdentifier, TCommandBase, TEventBase>>().AsSelf().SingleInstance();
-            builder.RegisterGeneric(typeof(Repository<,,>)).AsImplementedInterfaces().InstancePerLifetimeScope();
+            builder.RegisterType<CommandProcessor<TIdentifier, TCommandBase, TEventBase>>().As<ICommandProcessor<TCommandBase>>().SingleInstance();
+            builder.RegisterGeneric(typeof(Repository<,,>)).As(typeof(IRepository<,,>)).InstancePerLifetimeScope();
 
             builder.RegisterType<ReflectionEventHandlerTypeLocator>().As<IEventHandlerTypeLocator>().SingleInstance();
             builder.RegisterType<EventHandlingScopeFactory>().As<IEventHandlingScopeFactory>().SingleInstance();
