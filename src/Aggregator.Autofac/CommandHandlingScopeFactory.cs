@@ -13,7 +13,7 @@ namespace Aggregator.Autofac
         private readonly ILifetimeScope _lifetimeScope;
 
         /// <summary>
-        /// Construct a new <see cref="ICommandHandlingScopeFactory"/> instance.
+        /// Construct a new <see cref="CommandHandlingScopeFactory"/> instance.
         /// </summary>
         /// <param name="commandHandlerTypeLocator">The command handler type locator.</param>
         /// <param name="lifetimeScope">The parent Autofac lifetime scope.</param>
