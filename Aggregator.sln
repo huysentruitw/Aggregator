@@ -21,7 +21,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aggregator.Persistence.Even
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aggregator.Persistence.EventStore.Tests", "tests\Aggregator.Persistence.EventStore.Tests\Aggregator.Persistence.EventStore.Tests.csproj", "{92E03763-7033-4DCD-8EFD-CD50DEEAA356}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aggregator.ExampleWebHost", "examples\Aggregator.ExampleWebHost\Aggregator.ExampleWebHost.csproj", "{4B0958B7-50AA-46C3-B489-72F5A8B03CCB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aggregator.ExampleWebHost", "example\Aggregator.Example.WebHost\Aggregator.Example.WebHost.csproj", "{4B0958B7-50AA-46C3-B489-72F5A8B03CCB}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Example", "Example", "{C4B03F9F-A8DA-4B60-996A-B0519DC355D8}"
 EndProject
