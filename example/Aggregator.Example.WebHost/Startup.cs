@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.SpaServices.Webpack;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Aggregator.ExampleWebHost
+namespace Aggregator.Example.WebHost
 {
     public class Startup
     {

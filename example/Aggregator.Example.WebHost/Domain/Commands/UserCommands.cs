@@ -1,6 +1,6 @@
 using System;
 
-namespace Aggregator.ExampleWebHost.Domain.Commands
+namespace Aggregator.Example.WebHost.Domain.Commands
 {
     internal sealed class CreateUserCommand
     {
