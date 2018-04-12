@@ -1,11 +1,9 @@
-using System;
 using System.Collections.Generic;
 
 namespace Aggregator.Internal
 {
-    internal interface IAggregateRootInitializer<TIdentifier, TEventBase>
-        where TIdentifier : IEquatable<TIdentifier>
+    internal interface IAggregateRootInitializer<TEventBase>
     {
-        void Initialize(TIdentifier identifier, long expectedVersion, IEnumerable<TEventBase> events = null);
+        void Initialize(IEnumerable<TEventBase> events);
     }
 }

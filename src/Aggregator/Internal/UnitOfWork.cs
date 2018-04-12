@@ -9,23 +9,23 @@ namespace Aggregator.Internal
     internal sealed class UnitOfWork<TIdentifier, TEventBase>
         where TIdentifier : IEquatable<TIdentifier>
     {
-        private readonly ConcurrentDictionary<TIdentifier, IAggregateRootChangeTracker<TIdentifier, TEventBase>> _changes
-            = new ConcurrentDictionary<TIdentifier, IAggregateRootChangeTracker<TIdentifier, TEventBase>>();
+        private readonly ConcurrentDictionary<TIdentifier, AggregateRootEntity<TIdentifier, TEventBase>> _entities
+            = new ConcurrentDictionary<TIdentifier, AggregateRootEntity<TIdentifier, TEventBase>>();
 
-        public void Attach(AggregateRoot<TIdentifier, TEventBase> aggregateRoot)
+        public void Attach(AggregateRootEntity<TIdentifier, TEventBase> aggregateRootEntity)
         {
-            if (aggregateRoot == null) throw new ArgumentNullException(nameof(aggregateRoot));
-            if (!_changes.TryAdd(aggregateRoot.Identifier, aggregateRoot))
-                throw new AggregateRootAlreadyAttachedException<TIdentifier>(aggregateRoot.Identifier);
+            if (aggregateRootEntity == null) throw new ArgumentNullException(nameof(aggregateRootEntity));
+            if (!_entities.TryAdd(aggregateRootEntity.Identifier, aggregateRootEntity))
+                throw new AggregateRootAlreadyAttachedException<TIdentifier>(aggregateRootEntity.Identifier);
         }
 
-        public bool TryGet(TIdentifier identifier, out IAggregateRootChangeTracker<TIdentifier, TEventBase> aggregateRoot)
-            => _changes.TryGetValue(identifier, out aggregateRoot);
+        public bool TryGet(TIdentifier identifier, out AggregateRootEntity<TIdentifier, TEventBase> aggregateRootEntity)
+            => _entities.TryGetValue(identifier, out aggregateRootEntity);
 
         public bool HasChanges
-            => _changes.Values.Any(x => x.HasChanges);
+            => _entities.Values.Any(x => x.HasChanges);
 
-        public IEnumerable<IAggregateRootChangeTracker<TIdentifier, TEventBase>> GetChanges()
-            => _changes.Values.Where(x => x.HasChanges);
+        public IEnumerable<AggregateRootEntity<TIdentifier, TEventBase>> GetChanges()
+            => _entities.Values.Where(x => x.HasChanges);
     }
 }
