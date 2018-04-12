@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Aggregator.Command;
-using Aggregator.ExampleWebHost.Domain.Commands;
+using Aggregator.Example.WebHost.Domain.Commands;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Aggregator.ExampleWebHost.Controllers
+namespace Aggregator.Example.WebHost.Controllers
 {
     [Produces("application/json")]
     [Route("api/[controller]")]

@@ -1,7 +1,7 @@
 using Aggregator.Exceptions;
-using Aggregator.ExampleWebHost.Domain.Entities;
+using Aggregator.Example.WebHost.Domain.Entities;
 
-namespace Aggregator.ExampleWebHost.Domain.Exceptions
+namespace Aggregator.Example.WebHost.Domain.Exceptions
 {
     internal class UserDeletedException : AggregateRootException<string>
     {

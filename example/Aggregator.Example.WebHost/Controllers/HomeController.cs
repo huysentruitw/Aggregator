@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Aggregator.ExampleWebHost.Controllers
+namespace Aggregator.Example.WebHost.Controllers
 {
     public class HomeController : Controller
     {

@@ -1,6 +1,6 @@
 using System;
 
-namespace Aggregator.ExampleWebHost.Domain.Events
+namespace Aggregator.Example.WebHost.Domain.Events
 {
     internal class CreatedUserEvent
     {

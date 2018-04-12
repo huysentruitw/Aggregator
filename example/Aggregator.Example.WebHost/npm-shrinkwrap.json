@@ -1,5 +1,5 @@
 {
-  "name": "Aggregator.ExampleWebHost",
+  "name": "Aggregator.Example.WebHost",
   "version": "0.0.0",
   "dependencies": {
     "@angular/animations": {

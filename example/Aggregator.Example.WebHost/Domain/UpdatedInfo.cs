@@ -1,4 +1,4 @@
-namespace Aggregator.ExampleWebHost.Domain
+namespace Aggregator.Example.WebHost.Domain
 {
     internal class UpdatedInfo<T>
     {
