@@ -11,11 +11,11 @@ namespace Aggregator.Tests.Internal
     public class UnitOfWorkTests
     {
         [Test]
-        public void Attach_PassNullAsAggregate_ShouldThrowException()
+        public void Attach_PassNullAsAggregateRootEntity_ShouldThrowException()
         {
             var unitOfWork = new UnitOfWork<string, object>();
             var ex = Assert.Throws<ArgumentNullException>(() => unitOfWork.Attach(null));
-            Assert.That(ex.ParamName, Is.EqualTo("aggregateRoot"));
+            Assert.That(ex.ParamName, Is.EqualTo("aggregateRootEntity"));
         }
 
         [Test]
@@ -23,11 +23,11 @@ namespace Aggregator.Tests.Internal
         {
             var identifier = Guid.NewGuid().ToString("N");
             var aggregateRoot = new Mock<FakeAggregateRoot>().Object;
-            ((IAggregateRootInitializer<string, object>)aggregateRoot).Initialize(identifier, 1);
+            var aggregateRootEntity = new AggregateRootEntity<string, object>(identifier, aggregateRoot, 1);
 
             var unitOfWork = new UnitOfWork<string, object>();
-            unitOfWork.Attach(aggregateRoot);
-            var ex = Assert.Throws<AggregateRootAlreadyAttachedException<string>>(() => unitOfWork.Attach(aggregateRoot));
+            unitOfWork.Attach(aggregateRootEntity);
+            var ex = Assert.Throws<AggregateRootAlreadyAttachedException<string>>(() => unitOfWork.Attach(aggregateRootEntity));
             Assert.That(ex.Message, Is.EqualTo($"Exception for aggregate root with identifier '{identifier}': Aggregate root already attached"));
         }
 
@@ -36,33 +36,33 @@ namespace Aggregator.Tests.Internal
         {
             var identifier = Guid.NewGuid().ToString("N");
             var aggregateRoot = new Mock<FakeAggregateRoot>().Object;
-            ((IAggregateRootInitializer<string, object>)aggregateRoot).Initialize(identifier, 1);
+            var aggregateRootEntity = new AggregateRootEntity<string, object>(identifier, aggregateRoot, 1);
 
             var unitOfWork = new UnitOfWork<string, object>();
-            unitOfWork.Attach(aggregateRoot);
+            unitOfWork.Attach(aggregateRootEntity);
             Assert.That(unitOfWork.TryGet(Guid.NewGuid().ToString("N"), out var _), Is.False);
         }
 
         [Test]
-        public void TryGet_KnownIdentifier_ShouldReturnTrueAndAggregateRoot()
+        public void TryGet_KnownIdentifier_ShouldReturnTrueAndAggregateRootEntity()
         {
             var identifier = Guid.NewGuid().ToString("N");
             var aggregateRoot = new Mock<FakeAggregateRoot>().Object;
-            ((IAggregateRootInitializer<string, object>)aggregateRoot).Initialize(identifier, 1);
+            var aggregateRootEntity = new AggregateRootEntity<string, object>(identifier, aggregateRoot, 1);
 
             var unitOfWork = new UnitOfWork<string, object>();
-            unitOfWork.Attach(aggregateRoot);
-            Assert.That(unitOfWork.TryGet(identifier, out var resultingAggregateRoot), Is.True);
-            Assert.That(resultingAggregateRoot, Is.EqualTo(aggregateRoot));
+            unitOfWork.Attach(aggregateRootEntity);
+            Assert.That(unitOfWork.TryGet(identifier, out var resultingAggregateRootEntity), Is.True);
+            Assert.That(resultingAggregateRootEntity, Is.EqualTo(aggregateRootEntity));
         }
 
         [Test]
-        public void HasChanges_NoneOfTheTrackedAggregateRootsHaveChanges_ShouldReturnFalse()
+        public void HasChanges_NoneOfTheTrackedAggregateRootEntitiesHaveChanges_ShouldReturnFalse()
         {
             var aggregateRoots = CreateAggregateRoots();
 
             var unitOfWork = new UnitOfWork<string, object>();
-            Array.ForEach(aggregateRoots, x => unitOfWork.Attach(x));
+            Array.ForEach(aggregateRoots, x => unitOfWork.Attach(new AggregateRootEntity<string, object>(Guid.NewGuid().ToString("N"), x, 0)));
             Assert.That(unitOfWork.HasChanges, Is.False);
         }
 
@@ -72,7 +72,7 @@ namespace Aggregator.Tests.Internal
             var aggregateRoots = CreateAggregateRoots();
 
             var unitOfWork = new UnitOfWork<string, object>();
-            Array.ForEach(aggregateRoots, x => unitOfWork.Attach(x));
+            Array.ForEach(aggregateRoots, x => unitOfWork.Attach(new AggregateRootEntity<string, object>(Guid.NewGuid().ToString("N"), x, 0)));
             Assert.That(unitOfWork.HasChanges, Is.False);
             aggregateRoots[2].ApplyA();
             Assert.That(unitOfWork.HasChanges, Is.True);
@@ -84,7 +84,7 @@ namespace Aggregator.Tests.Internal
             var aggregateRoots = CreateAggregateRoots();
 
             var unitOfWork = new UnitOfWork<string, object>();
-            Array.ForEach(aggregateRoots, x => unitOfWork.Attach(x));
+            Array.ForEach(aggregateRoots, x => unitOfWork.Attach(new AggregateRootEntity<string, object>(Guid.NewGuid().ToString("N"), x, 0)));
             var changes = unitOfWork.GetChanges().ToArray();
             Assert.That(changes, Has.Length.Zero);
         }
@@ -95,7 +95,7 @@ namespace Aggregator.Tests.Internal
             var aggregateRoots = CreateAggregateRoots();
 
             var unitOfWork = new UnitOfWork<string, object>();
-            Array.ForEach(aggregateRoots, x => unitOfWork.Attach(x));
+            Array.ForEach(aggregateRoots, x => unitOfWork.Attach(new AggregateRootEntity<string, object>(Guid.NewGuid().ToString("N"), x, 0)));
             var changes = unitOfWork.GetChanges().ToArray();
             Assert.That(changes, Has.Length.Zero);
 
@@ -105,7 +105,7 @@ namespace Aggregator.Tests.Internal
             Assert.That(changes, Has.Length.EqualTo(2));
         }
 
-        public abstract class FakeAggregateRoot : AggregateRoot<string, object>
+        public abstract class FakeAggregateRoot : AggregateRoot<object>
         {
             public FakeAggregateRoot()
             {
@@ -119,12 +119,7 @@ namespace Aggregator.Tests.Internal
 
         private FakeAggregateRoot[] CreateAggregateRoots()
             => Enumerable.Range(1, 4)
-                .Select(_ =>
-                {
-                    var aggregateRoot = new Mock<FakeAggregateRoot>().Object;
-                    ((IAggregateRootInitializer<string, object>)aggregateRoot).Initialize(Guid.NewGuid().ToString("N"), 1);
-                    return aggregateRoot;
-                })
+                .Select(_ => new Mock<FakeAggregateRoot>().Object)
                 .ToArray();
     }
 }

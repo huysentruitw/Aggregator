@@ -7,58 +7,35 @@ using Aggregator.Internal;
 namespace Aggregator
 {
     /// <summary>
-    /// Base class for aggregate root entities that use a <see cref="string"/> as identifier and <see cref="object"/> as event base type.
+    /// Base class for aggregate root entities that use <see cref="object"/> as event base type.
     /// </summary>
-    public abstract class AggregateRoot : AggregateRoot<string, object>
+    public abstract class AggregateRoot : AggregateRoot<object>
     {
     }
 
     /// <summary>
     /// Base class for aggregate root entities.
     /// </summary>
-    /// <typeparam name="TIdentifier">The identifier type.</typeparam>
     /// <typeparam name="TEventBase">The event base type.</typeparam>
-    public abstract class AggregateRoot<TIdentifier, TEventBase>
-        : IAggregateRootInitializer<TIdentifier, TEventBase>
-        , IAggregateRootChangeTracker<TIdentifier, TEventBase>
-        where TIdentifier : IEquatable<TIdentifier>
+    public abstract class AggregateRoot<TEventBase>
+        : IAggregateRootInitializer<TEventBase>
+        , IAggregateRootChangeTracker<TEventBase>
     {
         private readonly Dictionary<Type, Action<TEventBase>> _handlers = new Dictionary<Type, Action<TEventBase>>();
         private readonly List<TEventBase> _changes = new List<TEventBase>();
-        private bool _isInitialized = false;
 
-        /// <summary>
-        /// The aggregate root identifier.
-        /// </summary>
-        public TIdentifier Identifier { get; private set; }
-
-        /// <summary>
-        /// The aggregate roots expected event version.
-        /// </summary>
-        public long ExpectedVersion { get; private set; }
-
-        void IAggregateRootInitializer<TIdentifier, TEventBase>.Initialize(TIdentifier identifier, long expectedVersion, IEnumerable<TEventBase> events)
+        void IAggregateRootInitializer<TEventBase>.Initialize(IEnumerable<TEventBase> events)
         {
-            if (Equals(identifier, default(TIdentifier))) throw new ArgumentException("Default value not allowed", nameof(identifier));
-            if (_isInitialized) throw new InvalidOperationException("Already initialized");
-
-            Identifier = identifier;
-            ExpectedVersion = expectedVersion;
-
-            foreach (var @event in events ?? Enumerable.Empty<TEventBase>())
+            if (events == null) return;
+            foreach (var @event in events)
                 Handle(@event);
-
-            _isInitialized = true;
         }
 
-        bool IAggregateRootChangeTracker<TIdentifier, TEventBase>.HasChanges
+        bool IAggregateRootChangeTracker<TEventBase>.HasChanges
             => _changes.Any();
 
-        IEnumerable<TEventBase> IAggregateRootChangeTracker<TIdentifier, TEventBase>.GetChanges()
-        {
-            GuardInitialized();
-            return _changes.AsEnumerable();
-        }
+        IEnumerable<TEventBase> IAggregateRootChangeTracker<TEventBase>.GetChanges()
+            => _changes.AsEnumerable();
 
         /// <summary>
         /// Registers an event handler.
@@ -72,7 +49,7 @@ namespace Aggregator
 
             var eventType = typeof(TEvent);
             if (_handlers.ContainsKey(eventType))
-                throw new HandlerForEventAlreadyRegisteredException<TIdentifier>(Identifier, eventType);
+                throw new HandlerForEventAlreadyRegisteredException(eventType);
 
             _handlers.Add(eventType, @event => handler((TEvent)@event));
         }
@@ -80,11 +57,12 @@ namespace Aggregator
         /// <summary>
         /// Apply a new event to the aggregate root.
         /// </summary>
+        /// <typeparam name="TEvent">The type of the event to apply.</typeparam>
         /// <param name="event">The event to apply.</param>
-        protected void Apply(TEventBase @event)
+        protected void Apply<TEvent>(TEvent @event)
+            where TEvent : TEventBase
         {
             if (@event == null) throw new ArgumentNullException(nameof(@event));
-            GuardInitialized();
             Handle(@event);
             _changes.Add(@event);
         }
@@ -95,14 +73,9 @@ namespace Aggregator
 
             var eventType = @event.GetType();
             if (!_handlers.TryGetValue(eventType, out var handler))
-                throw new UnhandledEventException<TIdentifier>(Identifier, eventType);
+                throw new UnhandledEventException(eventType);
 
             handler(@event);
-        }
-
-        private void GuardInitialized()
-        {
-            if (!_isInitialized) throw new InvalidOperationException("AggregateRoot not initialized");
         }
     }
 }

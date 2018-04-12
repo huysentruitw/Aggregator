@@ -93,10 +93,10 @@ namespace Aggregator.Command
 
                 try
                 {
-                    foreach (var aggregateRoot in unitOfWork.GetChanges())
+                    foreach (var aggregateRootEntity in unitOfWork.GetChanges())
                     {
-                        var events = aggregateRoot.GetChanges();
-                        await transaction.StoreEvents(aggregateRoot.Identifier, aggregateRoot.ExpectedVersion, events).ConfigureAwait(false);
+                        var events = aggregateRootEntity.GetChanges();
+                        await transaction.StoreEvents(aggregateRootEntity.Identifier, aggregateRootEntity.ExpectedVersion, events).ConfigureAwait(false);
                         storedEvents.AddRange(events);
                     }
 

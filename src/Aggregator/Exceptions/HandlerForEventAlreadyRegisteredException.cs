@@ -5,12 +5,10 @@ namespace Aggregator.Exceptions
     /// <summary>
     /// Thrown when trying to register a handler for the same event more than once.
     /// </summary>
-    /// <typeparam name="TIdentifier">The identifier type.</typeparam>
-    public class HandlerForEventAlreadyRegisteredException<TIdentifier> : AggregateRootException<TIdentifier>
-        where TIdentifier : IEquatable<TIdentifier>
+    public class HandlerForEventAlreadyRegisteredException : AggregateRootException
     {
-        internal HandlerForEventAlreadyRegisteredException(TIdentifier identifier, Type eventType)
-            : base(identifier, $"Handler for event {eventType.Name} already registered")
+        internal HandlerForEventAlreadyRegisteredException(Type eventType)
+            : base($"Handler for event {eventType.Name} already registered")
         {
         }
     }

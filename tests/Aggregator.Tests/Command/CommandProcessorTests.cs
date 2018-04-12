@@ -317,14 +317,13 @@ namespace Aggregator.Tests.Command
             {
                 var unitOfWork = _context.GetUnitOfWork<string, object>();
                 var aggregateRoot = new FakeAggregateRoot();
-                ((IAggregateRootInitializer<string, object>)aggregateRoot).Initialize("some_id", 5);
-                unitOfWork.Attach(aggregateRoot);
+                unitOfWork.Attach(new AggregateRootEntity<string, object>("some_id", aggregateRoot, 5));
                 _action.Invoke(aggregateRoot);
                 return Task.CompletedTask;
             }
         }
 
-        private class FakeAggregateRoot : AggregateRoot<string, object>
+        private class FakeAggregateRoot : AggregateRoot<object>
         {
             public FakeAggregateRoot()
             {

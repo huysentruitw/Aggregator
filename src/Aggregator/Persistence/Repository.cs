@@ -12,7 +12,7 @@ namespace Aggregator.Persistence
     /// </summary>
     /// <typeparam name="TAggregateRoot"></typeparam>
     public class Repository<TAggregateRoot> : Repository<string, object, TAggregateRoot>, IRepository<TAggregateRoot>
-        where TAggregateRoot : AggregateRoot<string, object>, new()
+        where TAggregateRoot : AggregateRoot<object>, new()
     {
         /// <summary>
         /// Creates a new <see cref="Repository{TAggregateRoot}"/> instance.
@@ -33,7 +33,7 @@ namespace Aggregator.Persistence
     /// <typeparam name="TAggregateRoot">The aggregate root type.</typeparam>
     public class Repository<TIdentifier, TEventBase, TAggregateRoot> : IRepository<TIdentifier, TEventBase, TAggregateRoot>
         where TIdentifier : IEquatable<TIdentifier>
-        where TAggregateRoot : AggregateRoot<TIdentifier, TEventBase>, new()
+        where TAggregateRoot : AggregateRoot<TEventBase>, new()
     {
         private readonly IEventStore<TIdentifier, TEventBase> _eventStore;
         private readonly UnitOfWork<TIdentifier, TEventBase> _unitOfWork;
@@ -63,38 +63,40 @@ namespace Aggregator.Persistence
         }
 
         /// <summary>
-        /// Creates a new aggregate root.
-        /// </summary>
-        /// <param name="identifier">The identifier.</param>
-        /// <param name="aggregateRootFactory">Optional aggregate root factory.</param>
-        /// <returns>The new aggregate root.</returns>
-        /// <exception cref="AggregateRootNotFoundException{TIdentifier}"></exception>
-        public Task<TAggregateRoot> Create(TIdentifier identifier, Func<TAggregateRoot> aggregateRootFactory = null)
-        {
-            var aggregateRoot = aggregateRootFactory?.Invoke() ?? new TAggregateRoot();
-            ((IAggregateRootInitializer<TIdentifier, TEventBase>)aggregateRoot).Initialize(identifier, 0);
-            _unitOfWork.Attach(aggregateRoot);
-            return Task.FromResult(aggregateRoot);
-        }
-
-        /// <summary>
         /// Gets an aggregate root by its identifier.
         /// </summary>
         /// <param name="identifier">The identifier.</param>
         /// <returns>The aggregate root.</returns>
+        /// <exception cref="AggregateRootNotFoundException{TIdentifier}"></exception>
         public async Task<TAggregateRoot> Get(TIdentifier identifier)
         {
-            if (_unitOfWork.TryGet(identifier, out var attachedAggregateRoot))
-                return (TAggregateRoot)attachedAggregateRoot;
+            if (_unitOfWork.TryGet(identifier, out var aggregateRootEntity))
+                return (TAggregateRoot)aggregateRootEntity.AggregateRoot;
 
             var events = await _eventStore.GetEvents(identifier).ConfigureAwait(false);
             if (events == null || !events.Any())
                 throw new AggregateRootNotFoundException<TIdentifier>(identifier);
 
             var aggregateRoot = new TAggregateRoot();
-            ((IAggregateRootInitializer<TIdentifier, TEventBase>)aggregateRoot).Initialize(identifier, events.Length, events);
-            _unitOfWork.Attach(aggregateRoot);
+            ((IAggregateRootInitializer<TEventBase>)aggregateRoot).Initialize(events);
+            _unitOfWork.Attach(new AggregateRootEntity<TIdentifier, TEventBase>(identifier, aggregateRoot, events.Length));
             return aggregateRoot;
+        }
+
+        /// <summary>
+        /// Adds a new aggregate root to the repository.
+        /// </summary>
+        /// <param name="identifier">The aggregate root identifier.</param>
+        /// <param name="aggregateRoot">The aggregate root.</param>
+        /// <returns>An awaitable <see cref="Task"/>.</returns>
+        /// <exception cref="AggregateRootAlreadyExistsException{TIdentifier}"></exception>
+        public async Task Add(TIdentifier identifier, TAggregateRoot aggregateRoot)
+        {
+            if (aggregateRoot == null) throw new ArgumentNullException(nameof(aggregateRoot));
+            if (await Contains(identifier).ConfigureAwait(false))
+                throw new AggregateRootAlreadyExistsException<TIdentifier>(identifier);
+
+            _unitOfWork.Attach(new AggregateRootEntity<TIdentifier, TEventBase>(identifier, aggregateRoot, 0));
         }
     }
 }

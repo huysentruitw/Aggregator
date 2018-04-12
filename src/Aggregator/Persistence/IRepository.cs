@@ -9,7 +9,7 @@ namespace Aggregator.Persistence
     /// </summary>
     /// <typeparam name="TAggregateRoot"></typeparam>
     public interface IRepository<TAggregateRoot> : IRepository<string, object, TAggregateRoot>
-        where TAggregateRoot : AggregateRoot<string, object>, new()
+        where TAggregateRoot : AggregateRoot<object>, new()
     {
     }
 
@@ -21,7 +21,7 @@ namespace Aggregator.Persistence
     /// <typeparam name="TAggregateRoot">The aggregate root type.</typeparam>
     public interface IRepository<TIdentifier, TEventBase, TAggregateRoot>
         where TIdentifier : IEquatable<TIdentifier>
-        where TAggregateRoot : AggregateRoot<TIdentifier, TEventBase>, new()
+        where TAggregateRoot : AggregateRoot<TEventBase>, new()
     {
         /// <summary>
         /// Checks if an aggregate root with the given identifier exists.
@@ -39,11 +39,12 @@ namespace Aggregator.Persistence
         Task<TAggregateRoot> Get(TIdentifier identifier);
 
         /// <summary>
-        /// Creates a new aggregate root.
+        /// Adds a new aggregate root to the repository.
         /// </summary>
-        /// <param name="identifier">The identifier.</param>
-        /// <param name="aggregateRootFactory">Optional aggregate root factory.</param>
-        /// <returns>The new aggregate root.</returns>
-        Task<TAggregateRoot> Create(TIdentifier identifier, Func<TAggregateRoot> aggregateRootFactory = null);
+        /// <param name="identifier">The aggregate root identifier.</param>
+        /// <param name="aggregateRoot">The aggregate root.</param>
+        /// <returns>An awaitable <see cref="Task"/>.</returns>
+        /// <exception cref="AggregateRootAlreadyExistsException{TIdentifier}"></exception>
+        Task Add(TIdentifier identifier, TAggregateRoot aggregateRoot);
     }
 }
