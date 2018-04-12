@@ -1,7 +1,7 @@
 using System;
 using Aggregator.Persistence;
 
-namespace Aggregator.Example.WebHost.Domain
+namespace Aggregator.Example.Domain
 {
     internal abstract class PersistentCommandHandler<TCommand, TAggregateRoot>
         : SafeCommandHandler<TCommand>

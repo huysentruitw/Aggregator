@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Aggregator.Command;
-using Aggregator.Example.WebHost.Domain.Commands;
+using Aggregator.Example.Messages;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Aggregator.Example.WebHost.Controllers

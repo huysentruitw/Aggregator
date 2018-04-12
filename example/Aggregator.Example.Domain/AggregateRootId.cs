@@ -1,6 +1,6 @@
 using System;
 
-namespace Aggregator.Example.WebHost.Domain
+namespace Aggregator.Example.Domain
 {
     internal class AggregateRootId
     {

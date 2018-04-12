@@ -1,6 +1,6 @@
-namespace Aggregator.Example.WebHost.Domain
+namespace Aggregator.Example.Messages
 {
-    internal class UpdatedInfo<T>
+    public class UpdatedInfo<T>
     {
         public UpdatedInfo(T oldValue, T newValue)
         {
@@ -13,13 +13,13 @@ namespace Aggregator.Example.WebHost.Domain
         public T NewValue { get; }
     }
 
-    internal static class UpdatedInfo
+    public static class UpdatedInfo
     {
         public static UpdatedInfoBuilder<T> From<T>(T oldValue)
             => new UpdatedInfoBuilder<T>(oldValue);
     }
 
-    internal class UpdatedInfoBuilder<T>
+    public class UpdatedInfoBuilder<T>
     {
         private readonly T _oldValue;
 

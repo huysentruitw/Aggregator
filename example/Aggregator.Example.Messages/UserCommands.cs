@@ -1,8 +1,8 @@
 using System;
 
-namespace Aggregator.Example.WebHost.Domain.Commands
+namespace Aggregator.Example.Messages
 {
-    internal sealed class CreateUserCommand
+    public sealed class CreateUserCommand
     {
         public Guid Id { get; set; }
 
@@ -13,28 +13,28 @@ namespace Aggregator.Example.WebHost.Domain.Commands
         public string Surname { get; set; }
     }
 
-    internal sealed class UpdateUserEmailAddressCommand
+    public sealed class UpdateUserEmailAddressCommand
     {
         public Guid Id { get; set; }
 
         public string EmailAddress { get; set; }
     }
 
-    internal sealed class UpdateUserGivenNameCommand
+    public sealed class UpdateUserGivenNameCommand
     {
         public Guid Id { get; set; }
 
         public string GivenName { get; set; }
     }
 
-    internal sealed class UpdateUserSurnameCommand
+    public sealed class UpdateUserSurnameCommand
     {
         public Guid Id { get; set; }
 
         public string Surname { get; set; }
     }
 
-    internal sealed class DeleteUserCommand
+    public sealed class DeleteUserCommand
     {
         public Guid Id { get; set; }
     }

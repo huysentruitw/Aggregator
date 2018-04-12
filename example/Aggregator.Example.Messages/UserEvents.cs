@@ -1,8 +1,8 @@
 using System;
 
-namespace Aggregator.Example.WebHost.Domain.Events
+namespace Aggregator.Example.Messages
 {
-    internal class CreatedUserEvent
+    public class CreatedUserEvent
     {
         public Guid Id { get; set; }
 
@@ -15,7 +15,7 @@ namespace Aggregator.Example.WebHost.Domain.Events
         public DateTimeOffset DateCreatedUtc { get; set; }
     }
 
-    internal class UpdatedUserEmailAddressEvent
+    public class UpdatedUserEmailAddressEvent
     {
         public Guid Id { get; set; }
 
@@ -28,7 +28,7 @@ namespace Aggregator.Example.WebHost.Domain.Events
         public DateTimeOffset DateUpdatedUtc { get; set; }
     }
 
-    internal class UpdatedUserGivenNameEvent
+    public class UpdatedUserGivenNameEvent
     {
         public Guid Id { get; set; }
 
@@ -41,7 +41,7 @@ namespace Aggregator.Example.WebHost.Domain.Events
         public DateTimeOffset DateUpdatedUtc { get; set; }
     }
 
-    internal class UpdatedUserSurnameEvent
+    public class UpdatedUserSurnameEvent
     {
         public Guid Id { get; set; }
 
@@ -54,7 +54,7 @@ namespace Aggregator.Example.WebHost.Domain.Events
         public DateTimeOffset DateUpdatedUtc { get; set; }
     }
 
-    internal class DeletedUserEvent
+    public class DeletedUserEvent
     {
         public Guid Id { get; set; }
 
