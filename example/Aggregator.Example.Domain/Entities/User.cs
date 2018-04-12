@@ -1,8 +1,8 @@
 using System;
-using Aggregator.Example.WebHost.Domain.Events;
-using Aggregator.Example.WebHost.Domain.Exceptions;
+using Aggregator.Example.Domain.Exceptions;
+using Aggregator.Example.Messages;
 
-namespace Aggregator.Example.WebHost.Domain.Entities
+namespace Aggregator.Example.Domain.Entities
 {
     internal sealed class User : AggregateRoot
     {

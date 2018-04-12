@@ -1,10 +1,10 @@
 using System.Threading.Tasks;
-using Aggregator.Example.WebHost.Domain.Commands;
-using Aggregator.Example.WebHost.Domain.Entities;
+using Aggregator.Example.Domain.Entities;
+using Aggregator.Example.Messages;
 using Aggregator.Persistence;
 using FluentValidation;
 
-namespace Aggregator.Example.WebHost.Domain.CommandHandlers
+namespace Aggregator.Example.Domain.CommandHandlers
 {
     internal sealed class CreateUserCommandHandler : PersistentCommandHandler<CreateUserCommand, User>
     {

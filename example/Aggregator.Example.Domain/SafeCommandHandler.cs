@@ -2,7 +2,7 @@ using System.Threading.Tasks;
 using Aggregator.Command;
 using FluentValidation;
 
-namespace Aggregator.Example.WebHost.Domain
+namespace Aggregator.Example.Domain
 {
     internal abstract class SafeCommandHandler<TCommand>
         : AbstractValidator<TCommand>

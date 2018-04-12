@@ -10,7 +10,6 @@
   <ItemGroup>
     <PackageReference Include="Autofac" Version="4.6.2" />
     <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="4.2.2" />
-    <PackageReference Include="FluentValidation" Version="7.5.2" />
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.6" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.0.3" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
@@ -40,6 +39,8 @@
     <ProjectReference Include="..\..\src\Aggregator.Autofac\Aggregator.Autofac.csproj" />
     <ProjectReference Include="..\..\src\Aggregator.Persistence.EventStore\Aggregator.Persistence.EventStore.csproj" />
     <ProjectReference Include="..\..\src\Aggregator\Aggregator.csproj" />
+    <ProjectReference Include="..\Aggregator.Example.Domain\Aggregator.Example.Domain.csproj" />
+    <ProjectReference Include="..\Aggregator.Example.Messages\Aggregator.Example.Messages.csproj" />
   </ItemGroup>
 
   <ItemGroup>
