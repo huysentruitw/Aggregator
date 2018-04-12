@@ -41,8 +41,9 @@ abstract class SafeCommandHandler<TCommand>
 If a command handler needs to manipulate an aggregate, you'll need some kind of persistent command handler:
 
 ```C#
-abstract class PersistentCommandHandler<TAggregateRoot, TCommand>
+abstract class PersistentCommandHandler<TCommand, TAggregateRoot>
     : SafeCommandHandler<TCommand>
+    where TAggregateRoot : AggregateRoot, new()
 {
     protected readonly IRepository<TAggregateRoot> Repository;
 
@@ -52,4 +53,3 @@ abstract class PersistentCommandHandler<TAggregateRoot, TCommand>
     }
 }
 ```
-
