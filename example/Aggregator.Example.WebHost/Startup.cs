@@ -36,7 +36,7 @@ namespace Aggregator.Example.WebHost
             builder.RegisterModule<AggregatorModule>();
             builder
                 .RegisterType<Persistence.EventStore.EventStore>()
-                .WithParameter("connectionString", "ConnectTo=tcp://admin:changeit@localhost:1113; HeartBeatTimeout=500")
+                .WithParameter("connectionString", Configuration.GetConnectionString("EventStore"))
                 .As<IEventStore<string, object>>()
                 .SingleInstance();
 
@@ -47,7 +47,7 @@ namespace Aggregator.Example.WebHost
 
             builder
                 .RegisterType<EventStoreProjector>()
-                .WithParameter("connectionString", "ConnectTo=tcp://admin:changeit@localhost:1113; HeartBeatTimeout=500")
+                .WithParameter("connectionString", Configuration.GetConnectionString("EventStore"))
                 .SingleInstance();
 
             return new AutofacServiceProvider(ApplicationContainer = builder.Build());
