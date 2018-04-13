@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Aggregator.Command;
 using Aggregator.Example.Messages;
+using Aggregator.Example.WebHost.Projections;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Aggregator.Example.WebHost.Controllers
@@ -12,20 +14,26 @@ namespace Aggregator.Example.WebHost.Controllers
     public partial class UserController : Controller
     {
         private readonly ICommandProcessor _commandProcessor;
+        private readonly IUserStore _userStore;
 
-        public UserController(ICommandProcessor commandProcessor)
+        public UserController(ICommandProcessor commandProcessor, IUserStore userStore)
         {
             _commandProcessor = commandProcessor;
+            _userStore = userStore;
         }
 
         [HttpGet("")]
         public IEnumerable<UserModel> All()
         {
-            return new[]
-            {
-                new UserModel { Id = Guid.NewGuid(), GivenName = "James", Surname = "Knoll", EmailAddress = "james.knoll@gmail.com" },
-                new UserModel { Id = Guid.Parse("bfdf57be-5a32-496d-b5fc-37c08b3899de"), GivenName = "Kurt", Surname = "Wally", EmailAddress = "kurt.wally@gmail.com" }
-            };
+            return _userStore
+                .GetUsers()
+                .Select(x => new UserModel
+                {
+                    Id = x.Id,
+                    GivenName = x.GivenName,
+                    Surname = x.Surname,
+                    EmailAddress = x.EmailAddress
+                });
         }
 
         [HttpPost("")]

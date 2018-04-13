@@ -21,12 +21,11 @@ namespace Aggregator.Example.Domain.CommandHandlers
             RuleFor(x => x.Surname).NotEmpty();
         }
 
-        protected override Task HandleValidatedCommand(CreateUserCommand command)
+        protected override async Task HandleValidatedCommand(CreateUserCommand command)
         {
             AggregateRootId<User> userId = command.Id;
             var user = User.Create(userId, command.EmailAddress, command.GivenName, command.Surname);
-            Repository.Add(userId, user);
-            return Task.CompletedTask;
+            await Repository.Add(userId, user).ConfigureAwait(false);
         }
     }
 

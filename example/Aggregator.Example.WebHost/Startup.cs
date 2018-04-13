@@ -1,5 +1,8 @@
 using System;
 using Aggregator.Autofac;
+using Aggregator.Example.Domain;
+using Aggregator.Example.WebHost.Projections;
+using Aggregator.Example.WebHost.Projections.Infrastructure;
 using Aggregator.Persistence;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
@@ -16,7 +19,11 @@ namespace Aggregator.Example.WebHost
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
+
+            AppDomain.CurrentDomain.Load(typeof(Dummy).Assembly.FullName);
         }
+
+        public IContainer ApplicationContainer { get; private set; }
 
         public IConfiguration Configuration { get; }
 
@@ -33,10 +40,20 @@ namespace Aggregator.Example.WebHost
                 .As<IEventStore<string, object>>()
                 .SingleInstance();
 
-            return new AutofacServiceProvider(builder.Build());
+            builder
+                .RegisterType<UserProjection>()
+                .AsImplementedInterfaces()
+                .SingleInstance();
+
+            builder
+                .RegisterType<EventStoreProjector>()
+                .WithParameter("connectionString", "ConnectTo=tcp://admin:changeit@localhost:1113; HeartBeatTimeout=500")
+                .SingleInstance();
+
+            return new AutofacServiceProvider(ApplicationContainer = builder.Build());
         }
 
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, IApplicationLifetime appLifetime)
         {
             if (env.IsDevelopment())
             {
@@ -68,6 +85,13 @@ namespace Aggregator.Example.WebHost
                         name: "spa-fallback",
                         defaults: new { controller = "Home", action = "Index" });
                 });
+            });
+
+            app.ApplicationServices.GetService<EventStoreProjector>().Start().Wait();
+
+            appLifetime.ApplicationStopped.Register(() =>
+            {
+                ApplicationContainer.Dispose();
             });
         }
     }
