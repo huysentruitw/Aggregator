@@ -56,9 +56,9 @@ abstract class PersistentCommandHandler<TCommand, TAggregateRoot>
 
 ... wip ...
 
-## Running the example
+## The example
 
-A very basic example is included in this solution that demonstrates the usage of the Aggregator library.
+A very basic example is included in this solution that demonstrates the usage of the Aggregator library in combination with EventStore.
 
 The example consists of 3 separate projects, although a real-life implementation should probably have more layers.
 
@@ -82,5 +82,7 @@ This is a ASP.NET Core Web API project that also hosts a single-page Angular web
 
 It also contains some simple in memory projections that gets rebuilt from the event store each time the application starts. The `EventStoreProjector` class will generate and keep our projections up-to-date.
 
+### EventStore
 
+Just [download](https://eventstore.org/downloads/) and run EventStore with default settings. The connection string in `appsettings.json` will connect with an instance running locally.
 
