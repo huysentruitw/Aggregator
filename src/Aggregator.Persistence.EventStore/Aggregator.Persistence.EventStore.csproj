@@ -2,6 +2,11 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net471</TargetFrameworks>
+    <Product>Aggregator</Product>
+    <Company>Sweet Mustard</Company>
+    <Authors>Wouter Huysentruit</Authors>
+    <Version>1.0.0.0</Version>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>
