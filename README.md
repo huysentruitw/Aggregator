@@ -1,5 +1,7 @@
 # Aggregator
 
+[![Build status](https://ci.appveyor.com/api/projects/status/c53dm2n5vcguo3e8/branch/master?svg=true)](https://ci.appveyor.com/project/huysentruitw/aggregator/branch/master)
+
 This package contains some fundamental base classes and interfaces for building a CQRS/ES based application.
 
 ## Get it on NuGet
