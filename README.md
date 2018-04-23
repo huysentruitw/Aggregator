@@ -2,7 +2,7 @@
 
 [![Build status](https://ci.appveyor.com/api/projects/status/c53dm2n5vcguo3e8/branch/master?svg=true)](https://ci.appveyor.com/project/huysentruitw/aggregator/branch/master)
 
-This package contains some fundamental base classes and interfaces for building a CQRS/ES based application.
+This package contains some fundamental base classes and interfaces for building a CQRS/ES based application in .NET and .NET Standard.
 
 ## Get it on NuGet
 
@@ -22,11 +22,11 @@ EventStore persistence integration package:
 
 ### Generic interfaces and base types
 
-For flexibility, this library consists of generic base types and generic interfaces that let you define your own base type for aggregate root identifiers (`TIdentifier`), commands (`TCommandBase`) and events (`TEventBase`). Most interfaces or base types have overloads that use `string` as aggregate root identifier type, and `object` as event and command base type which you can use if you don't have complex requirements.
+For flexibility, this library consists of generic base types and generic interfaces that lets you define your own base type for aggregate root identifiers (`TIdentifier`), commands (`TCommandBase`) and events (`TEventBase`). Most interfaces or base types have overloads that use `string` as aggregate root identifier type, and `object` as event and command base type which you can use in case you don't have complex requirements.
 
 ### AggregateRoot
 
-The `AggregateRoot` or `AggregateRoot<TEventBase>` class is an abstract base class that should be used as a base for aggregate roots. It allows registering event handlers, initializing the aggregate by replaying events and keeping track of changes getting applied to the aggregate root.
+The [`AggregateRoot`](./src/Aggregator/AggregateRoot.cs) or [`AggregateRoot<TEventBase>`](./src/Aggregator/AggregateRoot.cs) class is an abstract base class that should be used as a base for aggregate roots. It allows registering event handlers, initializing the aggregate by replaying events and keeping track of changes getting applied to the aggregate root.
 
 ```csharp
 class User : AggregateRoot
@@ -86,15 +86,15 @@ class User : AggregateRoot
 
 ### Repository
 
-The generic `Repository<TAggregateRoot>` class is responsible for creating new aggregate roots, loading aggregate roots from the event store and keeping track of changes applied to new or loaded aggregate roots.
+The generic [`Repository<TAggregateRoot>`](./src/Aggregator/Persistence/Repository.cs) class is responsible for creating new aggregate roots, loading aggregate roots from the event store and keeping track of changes applied to new or loaded aggregate roots.
 
-A scoped instance of this generic class needs to be injected into the command handlers that needs to create or modify an aggregate root. To allow unit-testing of the command handlers, the `IRepository<TAggregateRoot>` or `IRepositoryTIdentifier, TEventBase, TAggregateRoot>` should be injected instead.
+A scoped instance of this generic class needs to be injected into the command handlers that needs to create or modify an aggregate root. To allow unit-testing of the command handlers, the [`IRepository<TAggregateRoot>`](./src/Aggregator/Persistence/IRepository.cs) or [`IRepositoryTIdentifier, TEventBase, TAggregateRoot>`](./src/Aggregator/Persistence/IRepository.cs) should be injected instead.
 
 A repository is scoped and should only exist for the lifetime of a single command being processed. Because the repository needs to have access to the unit-of-work in the `CommandHandlingContext`, `Repository` instances are resolved from a childscope created by the `ICommandHandlingScopeFactory` implementation (see below).
 
 ### Command handlers
 
-The library contains a generic interface definition `ICommandHandler<TCommand>` that identifies command handlers.
+The library contains a generic interface definition [`ICommandHandler<TCommand>`](./src/Aggregator/Command/ICommandHandler.cs) that identifies command handlers.
 
 ```csharp
 class CreateUserCommandHandler : ICommandHandler<CreateUserCommand>
@@ -148,7 +148,7 @@ abstract class PersistentCommandHandler<TCommand, TAggregateRoot>
 
 ### CommandProcessor
 
-The `CommandProcessor` or `CommandProcessor<TIdentifier, TCommandBase, TEventBase>` class is responsible for processing commands, which consists of these steps:
+The [`CommandProcessor`](./src/Aggregator/Command/CommandProcessor.cs) or [`CommandProcessor<TIdentifier, TCommandBase, TEventBase>`](./src/Aggregator/Command/CommandProcessor.cs) class is responsible for processing commands, which consists of these steps:
 
 * Create a `CommandHandlingContext` which maintains the internal unit-of-work
 * Execute one or more command handlers that implement the `ICommandHandler<TCommand>` interface
@@ -161,23 +161,29 @@ Since the `CommandProcessor` keeps an internal cache of generic methods, it is w
 
 ### CommandHandlingContext
 
-The `CommandHandlingContext` is created by the `CommandProcessor` for the lifetime of one single command being processed. It's a property bag that can be used to store and retrieve properties during the processing of a single command. Internally, this context is also used to store the unit-of-work that is required by the `Repository` class to keep track of changes (events) generated by aggregate root entities.
+The [`CommandHandlingContext`](./src/Aggregator/Command/CommandHandlingContext.cs) is created by the `CommandProcessor` for the lifetime of one single command being processed. It's a property bag that can be used to store and retrieve properties during the processing of a single command. Internally, this context is also used to store the unit-of-work that is required by the `Repository` class to keep track of changes (events) generated by aggregate root entities.
 
 ### ICommandHandlingScopeFactory / ICommandHandlingScope
 
-The implementation of the `ICommandHandlingScopeFactory` interface is responsible for creating a temporary child scope from which the command handlers for a certain command type can be resolved. The child scope should also have the `CommandHandlingContext` registered so the `Repository` class used by the command handler can also be resolved (as the `Repository` class depends on the `CommandHandlingContext` for its unit-of-work).
+The implementation of the [`ICommandHandlingScopeFactory`](./src/Aggregator/Command/ICommandHandlingScopeFactory.cs) interface is responsible for creating a temporary child scope from which the command handlers for a certain command type can be resolved. The child scope should also have the `CommandHandlingContext` registered so the `Repository` class used by the command handler can also be resolved (as the `Repository` class depends on the `CommandHandlingContext` for its unit-of-work).
 
-The child scope, which implements `ICommandHandlingScope<TCommand>` is only valid for the lifetime of a single command being processed.
+The child scope, which implements [`ICommandHandlingScope<TCommand>`](./src/Aggregator/Command/ICommandHandlingScope.cs) is only valid for the lifetime of a single command being processed.
 
 These dedicated interfaces are DI independent. There's an integration NuGet package available for Autofac (`Aggregator.Autofac`) that can be used out of the box or serve as an example. Using the `Microsoft.Extensions.DependencyInjection` currently doesn't work as that implementation does not allow the creation of childscopes while registering additional services.
 
 ### Store events
 
-The `CommandProcessor` depends on an implementation of `IEventStore<TIdentifier, TEventBase>` which will be used to store one or more events that were generated during the processing of a single command in a transactional manner. When something goes wrong while storing (and dispatching) the event(s), the complete transaction will get rolled back and the exception will bubble up to the caller.
+The `CommandProcessor` depends on an implementation of [`IEventStore<TIdentifier, TEventBase>`](./src/Aggregator/Persistence/IEventStore.cs) which will be used to store one or more events that were generated during the processing of a single command in a transactional manner. When something goes wrong while storing (and dispatching) the event(s), the complete transaction will get rolled back and the exception will bubble up to the caller.
+
+There's an integration NuGet package available for using EventStore (`Aggregator.Persistence.EventStore`) that can be used or serve as an example for a custom event store.
 
 ### Dispatch events
 
-The `CommandProcessor` also depends on an implementation of `IEventDispatcher<TEventBase>` which will be used to dispatch one or more events that were generated during the processing of a single command inside the command domain. The implementation of the `IEventDispatcher<TEventBase>` interface is responsible for forwarding events to classes that implement the `IEventHandler<TEvent>` interface inside the command domain. A typical example of classes that listen to one or more events are Process Managers (sometimes referred to as Sagas) that act on events, keep track of some kind of long running state and send out commands depending on that state. Since the work and state of process managers is important, the `CommandProcessor` will also rollback the event store transaction in case something goes wrong during event dispatching.
+The `CommandProcessor` also depends on an implementation of [`IEventDispatcher<TEventBase>`](./src/Aggregator/Event/IEventDispatcher.cs) which will be used to dispatch one or more events that were generated during the processing of a single command inside the command domain. The implementation of the `IEventDispatcher<TEventBase>` interface is responsible for forwarding events to classes that implement the [`IEventHandler<TEvent>`](./src/Aggregator/Event/IEventHandler.cs) interface inside the command domain. A typical example of classes that listen to one or more events are Process Managers (sometimes referred to as Sagas) that act on events, keep track of some kind of long running state and send out commands depending on that state. Since the work and state of process managers is important, the `CommandProcessor` will also rollback the event store transaction in case something goes wrong during event dispatching.
+
+[`EventDispatcher<TEventBase>`](./src/Aggregator/Event/EventDispatcher.cs) is a default implementation that can be used for dispatching events. It depends on an implementation of the [`IEventHandlingScopeFactory`](./src/Aggregator/Event/IEventHandlingScopeFactory.cs) that is responsible for resolving event handlers for the requested event type.
+
+The Autofac integration package (`Aggregator.Autofac`) contains implementations for the `IEventHandlingScopeFactory` and `IEventHandlingScope<TEvent>` interfaces, [`EventHandlingScopeFactory`](./src/Aggregator.Autofac/EventHandlingScopeFactory.cs) and [`EventHandlingScope<TEvent>`](./src/Aggregator.Autofac/EventHandlingScope.cs) respectively.
 
 ## The example
 
