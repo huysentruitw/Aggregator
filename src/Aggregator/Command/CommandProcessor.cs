@@ -79,7 +79,7 @@ namespace Aggregator.Command
             if (command == null) throw new ArgumentNullException(nameof(command));
 
             var context = new CommandHandlingContext();
-            await _notificationHandlers.OnPrepareContext(command, context).ConfigureAwait(false);
+            _notificationHandlers.OnPrepareContext(command, context);
 
             var unitOfWork = new UnitOfWork<TIdentifier, TEventBase>();
             context.SetUnitOfWork(unitOfWork);
@@ -106,7 +106,7 @@ namespace Aggregator.Command
                     foreach (var aggregateRootEntity in unitOfWork.GetChanges())
                     {
                         var events = aggregateRootEntity.GetChanges();
-                        events = await Task.WhenAll(events.Select(x => _notificationHandlers.OnEnrichEvent(x, command, context))).ConfigureAwait(false);
+                        events = events.Select(x => _notificationHandlers.OnEnrichEvent(x, command, context)).ToArray();
                         await transaction.StoreEvents(aggregateRootEntity.Identifier, aggregateRootEntity.ExpectedVersion, events).ConfigureAwait(false);
                         storedEvents.AddRange(events);
                     }
