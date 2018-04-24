@@ -306,6 +306,59 @@ namespace Aggregator.Tests.Command
             prepareContextMock.Verify(x => x(It.IsAny<object>(), It.IsAny<CommandHandlingContext>()), Times.Once);
         }
 
+        [Test]
+        public async Task Process_WithEnrichEventNotificationHandler_ShouldCallEnrichEventNotificationHandler()
+        {
+            CommandHandlingContext capturedContext = null;
+            object capturedEvent1 = null;
+            object capturedEvent2 = null;
+            IEnumerable<object> capturedStoredEvents = null;
+
+            var command = new CommandA();
+            var event1 = new FakeEvent1();
+            var event2 = new FakeEvent2();
+
+            _commandHandlingScopeFactory
+                .Setup(x => x.BeginScopeFor<CommandA>(It.IsAny<CommandHandlingContext>()))
+                .Callback<CommandHandlingContext>(ctx => capturedContext = ctx)
+                .Returns<CommandHandlingContext>(ctx => new FakeCommandHandlingScope(ctx, x => x.DoSomething()));
+
+            var transactionMock = new Mock<IEventStoreTransaction<string, object>>();
+            _eventStoreMock
+                .Setup(x => x.BeginTransaction(It.IsAny<CommandHandlingContext>()))
+                .Returns(transactionMock.Object);
+            transactionMock
+                .Setup(x => x.StoreEvents("some_id", 5, It.IsAny<IEnumerable<object>>()))
+                .Callback<string, long, IEnumerable<object>>((_, __, x) => capturedStoredEvents = x)
+                .Returns(Task.CompletedTask);
+
+            var enrichEventMock = new Mock<Func<object, object, CommandHandlingContext, Task<object>>>();
+            enrichEventMock
+                .Setup(x => x(It.Is<object>(y => y is FakeEvent1), command, It.IsAny<CommandHandlingContext>()))
+                .Callback<object, object, CommandHandlingContext>((x, _, __) => capturedEvent1 = x)
+                .ReturnsAsync(event1);
+            enrichEventMock
+                .Setup(x => x(It.Is<object>(y => y is FakeEvent2), command, It.IsAny<CommandHandlingContext>()))
+                .Callback<object, object, CommandHandlingContext>((x, _, __) => capturedEvent2 = x)
+                .ReturnsAsync(event2);
+            var notificationHandlers = new CommandProcessorNotificationHandlers { EnrichEvent = enrichEventMock.Object };
+
+            var processor = new CommandProcessor(_commandHandlingScopeFactory.Object, _eventDispatcherMock.Object, _eventStoreMock.Object, notificationHandlers);
+            await processor.Process(command);
+
+            Assert.That(capturedContext, Is.Not.Null);
+            Assert.That(capturedEvent1, Is.Not.Null);
+            Assert.That(capturedEvent2, Is.Not.Null);
+            Assert.That(capturedStoredEvents, Is.Not.Null);
+
+            enrichEventMock.Verify(x => x(capturedEvent1, command, capturedContext), Times.Once);
+            enrichEventMock.Verify(x => x(capturedEvent2, command, capturedContext), Times.Once);
+
+            transactionMock.Verify(x => x.StoreEvents("some_id", 5, capturedStoredEvents), Times.Once);
+            Assert.That(capturedStoredEvents, Does.Contain(event1));
+            Assert.That(capturedStoredEvents, Does.Contain(event2));
+        }
+
         #region Test infrastructure
 
         public class CommandA { }
