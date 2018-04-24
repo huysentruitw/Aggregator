@@ -23,8 +23,13 @@ namespace Aggregator.Command
         /// <param name="commandHandlingScopeFactory">The command handling scope factory.</param>
         /// <param name="eventDispatcher">The event dispatcher.</param>
         /// <param name="eventStore">The event store.</param>
-        public CommandProcessor(ICommandHandlingScopeFactory commandHandlingScopeFactory, IEventDispatcher<object> eventDispatcher, IEventStore<string, object> eventStore)
-            : base(commandHandlingScopeFactory, eventDispatcher, eventStore)
+        /// <param name="notificationHandlers">Optional <see cref="CommandProcessorNotificationHandlers"/> instance.</param>
+        public CommandProcessor(
+            ICommandHandlingScopeFactory commandHandlingScopeFactory,
+            IEventDispatcher<object> eventDispatcher,
+            IEventStore<string, object> eventStore,
+            CommandProcessorNotificationHandlers notificationHandlers = null)
+            : base(commandHandlingScopeFactory, eventDispatcher, eventStore, notificationHandlers)
         {
         }
     }
@@ -43,6 +48,7 @@ namespace Aggregator.Command
         private readonly ICommandHandlingScopeFactory _commandHandlingScopeFactory;
         private readonly IEventDispatcher<TEventBase> _eventDispatcher;
         private readonly IEventStore<TIdentifier, TEventBase> _eventStore;
+        private readonly CommandProcessorNotificationHandlers<TIdentifier, TCommandBase, TEventBase> _notificationHandlers;
 
         /// <summary>
         /// Constructs a new <see cref="CommandProcessor{TIdentifier, TCommandBase, TEventBase}"/> instance.
@@ -50,28 +56,30 @@ namespace Aggregator.Command
         /// <param name="commandHandlingScopeFactory">The command handling scope factory.</param>
         /// <param name="eventDispatcher">The event dispatcher.</param>
         /// <param name="eventStore">The event store.</param>
+        /// <param name="notificationHandlers">Optional <see cref="CommandProcessorNotificationHandlers{TIdentifier, TCommandBase, TEventBase}"/> instance.</param>
         public CommandProcessor(
             ICommandHandlingScopeFactory commandHandlingScopeFactory,
             IEventDispatcher<TEventBase> eventDispatcher,
-            IEventStore<TIdentifier, TEventBase> eventStore)
+            IEventStore<TIdentifier, TEventBase> eventStore,
+            CommandProcessorNotificationHandlers<TIdentifier, TCommandBase, TEventBase> notificationHandlers = null)
         {
             _commandHandlingScopeFactory = commandHandlingScopeFactory ?? throw new ArgumentNullException(nameof(commandHandlingScopeFactory));
             _eventDispatcher = eventDispatcher ?? throw new ArgumentNullException(nameof(eventDispatcher));
             _eventStore = eventStore ?? throw new ArgumentNullException(nameof(eventStore));
+            _notificationHandlers = notificationHandlers ?? new CommandProcessorNotificationHandlers<TIdentifier, TCommandBase, TEventBase>();
         }
 
         /// <summary>
         /// Processes a single command.
         /// </summary>
         /// <param name="command">The command to process.</param>
-        /// <param name="prepareContext">Optional action for preparing the command handling context.</param>
         /// <returns>An awaitable <see cref="Task"/>.</returns>
-        public async Task Process(TCommandBase command, Action<CommandHandlingContext> prepareContext = null)
+        public async Task Process(TCommandBase command)
         {
             if (command == null) throw new ArgumentNullException(nameof(command));
 
             var context = new CommandHandlingContext();
-            prepareContext?.Invoke(context);
+            await _notificationHandlers.OnPrepareContext(command, context).ConfigureAwait(false);
 
             var unitOfWork = new UnitOfWork<TIdentifier, TEventBase>();
             context.SetUnitOfWork(unitOfWork);
