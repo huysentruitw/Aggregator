@@ -279,6 +279,29 @@ namespace Aggregator.Tests.Command
             Assert.That(dispatchedEvents[1], Is.InstanceOf<FakeEvent1>());
         }
 
+        [Test]
+        public async Task Process_PassPrepareContextAction_ShouldCallPrepareContextAction()
+        {
+            CommandHandlingContext capturedContext = null;
+
+            var scopeMock = new Mock<ICommandHandlingScope<CommandA>>();
+            _commandHandlingScopeFactory
+                .Setup(x => x.BeginScopeFor<CommandA>(It.IsAny<CommandHandlingContext>()))
+                .Callback<CommandHandlingContext>(ctx => capturedContext = ctx)
+                .Returns(scopeMock.Object);
+
+            scopeMock
+                .Setup(x => x.ResolveHandlers())
+                .Returns(new[] { new Mock<ICommandHandler<CommandA>>().Object });
+
+            var prepareContextActionMock = new Mock<Action<CommandHandlingContext>>();
+
+            var processor = new CommandProcessor(_commandHandlingScopeFactory.Object, _eventDispatcherMock.Object, _eventStoreMock.Object);
+            await processor.Process(new CommandA(), prepareContextActionMock.Object);
+
+            prepareContextActionMock.Verify(x => x(capturedContext));
+        }
+
         #region Test infrastructure
 
         public class CommandA { }
