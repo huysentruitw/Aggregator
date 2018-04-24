@@ -280,9 +280,11 @@ namespace Aggregator.Tests.Command
         }
 
         [Test]
-        public async Task Process_PassPrepareContextAction_ShouldCallPrepareContextAction()
+        public async Task Process_WithPrepareContextNotificationHandler_ShouldCallPrepareContextNotificationHandler()
         {
             CommandHandlingContext capturedContext = null;
+
+            var command = new CommandA();
 
             var scopeMock = new Mock<ICommandHandlingScope<CommandA>>();
             _commandHandlingScopeFactory
@@ -294,12 +296,14 @@ namespace Aggregator.Tests.Command
                 .Setup(x => x.ResolveHandlers())
                 .Returns(new[] { new Mock<ICommandHandler<CommandA>>().Object });
 
-            var prepareContextActionMock = new Mock<Action<CommandHandlingContext>>();
+            var prepareContextMock = new Mock<Func<object, CommandHandlingContext, Task>>();
+            var notificationHandlers = new CommandProcessorNotificationHandlers { PrepareContext = prepareContextMock.Object };
 
-            var processor = new CommandProcessor(_commandHandlingScopeFactory.Object, _eventDispatcherMock.Object, _eventStoreMock.Object);
-            await processor.Process(new CommandA(), prepareContextActionMock.Object);
+            var processor = new CommandProcessor(_commandHandlingScopeFactory.Object, _eventDispatcherMock.Object, _eventStoreMock.Object, notificationHandlers);
+            await processor.Process(command);
 
-            prepareContextActionMock.Verify(x => x(capturedContext));
+            prepareContextMock.Verify(x => x(command, capturedContext), Times.Once);
+            prepareContextMock.Verify(x => x(It.IsAny<object>(), It.IsAny<CommandHandlingContext>()), Times.Once);
         }
 
         #region Test infrastructure
