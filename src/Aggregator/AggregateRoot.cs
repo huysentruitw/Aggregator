@@ -34,8 +34,8 @@ namespace Aggregator
         bool IAggregateRootChangeTracker<TEventBase>.HasChanges
             => _changes.Any();
 
-        IEnumerable<TEventBase> IAggregateRootChangeTracker<TEventBase>.GetChanges()
-            => _changes.AsEnumerable();
+        TEventBase[] IAggregateRootChangeTracker<TEventBase>.GetChanges()
+            => _changes.ToArray();
 
         /// <summary>
         /// Registers an event handler.
