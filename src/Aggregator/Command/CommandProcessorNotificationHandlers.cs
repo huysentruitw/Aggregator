@@ -1,5 +1,4 @@
 using System;
-using System.Threading.Tasks;
 
 namespace Aggregator.Command
 {
@@ -19,20 +18,20 @@ namespace Aggregator.Command
         /// <summary>
         /// Handler invoked right after the command handling context is created during the <see cref="CommandProcessor{TIdentifier, TCommandBase, TEventBase}.Process(TCommandBase)"/> call.
         /// </summary>
-        public Func<TCommandBase, CommandHandlingContext, Task> PrepareContext { get; set; } = null;
+        public Action<TCommandBase, CommandHandlingContext> PrepareContext { get; set; } = null;
 
         /// <summary>
         /// Handler invoked right after the command handling context is created during the <see cref="CommandProcessor{TIdentifier, TCommandBase, TEventBase}.Process(TCommandBase)"/> call.
         /// </summary>
         /// <param name="command">The command being processed.</param>
         /// <param name="context">The command handling context.</param>
-        public virtual Task OnPrepareContext(TCommandBase command, CommandHandlingContext context)
-            => PrepareContext != null ? PrepareContext?.Invoke(command, context) : Task.CompletedTask;
+        public virtual void OnPrepareContext(TCommandBase command, CommandHandlingContext context)
+            => PrepareContext?.Invoke(command, context);
 
         /// <summary>
         /// Handler invoked right after events are retrieved from the unit-of-work and before storing/dispatching events.
         /// </summary>
-        public Func<TEventBase, TCommandBase, CommandHandlingContext, Task<TEventBase>> EnrichEvent { get; set; } = null;
+        public Func<TEventBase, TCommandBase, CommandHandlingContext, TEventBase> EnrichEvent { get; set; } = null;
 
         /// <summary>
         /// Handler invoked right after events are retrieved from the unit-of-work and before storing/dispatching events.
@@ -41,7 +40,7 @@ namespace Aggregator.Command
         /// <param name="command">The command being processed.</param>
         /// <param name="context">The command handling context.</param>
         /// <returns>The enriched event.</returns>
-        public Task<TEventBase> OnEnrichEvent(TEventBase @event, TCommandBase command, CommandHandlingContext context)
-            => EnrichEvent != null ? EnrichEvent.Invoke(@event, command, context) : Task.FromResult(@event);
+        public TEventBase OnEnrichEvent(TEventBase @event, TCommandBase command, CommandHandlingContext context)
+            => EnrichEvent != null ? EnrichEvent.Invoke(@event, command, context) : @event;
     }
 }

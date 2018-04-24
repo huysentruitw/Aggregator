@@ -296,7 +296,7 @@ namespace Aggregator.Tests.Command
                 .Setup(x => x.ResolveHandlers())
                 .Returns(new[] { new Mock<ICommandHandler<CommandA>>().Object });
 
-            var prepareContextMock = new Mock<Func<object, CommandHandlingContext, Task>>();
+            var prepareContextMock = new Mock<Action<object, CommandHandlingContext>>();
             var notificationHandlers = new CommandProcessorNotificationHandlers { PrepareContext = prepareContextMock.Object };
 
             var processor = new CommandProcessor(_commandHandlingScopeFactory.Object, _eventDispatcherMock.Object, _eventStoreMock.Object, notificationHandlers);
@@ -332,15 +332,15 @@ namespace Aggregator.Tests.Command
                 .Callback<string, long, IEnumerable<object>>((_, __, x) => capturedStoredEvents = x)
                 .Returns(Task.CompletedTask);
 
-            var enrichEventMock = new Mock<Func<object, object, CommandHandlingContext, Task<object>>>();
+            var enrichEventMock = new Mock<Func<object, object, CommandHandlingContext, object>>();
             enrichEventMock
                 .Setup(x => x(It.Is<object>(y => y is FakeEvent1), command, It.IsAny<CommandHandlingContext>()))
                 .Callback<object, object, CommandHandlingContext>((x, _, __) => capturedEvent1 = x)
-                .ReturnsAsync(event1);
+                .Returns(event1);
             enrichEventMock
                 .Setup(x => x(It.Is<object>(y => y is FakeEvent2), command, It.IsAny<CommandHandlingContext>()))
                 .Callback<object, object, CommandHandlingContext>((x, _, __) => capturedEvent2 = x)
-                .ReturnsAsync(event2);
+                .Returns(event2);
             var notificationHandlers = new CommandProcessorNotificationHandlers { EnrichEvent = enrichEventMock.Object };
 
             var processor = new CommandProcessor(_commandHandlingScopeFactory.Object, _eventDispatcherMock.Object, _eventStoreMock.Object, notificationHandlers);
