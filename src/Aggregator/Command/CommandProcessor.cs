@@ -64,12 +64,14 @@ namespace Aggregator.Command
         /// Processes a single command.
         /// </summary>
         /// <param name="command">The command to process.</param>
+        /// <param name="prepareContext">Optional action for preparing the command handling context.</param>
         /// <returns>An awaitable <see cref="Task"/>.</returns>
-        public async Task Process(TCommandBase command)
+        public async Task Process(TCommandBase command, Action<CommandHandlingContext> prepareContext = null)
         {
             if (command == null) throw new ArgumentNullException(nameof(command));
 
             var context = new CommandHandlingContext();
+            prepareContext?.Invoke(context);
 
             var unitOfWork = new UnitOfWork<TIdentifier, TEventBase>();
             context.SetUnitOfWork(unitOfWork);
