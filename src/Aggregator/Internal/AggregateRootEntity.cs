@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 
 namespace Aggregator.Internal
 {
@@ -22,7 +21,7 @@ namespace Aggregator.Internal
         public bool HasChanges
             => ((IAggregateRootChangeTracker<TEventBase>)AggregateRoot).HasChanges;
 
-        public IEnumerable<TEventBase> GetChanges()
+        public TEventBase[] GetChanges()
             => ((IAggregateRootChangeTracker<TEventBase>)AggregateRoot).GetChanges();
     }
 }
