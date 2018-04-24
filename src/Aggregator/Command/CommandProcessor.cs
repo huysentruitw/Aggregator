@@ -106,6 +106,7 @@ namespace Aggregator.Command
                     foreach (var aggregateRootEntity in unitOfWork.GetChanges())
                     {
                         var events = aggregateRootEntity.GetChanges();
+                        events = await Task.WhenAll(events.Select(x => _notificationHandlers.OnEnrichEvent(x, command, context))).ConfigureAwait(false);
                         await transaction.StoreEvents(aggregateRootEntity.Identifier, aggregateRootEntity.ExpectedVersion, events).ConfigureAwait(false);
                         storedEvents.AddRange(events);
                     }

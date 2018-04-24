@@ -28,5 +28,20 @@ namespace Aggregator.Command
         /// <param name="context">The command handling context.</param>
         public virtual Task OnPrepareContext(TCommandBase command, CommandHandlingContext context)
             => PrepareContext != null ? PrepareContext?.Invoke(command, context) : Task.CompletedTask;
+
+        /// <summary>
+        /// Handler invoked right after events are retrieved from the unit-of-work and before storing/dispatching events.
+        /// </summary>
+        public Func<TEventBase, TCommandBase, CommandHandlingContext, Task<TEventBase>> EnrichEvent { get; set; } = null;
+
+        /// <summary>
+        /// Handler invoked right after events are retrieved from the unit-of-work and before storing/dispatching events.
+        /// </summary>
+        /// <param name="event">The event to enrich.</param>
+        /// <param name="command">The command being processed.</param>
+        /// <param name="context">The command handling context.</param>
+        /// <returns>The enriched event.</returns>
+        public Task<TEventBase> OnEnrichEvent(TEventBase @event, TCommandBase command, CommandHandlingContext context)
+            => EnrichEvent != null ? EnrichEvent.Invoke(@event, command, context) : Task.FromResult(@event);
     }
 }
