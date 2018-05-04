@@ -80,6 +80,11 @@ namespace Aggregator.Tests.Persistence
             var ex = Assert.ThrowsAsync<AggregateRootNotFoundException<string>>(() => repository.Get(unknownIdentifier));
             Assert.That(ex.Identifier, Is.EqualTo(unknownIdentifier));
             Assert.That(ex.Message, Is.EqualTo($"Exception for aggregate root with identifier '{unknownIdentifier}': Aggregate root not found"));
+
+            _eventStoreMock.Setup(x => x.GetEvents(unknownIdentifier, 1)).ReturnsAsync((object[])null);
+            ex = Assert.ThrowsAsync<AggregateRootNotFoundException<string>>(() => repository.Get(unknownIdentifier));
+            Assert.That(ex.Identifier, Is.EqualTo(unknownIdentifier));
+            Assert.That(ex.Message, Is.EqualTo($"Exception for aggregate root with identifier '{unknownIdentifier}': Aggregate root not found"));
         }
 
         [Test]
