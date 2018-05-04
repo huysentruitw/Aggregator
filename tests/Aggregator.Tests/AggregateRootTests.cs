@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using Aggregator.Exceptions;
 using Aggregator.Internal;
@@ -9,6 +10,13 @@ namespace Aggregator.Tests
     [TestFixture]
     public class AggregateRootTests
     {
+        [Test]
+        public void Initialize_PassNullAsEvents_ShouldNotThrowException()
+        {
+            IAggregateRootInitializer<object> aggregateRoot = new Mock<FakeAggregateRoot>().Object;
+            Assert.DoesNotThrow(() => aggregateRoot.Initialize(null));
+        }
+
         [Test]
         public void Initialize_PassEvents_ShouldHandleEvents()
         {
@@ -38,7 +46,7 @@ namespace Aggregator.Tests
             var events = new object[] { new EventA(), new EventC() };
             IAggregateRootInitializer<object> aggregateRoot = new Mock<FakeAggregateRoot>().Object;
             var ex = Assert.Throws<UnhandledEventException>(() => aggregateRoot.Initialize(events));
-            Assert.That(ex.Message, Is.EqualTo($"Unhandled event EventC"));
+            Assert.That(ex.Message, Is.EqualTo("Unhandled event EventC"));
         }
 
         [Test]
@@ -46,6 +54,21 @@ namespace Aggregator.Tests
         {
             var ex = Assert.Throws<HandlerForEventAlreadyRegisteredException>(() => new RegisterTwiceAggregateRoot());
             Assert.That(ex.Message, Does.Contain("Handler for event EventA already registered"));
+        }
+
+        [Test]
+        public void Register_PassNullAsHandler_ShouldThrowException()
+        {
+            var ex = Assert.Throws<ArgumentNullException>(() => new RegisterNullAggregateRoot());
+            Assert.That(ex.ParamName, Is.EqualTo("handler"));
+        }
+
+        [Test]
+        public void Apply_PassNullAsEvent_ShouldThrowException()
+        {
+            var aggregateRoot = new Mock<FakeAggregateRoot>().Object;
+            var ex = Assert.Throws<ArgumentNullException>(() => aggregateRoot.ApplyNull());
+            Assert.That(ex.ParamName, Is.EqualTo("event"));
         }
 
         [Test]
@@ -98,6 +121,8 @@ namespace Aggregator.Tests
             }
 
             public void ApplyC() => Apply(new EventC());
+
+            public void ApplyNull() => Apply((EventA)null);
         }
 
         public class EventA { }
@@ -112,6 +137,14 @@ namespace Aggregator.Tests
             {
                 Register<EventA>(_ => { });
                 Register<EventA>(_ => { });
+            }
+        }
+
+        public class RegisterNullAggregateRoot : AggregateRoot<object>
+        {
+            public RegisterNullAggregateRoot()
+            {
+                Register<EventA>(null);
             }
         }
     }
