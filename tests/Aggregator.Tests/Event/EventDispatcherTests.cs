@@ -25,6 +25,14 @@ namespace Aggregator.Tests.Event
         }
 
         [Test]
+        public void Dispatch_PassNullAsOrEmptyEventArray_ShouldNotThrowException()
+        {
+            var dispatcher = new EventDispatcher<object>(_eventHandlingScopeFactoryMock.Object);
+            Assert.DoesNotThrowAsync(() => dispatcher.Dispatch(null));
+            Assert.DoesNotThrowAsync(() => dispatcher.Dispatch(Array.Empty<object>()));
+        }
+
+        [Test]
         public async Task Dispatch_EventArray_ShouldBeginEventHandlingScope()
         {
             var eventHandlingScopeMock = new Mock<IEventHandlingScope<EventA>>();
@@ -36,6 +44,20 @@ namespace Aggregator.Tests.Event
             await dispatcher.Dispatch(new[] { new EventA() });
 
             _eventHandlingScopeFactoryMock.Verify(x => x.BeginScopeFor<EventA>(), Times.Once);
+        }
+
+        [Test]
+        public async Task Dispatch_EventArray_ShouldDisposeEventHandlingScope()
+        {
+            var eventHandlingScopeMock = new Mock<IEventHandlingScope<EventA>>();
+            _eventHandlingScopeFactoryMock
+                .Setup(x => x.BeginScopeFor<EventA>())
+                .Returns(eventHandlingScopeMock.Object);
+
+            var dispatcher = new EventDispatcher<object>(_eventHandlingScopeFactoryMock.Object);
+            await dispatcher.Dispatch(new[] { new EventA() });
+
+            eventHandlingScopeMock.Verify(x => x.Dispose(), Times.Once);
         }
 
         [Test]
