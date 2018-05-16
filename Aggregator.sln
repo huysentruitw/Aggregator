@@ -8,6 +8,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D50EDB65-6E15-40AA-B673-F78D33F5789E}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
+		Jenkinsfile = Jenkinsfile
 		README.md = README.md
 	EndProjectSection
 EndProject
@@ -25,9 +26,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aggregator.Example.WebHost"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Example", "Example", "{C4B03F9F-A8DA-4B60-996A-B0519DC355D8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aggregator.Example.Domain", "example\Aggregator.Example.Domain\Aggregator.Example.Domain.csproj", "{869C6252-49C8-4E99-819E-49C72D77E2E5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aggregator.Example.Domain", "example\Aggregator.Example.Domain\Aggregator.Example.Domain.csproj", "{869C6252-49C8-4E99-819E-49C72D77E2E5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aggregator.Example.Messages", "example\Aggregator.Example.Messages\Aggregator.Example.Messages.csproj", "{34668765-14C0-4B37-BDF5-217BBB242CAC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aggregator.Example.Messages", "example\Aggregator.Example.Messages\Aggregator.Example.Messages.csproj", "{34668765-14C0-4B37-BDF5-217BBB242CAC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
