@@ -214,3 +214,15 @@ It also contains some simple in memory projections that gets rebuilt from the ev
 ### EventStore
 
 Just [download](https://eventstore.org/downloads/) and run EventStore with default settings. The connection string in `appsettings.json` will connect with an instance running locally.
+
+## Contributing
+
+Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests to us.
+
+## Versioning
+
+We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/sweet-mustard/vinegar-java/tags). 
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE.txt](LICENCE.txt) file for detail
