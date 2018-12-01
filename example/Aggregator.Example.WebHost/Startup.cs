@@ -19,8 +19,6 @@ namespace Aggregator.Example.WebHost
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
-
-            AppDomain.CurrentDomain.Load(typeof(Dummy).Assembly.FullName);
         }
 
         public IContainer ApplicationContainer { get; private set; }
@@ -33,8 +31,12 @@ namespace Aggregator.Example.WebHost
 
             var builder = new ContainerBuilder();
             builder.Populate(services);
-            builder.RegisterModule<AggregatorModule>();
             builder
+                .RegisterModule<AggregatorModule>();
+
+            builder
+                .RegisterCommandHandlersInAssemblyOf<HandlerLocator>()
+                .RegisterEventHandlersInAssemblyOf<HandlerLocator>()
                 .RegisterType<Persistence.EventStore.EventStore>()
                 .WithParameter("connectionString", Configuration.GetConnectionString("EventStore"))
                 .As<IEventStore<string, object>>()

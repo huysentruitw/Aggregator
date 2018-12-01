@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using Aggregator.Command;
+using Aggregator.DI;
 using Aggregator.Event;
 using Aggregator.Persistence;
 using Autofac;
@@ -43,13 +44,10 @@ namespace Aggregator.Autofac
         /// <param name="builder">The container builder.</param>
         protected override void Load(ContainerBuilder builder)
         {
-            builder.RegisterType<ReflectionCommandHandlerTypeLocator>().As<ICommandHandlerTypeLocator>().SingleInstance();
-            builder.RegisterType<CommandHandlingScopeFactory>().As<ICommandHandlingScopeFactory>().SingleInstance();
+            builder.RegisterType<CommandHandlingContext>().AsSelf().InstancePerLifetimeScope();
             builder.RegisterType<CommandProcessor<TIdentifier, TCommandBase, TEventBase>>().As<ICommandProcessor<TCommandBase>>().SingleInstance();
             builder.RegisterGeneric(typeof(Repository<,,>)).As(typeof(IRepository<,,>)).InstancePerLifetimeScope();
-
-            builder.RegisterType<ReflectionEventHandlerTypeLocator>().As<IEventHandlerTypeLocator>().SingleInstance();
-            builder.RegisterType<EventHandlingScopeFactory>().As<IEventHandlingScopeFactory>().SingleInstance();
+            builder.RegisterType<ServiceScopeFactory>().As<IServiceScopeFactory>().SingleInstance();
             builder.RegisterType<EventDispatcher<TEventBase>>().As<IEventDispatcher<TEventBase>>().SingleInstance();
         }
     }

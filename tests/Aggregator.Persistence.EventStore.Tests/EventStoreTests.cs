@@ -25,6 +25,7 @@ namespace Aggregator.Persistence.EventStore.Tests
         [Test]
         public void Constructor_PassInvalidConnection_ShouldThrowException()
         {
+            // Assert
             var ex = Assert.Throws<ArgumentNullException>(() => new EventStore((IEventStoreConnection)null));
             Assert.That(ex.ParamName, Is.EqualTo("connection"));
         }
@@ -32,54 +33,66 @@ namespace Aggregator.Persistence.EventStore.Tests
         [Test]
         public void Dispose_ShouldDisposeUnderlyingConnection()
         {
+            // Arrange
             var eventStore = new EventStore(_eventStoreConnectionMock.Object);
             _eventStoreConnectionMock.Verify(x => x.Dispose(), Times.Never);
+
+            // Act
             eventStore.Dispose();
+
+            // Assert
             _eventStoreConnectionMock.Verify(x => x.Dispose(), Times.Once);
         }
 
         [Test]
         public async Task Contains_EventStreamForAggregateRootNotFound_ShouldReturnFalse()
         {
+            // Arrange
             var identifier = Guid.NewGuid().ToString("N");
-
             _eventStoreConnectionMock
                 .Setup(x => x.ReadEventAsync(identifier, 0, false, null))
                 .ReturnsAsync(CreateEventReadResult(EventReadStatus.NoStream));
-
             var eventStore = new EventStore(_eventStoreConnectionMock.Object);
+
+            // Act
             var result = await eventStore.Contains(identifier);
+
+            // Assert
             Assert.That(result, Is.False);
         }
 
         [Test]
         public async Task Contains_EventStreamForAggregateRootFound_ShouldReturnTrue()
         {
+            // Arrange
             var identifier = Guid.NewGuid().ToString("N");
-
             _eventStoreConnectionMock
                 .Setup(x => x.ReadEventAsync(identifier, 0, false, null))
                 .ReturnsAsync(CreateEventReadResult(EventReadStatus.Success));
-
             var eventStore = new EventStore(_eventStoreConnectionMock.Object);
+
+            // Act
             var result = await eventStore.Contains(identifier);
+
+            // Assert
             Assert.That(result, Is.True);
         }
 
         [Test]
         public async Task GetEvents_PassingMinimumVersion_ShouldStartReadingEventsFromMinimumVersion()
         {
+            // Arrange
             var identifier = Guid.NewGuid().ToString("N");
-
             var events = new object[] { new EventB(), new EventA() };
-
             _eventStoreConnectionMock
                 .Setup(x => x.ReadStreamEventsForwardAsync(identifier, 4, It.IsAny<int>(), false, null))
                 .ReturnsAsync(CreateStreamEventSlice(events, true));
-
             var eventStore = new EventStore(_eventStoreConnectionMock.Object);
+
+            // Act
             var result = await eventStore.GetEvents(identifier, 4);
 
+            // Assert
             Assert.That(result, Has.Length.EqualTo(2));
             Assert.That(result[0], Is.InstanceOf<EventB>());
             Assert.That(result[1], Is.InstanceOf<EventA>());
@@ -88,8 +101,13 @@ namespace Aggregator.Persistence.EventStore.Tests
         [Test]
         public void BeginTransaction_ShouldReturnAnEventStoreTransactionInstance()
         {
+            // Arrange
             var eventStore = new EventStore(_eventStoreConnectionMock.Object);
+
+            // Act
             var transaction = eventStore.BeginTransaction(null);
+
+            // Assert
             Assert.That(transaction, Is.Not.Null);
             Assert.That(transaction, Is.InstanceOf<EventStoreTransaction<string, object>>());
         }

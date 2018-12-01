@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Concurrent;
+using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Aggregator.Command;
+using Aggregator.DI;
 
 namespace Aggregator.Event
 {
@@ -13,15 +15,15 @@ namespace Aggregator.Event
     public class EventDispatcher<TEventBase> : IEventDispatcher<TEventBase>
     {
         private readonly ConcurrentDictionary<Type, MethodInfo> _dispatchEventMethodCache = new ConcurrentDictionary<Type, MethodInfo>();
-        private readonly IEventHandlingScopeFactory _eventHandlingScopeFactory;
+        private readonly IServiceScopeFactory _serviceScopeFactory;
 
         /// <summary>
         /// Constructs a new <see cref="EventDispatcher{TEventBase}"/> instance.
         /// </summary>
-        /// <param name="eventHandlingScopeFactory">The event handler scope factory.</param>
-        public EventDispatcher(IEventHandlingScopeFactory eventHandlingScopeFactory)
+        /// <param name="eventHandlingScopeFactory">The service scope factory.</param>
+        public EventDispatcher(IServiceScopeFactory serviceScopeFactory)
         {
-            _eventHandlingScopeFactory = eventHandlingScopeFactory ?? throw new ArgumentNullException(nameof(eventHandlingScopeFactory));
+            _serviceScopeFactory = serviceScopeFactory ?? throw new ArgumentNullException(nameof(serviceScopeFactory));
         }
 
         /// <summary>
@@ -44,10 +46,10 @@ namespace Aggregator.Event
 
         private async Task DispatchEvent<TEvent>(TEvent @event)
         {
-            using (var eventHandlingScope = _eventHandlingScopeFactory.BeginScopeFor<TEvent>())
+            using (var serviceScope = _serviceScopeFactory.CreateScope())
             {
-                var handlers = eventHandlingScope.ResolveHandlers();
-                foreach (var handler in handlers)
+                var handlers = serviceScope.GetServices<IEventHandler<TEvent>>();
+                foreach (var handler in handlers ?? Enumerable.Empty<IEventHandler<TEvent>>())
                     await handler.Handle(@event).ConfigureAwait(false);
             }
         }

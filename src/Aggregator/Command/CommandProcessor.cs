@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using Aggregator.DI;
 using Aggregator.Event;
 using Aggregator.Exceptions;
-using Aggregator.Internal;
 using Aggregator.Persistence;
 
 namespace Aggregator.Command
@@ -20,16 +20,16 @@ namespace Aggregator.Command
         /// <summary>
         /// Constructs a new <see cref="CommandProcessor"/> instance.
         /// </summary>
-        /// <param name="commandHandlingScopeFactory">The command handling scope factory.</param>
+        /// <param name="serviceScopeFactory">The service scope factory.</param>
         /// <param name="eventDispatcher">The event dispatcher.</param>
         /// <param name="eventStore">The event store.</param>
         /// <param name="notificationHandlers">Optional <see cref="CommandProcessorNotificationHandlers"/> instance.</param>
         public CommandProcessor(
-            ICommandHandlingScopeFactory commandHandlingScopeFactory,
+            IServiceScopeFactory serviceScopeFactory,
             IEventDispatcher<object> eventDispatcher,
             IEventStore<string, object> eventStore,
             CommandProcessorNotificationHandlers notificationHandlers = null)
-            : base(commandHandlingScopeFactory, eventDispatcher, eventStore, notificationHandlers)
+            : base(serviceScopeFactory, eventDispatcher, eventStore, notificationHandlers)
         {
         }
     }
@@ -45,7 +45,7 @@ namespace Aggregator.Command
         where TIdentifier : IEquatable<TIdentifier>
     {
         private readonly ConcurrentDictionary<Type, MethodInfo> _executeMethodCache = new ConcurrentDictionary<Type, MethodInfo>();
-        private readonly ICommandHandlingScopeFactory _commandHandlingScopeFactory;
+        private readonly IServiceScopeFactory _serviceScopeFactory;
         private readonly IEventDispatcher<TEventBase> _eventDispatcher;
         private readonly IEventStore<TIdentifier, TEventBase> _eventStore;
         private readonly CommandProcessorNotificationHandlers<TIdentifier, TCommandBase, TEventBase> _notificationHandlers;
@@ -53,17 +53,17 @@ namespace Aggregator.Command
         /// <summary>
         /// Constructs a new <see cref="CommandProcessor{TIdentifier, TCommandBase, TEventBase}"/> instance.
         /// </summary>
-        /// <param name="commandHandlingScopeFactory">The command handling scope factory.</param>
+        /// <param name="serviceScopeFactory">The service scope factory.</param>
         /// <param name="eventDispatcher">The event dispatcher.</param>
         /// <param name="eventStore">The event store.</param>
         /// <param name="notificationHandlers">Optional <see cref="CommandProcessorNotificationHandlers{TIdentifier, TCommandBase, TEventBase}"/> instance.</param>
         public CommandProcessor(
-            ICommandHandlingScopeFactory commandHandlingScopeFactory,
+            IServiceScopeFactory serviceScopeFactory,
             IEventDispatcher<TEventBase> eventDispatcher,
             IEventStore<TIdentifier, TEventBase> eventStore,
             CommandProcessorNotificationHandlers<TIdentifier, TCommandBase, TEventBase> notificationHandlers = null)
         {
-            _commandHandlingScopeFactory = commandHandlingScopeFactory ?? throw new ArgumentNullException(nameof(commandHandlingScopeFactory));
+            _serviceScopeFactory = serviceScopeFactory ?? throw new ArgumentNullException(nameof(serviceScopeFactory));
             _eventDispatcher = eventDispatcher ?? throw new ArgumentNullException(nameof(eventDispatcher));
             _eventStore = eventStore ?? throw new ArgumentNullException(nameof(eventStore));
             _notificationHandlers = notificationHandlers ?? new CommandProcessorNotificationHandlers<TIdentifier, TCommandBase, TEventBase>();
@@ -78,64 +78,63 @@ namespace Aggregator.Command
         {
             if (command == null) throw new ArgumentNullException(nameof(command));
 
-            var context = new CommandHandlingContext();
-            _notificationHandlers.OnPrepareContext(command, context);
-
-            var unitOfWork = new UnitOfWork<TIdentifier, TEventBase>();
-            context.SetUnitOfWork(unitOfWork);
-
-            var executeMethod = _executeMethodCache.GetOrAdd(command.GetType(), type =>
-                typeof(CommandProcessor<TIdentifier, TCommandBase, TEventBase>)
-                    .GetMethod(nameof(Execute), BindingFlags.NonPublic | BindingFlags.Instance)
-                    .MakeGenericMethod(type));
-
-            await ((Task)executeMethod.Invoke(this, new object[] { command, context })).ConfigureAwait(false);
-
-            if (!unitOfWork.HasChanges)
+            using (var serviceScope = _serviceScopeFactory.CreateScope())
             {
-                await _eventDispatcher.Dispatch(Array.Empty<TEventBase>()).ConfigureAwait(false);
-                return;
-            }
+                var context = serviceScope.GetService<CommandHandlingContext>();
+                _notificationHandlers.OnPrepareContext(command, context);
 
-            using (var transaction = _eventStore.BeginTransaction(context))
-            {
-                var storedEvents = new List<TEventBase>();
+                var unitOfWork = context.CreateUnitOfWork<TIdentifier, TEventBase>();
 
-                try
+                var executeMethod = _executeMethodCache.GetOrAdd(command.GetType(), type =>
+                    typeof(CommandProcessor<TIdentifier, TCommandBase, TEventBase>)
+                        .GetMethod(nameof(Execute), BindingFlags.NonPublic | BindingFlags.Instance)
+                        .MakeGenericMethod(type));
+
+                await ((Task)executeMethod.Invoke(this, new object[] { command, serviceScope })).ConfigureAwait(false);
+
+                if (!unitOfWork.HasChanges)
                 {
-                    foreach (var aggregateRootEntity in unitOfWork.GetChanges())
-                    {
-                        var events = aggregateRootEntity.GetChanges();
-                        events = events.Select(x => _notificationHandlers.OnEnrichEvent(x, command, context)).ToArray();
-                        await transaction.StoreEvents(aggregateRootEntity.Identifier, aggregateRootEntity.ExpectedVersion, events).ConfigureAwait(false);
-                        storedEvents.AddRange(events);
-                    }
-
-                    await _eventDispatcher.Dispatch(storedEvents.ToArray()).ConfigureAwait(false);
-
-                    await transaction.Commit().ConfigureAwait(false);
+                    await _eventDispatcher.Dispatch(Array.Empty<TEventBase>()).ConfigureAwait(false);
+                    return;
                 }
-                catch
+
+                using (var transaction = _eventStore.BeginTransaction(context))
                 {
-                    await transaction.Rollback().ConfigureAwait(false);
-                    throw;
+                    var storedEvents = new List<TEventBase>();
+
+                    try
+                    {
+                        foreach (var aggregateRootEntity in unitOfWork.GetChanges())
+                        {
+                            var events = aggregateRootEntity.GetChanges();
+                            events = events.Select(x => _notificationHandlers.OnEnrichEvent(x, command, context)).ToArray();
+                            await transaction.StoreEvents(aggregateRootEntity.Identifier, aggregateRootEntity.ExpectedVersion, events).ConfigureAwait(false);
+                            storedEvents.AddRange(events);
+                        }
+
+                        await _eventDispatcher.Dispatch(storedEvents.ToArray()).ConfigureAwait(false);
+
+                        await transaction.Commit().ConfigureAwait(false);
+                    }
+                    catch
+                    {
+                        await transaction.Rollback().ConfigureAwait(false);
+                        throw;
+                    }
                 }
             }
         }
 
-        private async Task Execute<TCommand>(TCommand command, CommandHandlingContext context)
+        private async Task Execute<TCommand>(TCommand command, IServiceScope serviceScope)
             where TCommand : TCommandBase
         {
-            using (var commandHandlingScope = _commandHandlingScopeFactory.BeginScopeFor<TCommand>(context))
-            {
-                var handlers = commandHandlingScope.ResolveHandlers();
+            var handlers = serviceScope.GetServices<ICommandHandler<TCommand>>();
 
-                if (handlers == null || !handlers.Any())
-                    throw new UnhandledCommandException(command);
+            if (handlers == null || !handlers.Any())
+                throw new UnhandledCommandException(command);
 
-                foreach (var handler in handlers)
-                    await handler.Handle(command).ConfigureAwait(false);
-            }
+            foreach (var handler in handlers)
+                await handler.Handle(command).ConfigureAwait(false);
         }
     }
 }

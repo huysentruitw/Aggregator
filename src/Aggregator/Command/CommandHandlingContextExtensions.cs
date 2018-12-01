@@ -7,9 +7,19 @@ namespace Aggregator.Command
     {
         internal static readonly string UnitOfWorkKey = $"UnitOfWork.{Guid.NewGuid():N}";
 
-        public static void SetUnitOfWork<TIdentifier, TEventBase>(this CommandHandlingContext context, UnitOfWork<TIdentifier, TEventBase> unitOfWork)
+        public static UnitOfWork<TIdentifier, TEventBase> CreateUnitOfWork<TIdentifier, TEventBase>(this CommandHandlingContext context)
             where TIdentifier : IEquatable<TIdentifier>
-            => context.Set(UnitOfWorkKey, unitOfWork);
+        {
+            lock (context)
+            {
+                if (context.GetUnitOfWork<TIdentifier, TEventBase>() != null)
+                    throw new InvalidOperationException("Unit of work already created for this context, make sure CommandHandlingContext is registered as scoped service");
+
+                var unitOfWork = new UnitOfWork<TIdentifier, TEventBase>();
+                context.Set(UnitOfWorkKey, unitOfWork);
+                return unitOfWork;
+            }
+        }
 
         public static UnitOfWork<TIdentifier, TEventBase> GetUnitOfWork<TIdentifier, TEventBase>(this CommandHandlingContext context)
             where TIdentifier : IEquatable<TIdentifier>
