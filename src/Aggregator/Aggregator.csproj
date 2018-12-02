@@ -5,6 +5,8 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Version>1.0.0.0</Version>
     <Authors>Wouter Huysentruit</Authors>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>keyfile.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard2.0|AnyCPU'">

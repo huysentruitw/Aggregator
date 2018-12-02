@@ -2,6 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>keyfile.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
   <ItemGroup>
