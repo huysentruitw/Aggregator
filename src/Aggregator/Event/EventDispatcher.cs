@@ -20,7 +20,7 @@ namespace Aggregator.Event
         /// <summary>
         /// Constructs a new <see cref="EventDispatcher{TEventBase}"/> instance.
         /// </summary>
-        /// <param name="eventHandlingScopeFactory">The service scope factory.</param>
+        /// <param name="serviceScopeFactory">The service scope factory.</param>
         public EventDispatcher(IServiceScopeFactory serviceScopeFactory)
         {
             _serviceScopeFactory = serviceScopeFactory ?? throw new ArgumentNullException(nameof(serviceScopeFactory));

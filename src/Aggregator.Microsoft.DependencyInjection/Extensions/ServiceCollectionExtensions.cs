@@ -7,6 +7,9 @@ using Aggregator.Persistence;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
+    /// <summary>
+    /// Aggregator related extension methods for <see cref="IServiceCollection"/>.
+    /// </summary>
     [ExcludeFromCodeCoverage]
     public static class ServiceCollectionExtensions
     {
