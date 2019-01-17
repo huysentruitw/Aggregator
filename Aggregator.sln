@@ -34,7 +34,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aggregator", "src\Aggregato
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aggregator.Microsoft.DependencyInjection", "src\Aggregator.Microsoft.DependencyInjection\Aggregator.Microsoft.DependencyInjection.csproj", "{40FF334B-145B-4951-A630-3819AD29419B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aggregator.Microsoft.DependencyInjection.Tests", "tests\Aggregator.Microsoft.DependencyInjection.Tests\Aggregator.Microsoft.DependencyInjection.Tests.csproj", "{58AAC9AD-CDD9-4823-83D5-307194F51788}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aggregator.Microsoft.DependencyInjection.Tests", "tests\Aggregator.Microsoft.DependencyInjection.Tests\Aggregator.Microsoft.DependencyInjection.Tests.csproj", "{58AAC9AD-CDD9-4823-83D5-307194F51788}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
