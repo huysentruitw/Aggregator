@@ -14,7 +14,7 @@ EventStore persistence integration package:
 
     PM> Install-Package Aggregator.Persistence.EventStore
 
-Microsoft DI integration packege:
+Microsoft DI integration package:
 
     PM> Install-Package Aggregator.Microsoft.DependencyInjection
 
