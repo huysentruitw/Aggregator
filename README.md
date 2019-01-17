@@ -2,7 +2,7 @@
 
 [![Build status](https://ci.appveyor.com/api/projects/status/c53dm2n5vcguo3e8/branch/master?svg=true)](https://ci.appveyor.com/project/huysentruitw/aggregator/branch/master)
 
-This package contains some fundamental base classes and interfaces for building a CQRS/ES based application in .NET and .NET Standard.
+This package contains some fundamental base classes and interfaces for building a CQRS/ES based application. Supports .NET Core / .NET Standard / .NET Framework.
 
 ## Get it on NuGet
 
@@ -10,19 +10,23 @@ The main package:
 
     PM> Install-Package Aggregator
 
-Autofac integration package:
-
-    PM> Install-Package Aggregator.Autofac
-
 EventStore persistence integration package:
 
     PM> Install-Package Aggregator.Persistence.EventStore
+
+Microsoft DI integration packege:
+
+    PM> Install-Package Aggregator.Microsoft.DependencyInjection
+
+Autofac DI integration package:
+
+    PM> Install-Package Aggregator.Autofac
 
 ## Usage
 
 ### Generic interfaces and base types
 
-For flexibility, this library consists of generic base types and generic interfaces that lets you define your own base type for aggregate root identifiers (`TIdentifier`), commands (`TCommandBase`) and events (`TEventBase`). Most interfaces or base types have overloads that use `string` as aggregate root identifier type, and `object` as event and command base type which you can use in case you don't have complex requirements.
+For flexibility, this library consists of generic base types and generic interfaces that lets you define your own base type for aggregate root identifiers (`TIdentifier`), commands (`TCommandBase`) and events (`TEventBase`). Most interfaces or base types have overloads that use `string` as aggregate root identifier type, and `object` as event and command base type which you can use in case your application doesn't have complex requirements.
 
 ### AggregateRoot
 
@@ -88,13 +92,13 @@ class User : AggregateRoot
 
 The generic [`Repository<TAggregateRoot>`](./src/Aggregator/Persistence/Repository.cs) class is responsible for creating new aggregate roots, loading aggregate roots from the event store and keeping track of changes applied to new or loaded aggregate roots.
 
-A scoped instance of this generic class needs to be injected into the command handlers that needs to create or modify an aggregate root. To allow unit-testing of the command handlers, the [`IRepository<TAggregateRoot>`](./src/Aggregator/Persistence/IRepository.cs) or [`IRepositoryTIdentifier, TEventBase, TAggregateRoot>`](./src/Aggregator/Persistence/IRepository.cs) should be injected instead.
-
-A repository is scoped and should only exist for the lifetime of a single command being processed. Because the repository needs to have access to the unit-of-work in the `CommandHandlingContext`, `Repository` instances are resolved from a childscope created by the `ICommandHandlingScopeFactory` implementation (see below).
+This generic repository is registered as a scoped instance (when using one of the DI integration packages) as an instance should only exist for the lifetime of a single command being processed.
 
 ### Command handlers
 
 The library contains a generic interface definition [`ICommandHandler<TCommand>`](./src/Aggregator/Command/ICommandHandler.cs) that identifies command handlers.
+
+For example:
 
 ```csharp
 class CreateUserCommandHandler : ICommandHandler<CreateUserCommand>
@@ -106,9 +110,7 @@ class CreateUserCommandHandler : ICommandHandler<CreateUserCommand>
 }
 ```
 
-In most cases, command parameters need to be validated before executing the command.
-
-The easiest way to do this is to create a generic base class that uses a validation library like [FluentValidation](https://github.com/JeremySkinner/FluentValidation):
+A great way to validate commands in the command handler is to use a validation library like [FluentValidation](https://github.com/JeremySkinner/FluentValidation):
 
 ```csharp
 using FluentValidation;
@@ -130,7 +132,7 @@ abstract class SafeCommandHandler<TCommand>
 }
 ```
 
-If a command handler needs to manipulate an aggregate, you'll need some kind of persistent command handler:
+Additionally, if a command handler needs to manipulate an aggregate, you could create some kind of persistent command handler:
 
 ```csharp
 abstract class PersistentCommandHandler<TCommand, TAggregateRoot>
@@ -150,22 +152,18 @@ abstract class PersistentCommandHandler<TCommand, TAggregateRoot>
 
 The [`CommandProcessor`](./src/Aggregator/Command/CommandProcessor.cs) or [`CommandProcessor<TIdentifier, TCommandBase, TEventBase>`](./src/Aggregator/Command/CommandProcessor.cs) class is responsible for processing commands, which consists of these steps:
 
-* Create a `CommandHandlingContext` which maintains the internal unit-of-work
+* Requests a new `CommandHandlingContext` from the DI container which will maintain the internal unit-of-work
 * Execute one or more command handlers that implement the `ICommandHandler<TCommand>` interface
 * Store events that were tracked by the unit-of-work
 * Dispatch events that were tracked by the unit-of-work in the `CommandHandlingContext`
-
-Since each call to `Process` creates a new `CommandHandlingContext`, we need to implement some kind of dependency injection that is responsible for injecting this context into newly resolved command handler instances. The class that implements the `ICommandHandlingScopeFactory` and `ICommandHandlingScope` is responsible for resolving scoped instances of command handlers that match the command to be processed. The lifetime of these command handler instances only span the execution of a single command.
-
-Since the `CommandProcessor` keeps an internal cache of generic methods, it is wise to only have one single instance of this class that is used through the entire lifetime of the application.
 
 ### IServiceScopeFactory / IServiceScope
 
 The implementation of the [`IServiceScopeFactory`](./src/Aggregator/DI/IServiceScopeFactory.cs) interface is responsible for creating a temporary child scope from which the `CommandHandlingContext`, command handlers and event handlers are resolved.
 
-The child scope, which implements [`IServiceScope`](./src/Aggregator/DI/IServiceScope.cs) is only valid for the lifetime of a single command being processed.
+The child scope, which implements [`IServiceScope`](./src/Aggregator/DI/IServiceScope.cs) is only valid for the lifetime of a single command or event being processed/dispatched.
 
-These dedicated interfaces are DI independent. There's an integration NuGet package available for Autofac (`Aggregator.Autofac`) that can be used out of the box or serve as an example. Support for Microsoft.Extensions.DependencyInjection is coming.
+These dedicated interfaces are DI independent. There's an integration NuGet package available for Microsoft.Extensions.DI (`Aggregator.Microsoft.DependencyInjection`) and Autofac (`Aggregator.Autofac`) that can be used out of the box or serve as an example.
 
 ### CommandHandlingContext
 
