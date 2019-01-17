@@ -237,3 +237,4 @@ _Pvt_Extensions
 .nuget/NuGet.exe
 *.ncrunchsolution
 _testing/
+*.DotSettings
