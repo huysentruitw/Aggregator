@@ -69,8 +69,6 @@ namespace Aggregator
 
         private void Handle(TEventBase @event)
         {
-            if (@event == null) throw new ArgumentNullException(nameof(@event));
-
             var eventType = @event.GetType();
             if (!_handlers.TryGetValue(eventType, out var handler))
                 throw new UnhandledEventException(eventType);
