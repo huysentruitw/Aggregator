@@ -8,19 +8,19 @@ This package contains some fundamental base classes and interfaces for building 
 
 The main package:
 
-    PM> Install-Package Aggregator
+    PM> Install-Package AggregatR
 
 EventStore persistence integration package:
 
-    PM> Install-Package Aggregator.Persistence.EventStore
+    PM> Install-Package AggregatR.Persistence.EventStore
 
 Microsoft DI integration package:
 
-    PM> Install-Package Aggregator.Microsoft.DependencyInjection
+    PM> Install-Package AggregatR.Microsoft.DependencyInjection
 
 Autofac DI integration package:
 
-    PM> Install-Package Aggregator.Autofac
+    PM> Install-Package AggregatR.Autofac
 
 ## Usage
 
