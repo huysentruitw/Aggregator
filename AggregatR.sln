@@ -20,14 +20,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AggregatR.Persistence.Event
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AggregatR.Persistence.EventStore.Tests", "tests\AggregatR.Persistence.EventStore.Tests\AggregatR.Persistence.EventStore.Tests.csproj", "{92E03763-7033-4DCD-8EFD-CD50DEEAA356}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AggregatR.Example.WebHost", "example\AggregatR.Example.WebHost\AggregatR.Example.WebHost.csproj", "{4B0958B7-50AA-46C3-B489-72F5A8B03CCB}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Example", "Example", "{C4B03F9F-A8DA-4B60-996A-B0519DC355D8}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AggregatR.Example.Domain", "example\AggregatR.Example.Domain\AggregatR.Example.Domain.csproj", "{869C6252-49C8-4E99-819E-49C72D77E2E5}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AggregatR.Example.Messages", "example\AggregatR.Example.Messages\AggregatR.Example.Messages.csproj", "{34668765-14C0-4B37-BDF5-217BBB242CAC}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AggregatR.Autofac", "src\AggregatR.Autofac\AggregatR.Autofac.csproj", "{A9D0CC28-F00C-47E6-9426-F6411844A6AB}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AggregatR", "src\AggregatR\AggregatR.csproj", "{5236A9C2-98A1-4B58-A748-9D38E515783C}"
@@ -58,18 +50,6 @@ Global
 		{92E03763-7033-4DCD-8EFD-CD50DEEAA356}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{92E03763-7033-4DCD-8EFD-CD50DEEAA356}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{92E03763-7033-4DCD-8EFD-CD50DEEAA356}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4B0958B7-50AA-46C3-B489-72F5A8B03CCB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4B0958B7-50AA-46C3-B489-72F5A8B03CCB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4B0958B7-50AA-46C3-B489-72F5A8B03CCB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4B0958B7-50AA-46C3-B489-72F5A8B03CCB}.Release|Any CPU.Build.0 = Release|Any CPU
-		{869C6252-49C8-4E99-819E-49C72D77E2E5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{869C6252-49C8-4E99-819E-49C72D77E2E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{869C6252-49C8-4E99-819E-49C72D77E2E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{869C6252-49C8-4E99-819E-49C72D77E2E5}.Release|Any CPU.Build.0 = Release|Any CPU
-		{34668765-14C0-4B37-BDF5-217BBB242CAC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{34668765-14C0-4B37-BDF5-217BBB242CAC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{34668765-14C0-4B37-BDF5-217BBB242CAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{34668765-14C0-4B37-BDF5-217BBB242CAC}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A9D0CC28-F00C-47E6-9426-F6411844A6AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A9D0CC28-F00C-47E6-9426-F6411844A6AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A9D0CC28-F00C-47E6-9426-F6411844A6AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -89,11 +69,6 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{4B0958B7-50AA-46C3-B489-72F5A8B03CCB} = {C4B03F9F-A8DA-4B60-996A-B0519DC355D8}
-		{869C6252-49C8-4E99-819E-49C72D77E2E5} = {C4B03F9F-A8DA-4B60-996A-B0519DC355D8}
-		{34668765-14C0-4B37-BDF5-217BBB242CAC} = {C4B03F9F-A8DA-4B60-996A-B0519DC355D8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {1D1D1371-E013-47B1-8EE5-0ABDE1701470}

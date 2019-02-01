@@ -181,36 +181,6 @@ The `CommandProcessor` also depends on an implementation of [`IEventDispatcher<T
 
 [`EventDispatcher<TEventBase>`](./src/AggregatR/Event/EventDispatcher.cs) is a default implementation that can be used for dispatching events.
 
-## The example
-
-A very basic example is included in this solution that demonstrates the usage of the AggregatR library in combination with EventStore.
-
-The example consists of 3 separate projects, although a real-life implementation should probably have more layers.
-
-### AggregatR.Example.Messages project
-
-The messages project contains all base message types like commands and events which are typically shared between both sides in a CQRS/ES application.
-
-### AggregatR.Example.Domain project
-
-This project contains the domain part of the application. The domain part contains the command handlers and the aggregate root entities that generate events.
-
-Generated events are published to streams using [EventStore](https://eventstore.org/), each aggregate root has its own stream in the event store.
-
-In a real-life implementation, the domain part should also have some kind of API layer or command bus over which we can request the execution of certain commands.
-
-In this example, we will use the `CommandProcessor` directly from our WebHost project. To facilitate this, we had to add a public `Dummy` class to the domain project and load the domain assembly in our WebHost `AppDomain`.
-
-### AggregatR.Example.WebHost project
-
-This is a ASP.NET Core Web API project that also hosts a single-page Angular website.
-
-It also contains some simple in memory projections that gets rebuilt from the event store each time the application starts. The `EventStoreProjector` class will generate and keep our projections up-to-date.
-
-### EventStore
-
-Just [download](https://eventstore.org/downloads/) and run EventStore with default settings. The connection string in `appsettings.json` will connect with an instance running locally.
-
 ## Contributing
 
 Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests to us.
