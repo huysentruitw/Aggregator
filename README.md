@@ -1,4 +1,4 @@
-# Aggregator
+# AggregatR
 
 [![Build status](https://ci.appveyor.com/api/projects/status/c53dm2n5vcguo3e8/branch/master?svg=true)](https://ci.appveyor.com/project/huysentruitw/aggregator/branch/master)
 
@@ -30,7 +30,7 @@ For flexibility, this library consists of generic base types and generic interfa
 
 ### AggregateRoot
 
-The [`AggregateRoot`](./src/Aggregator/AggregateRoot.cs) or [`AggregateRoot<TEventBase>`](./src/Aggregator/AggregateRoot.cs) class is an abstract base class that should be used as a base for aggregate roots. It allows registering event handlers, initializing the aggregate by replaying events and keeping track of changes getting applied to the aggregate root.
+The [`AggregateRoot`](./src/AggregatR/AggregateRoot.cs) or [`AggregateRoot<TEventBase>`](./src/AggregatR/AggregateRoot.cs) class is an abstract base class that should be used as a base for aggregate roots. It allows registering event handlers, initializing the aggregate by replaying events and keeping track of changes getting applied to the aggregate root.
 
 ```csharp
 class User : AggregateRoot
@@ -90,13 +90,13 @@ class User : AggregateRoot
 
 ### Repository
 
-The generic [`Repository<TAggregateRoot>`](./src/Aggregator/Persistence/Repository.cs) class is responsible for creating new aggregate roots, loading aggregate roots from the event store and keeping track of changes applied to new or loaded aggregate roots.
+The generic [`Repository<TAggregateRoot>`](./src/AggregatR/Persistence/Repository.cs) class is responsible for creating new aggregate roots, loading aggregate roots from the event store and keeping track of changes applied to new or loaded aggregate roots.
 
 This generic repository is registered as a scoped instance (when using one of the DI integration packages) as an instance should only exist for the lifetime of a single command being processed.
 
 ### Command handlers
 
-The library contains a generic interface definition [`ICommandHandler<TCommand>`](./src/Aggregator/Command/ICommandHandler.cs) that identifies command handlers.
+The library contains a generic interface definition [`ICommandHandler<TCommand>`](./src/AggregatR/Command/ICommandHandler.cs) that identifies command handlers.
 
 For example:
 
@@ -150,7 +150,7 @@ abstract class PersistentCommandHandler<TCommand, TAggregateRoot>
 
 ### CommandProcessor
 
-The [`CommandProcessor`](./src/Aggregator/Command/CommandProcessor.cs) or [`CommandProcessor<TIdentifier, TCommandBase, TEventBase>`](./src/Aggregator/Command/CommandProcessor.cs) class is responsible for processing commands, which consists of these steps:
+The [`CommandProcessor`](./src/AggregatR/Command/CommandProcessor.cs) or [`CommandProcessor<TIdentifier, TCommandBase, TEventBase>`](./src/AggregatR/Command/CommandProcessor.cs) class is responsible for processing commands, which consists of these steps:
 
 * Requests a new `CommandHandlingContext` from the DI container which will maintain the internal unit-of-work
 * Execute one or more command handlers that implement the `ICommandHandler<TCommand>` interface
@@ -159,39 +159,39 @@ The [`CommandProcessor`](./src/Aggregator/Command/CommandProcessor.cs) or [`Comm
 
 ### IServiceScopeFactory / IServiceScope
 
-The implementation of the [`IServiceScopeFactory`](./src/Aggregator/DI/IServiceScopeFactory.cs) interface is responsible for creating a temporary child scope from which the `CommandHandlingContext`, command handlers and event handlers are resolved.
+The implementation of the [`IServiceScopeFactory`](./src/AggregatR/DI/IServiceScopeFactory.cs) interface is responsible for creating a temporary child scope from which the `CommandHandlingContext`, command handlers and event handlers are resolved.
 
-The child scope, which implements [`IServiceScope`](./src/Aggregator/DI/IServiceScope.cs) is only valid for the lifetime of a single command or event being processed/dispatched.
+The child scope, which implements [`IServiceScope`](./src/AggregatR/DI/IServiceScope.cs) is only valid for the lifetime of a single command or event being processed/dispatched.
 
-These dedicated interfaces are DI independent. There's an integration NuGet package available for Microsoft.Extensions.DI (`Aggregator.Microsoft.DependencyInjection`) and Autofac (`Aggregator.Autofac`) that can be used out of the box or serve as an example.
+These dedicated interfaces are DI independent. There's an integration NuGet package available for Microsoft.Extensions.DI (`AggregatR.Microsoft.DependencyInjection`) and Autofac (`AggregatR.Autofac`) that can be used out of the box or serve as an example.
 
 ### CommandHandlingContext
 
-The [`CommandHandlingContext`](./src/Aggregator/Command/CommandHandlingContext.cs) is resolved from the `IServiceScope` instance by the `CommandProcessor` for the lifetime of one single command being processed. It's a property bag that can be used to store and retrieve properties during the processing of a single command. Internally, this context is also used to store the unit-of-work that is required by the `Repository` class to keep track of changes (events) generated by aggregate root entities.
+The [`CommandHandlingContext`](./src/AggregatR/Command/CommandHandlingContext.cs) is resolved from the `IServiceScope` instance by the `CommandProcessor` for the lifetime of one single command being processed. It's a property bag that can be used to store and retrieve properties during the processing of a single command. Internally, this context is also used to store the unit-of-work that is required by the `Repository` class to keep track of changes (events) generated by aggregate root entities.
 
 ### Store events
 
-The `CommandProcessor` depends on an implementation of [`IEventStore<TIdentifier, TEventBase>`](./src/Aggregator/Persistence/IEventStore.cs) which will be used to store one or more events that were generated during the processing of a single command in a transactional manner. When something goes wrong while storing (and dispatching) the event(s), the complete transaction will get rolled back and the exception will bubble up to the caller.
+The `CommandProcessor` depends on an implementation of [`IEventStore<TIdentifier, TEventBase>`](./src/AggregatR/Persistence/IEventStore.cs) which will be used to store one or more events that were generated during the processing of a single command in a transactional manner. When something goes wrong while storing (and dispatching) the event(s), the complete transaction will get rolled back and the exception will bubble up to the caller.
 
-There's an integration NuGet package available for using EventStore (`Aggregator.Persistence.EventStore`) that can be used or serve as an example for a custom event store.
+There's an integration NuGet package available for using EventStore (`AggregatR.Persistence.EventStore`) that can be used or serve as an example for a custom event store.
 
 ### Dispatch events
 
-The `CommandProcessor` also depends on an implementation of [`IEventDispatcher<TEventBase>`](./src/Aggregator/Event/IEventDispatcher.cs) which will be used to dispatch one or more events that were generated during the processing of a single command inside the command domain. The implementation of the `IEventDispatcher<TEventBase>` interface is responsible for forwarding events to classes that implement the [`IEventHandler<TEvent>`](./src/Aggregator/Event/IEventHandler.cs) interface inside the command domain. A typical example of classes that listen to one or more events are Process Managers (sometimes referred to as Sagas) that act on events, keep track of some kind of long running state and send out commands depending on that state. Since the work and state of process managers is important, the `CommandProcessor` will also rollback the event store transaction in case something goes wrong during event dispatching.
+The `CommandProcessor` also depends on an implementation of [`IEventDispatcher<TEventBase>`](./src/AggregatR/Event/IEventDispatcher.cs) which will be used to dispatch one or more events that were generated during the processing of a single command inside the command domain. The implementation of the `IEventDispatcher<TEventBase>` interface is responsible for forwarding events to classes that implement the [`IEventHandler<TEvent>`](./src/AggregatR/Event/IEventHandler.cs) interface inside the command domain. A typical example of classes that listen to one or more events are Process Managers (sometimes referred to as Sagas) that act on events, keep track of some kind of long running state and send out commands depending on that state. Since the work and state of process managers is important, the `CommandProcessor` will also rollback the event store transaction in case something goes wrong during event dispatching.
 
-[`EventDispatcher<TEventBase>`](./src/Aggregator/Event/EventDispatcher.cs) is a default implementation that can be used for dispatching events.
+[`EventDispatcher<TEventBase>`](./src/AggregatR/Event/EventDispatcher.cs) is a default implementation that can be used for dispatching events.
 
 ## The example
 
-A very basic example is included in this solution that demonstrates the usage of the Aggregator library in combination with EventStore.
+A very basic example is included in this solution that demonstrates the usage of the AggregatR library in combination with EventStore.
 
 The example consists of 3 separate projects, although a real-life implementation should probably have more layers.
 
-### Aggregator.Example.Messages project
+### AggregatR.Example.Messages project
 
 The messages project contains all base message types like commands and events which are typically shared between both sides in a CQRS/ES application.
 
-### Aggregator.Example.Domain project
+### AggregatR.Example.Domain project
 
 This project contains the domain part of the application. The domain part contains the command handlers and the aggregate root entities that generate events.
 
@@ -201,7 +201,7 @@ In a real-life implementation, the domain part should also have some kind of API
 
 In this example, we will use the `CommandProcessor` directly from our WebHost project. To facilitate this, we had to add a public `Dummy` class to the domain project and load the domain assembly in our WebHost `AppDomain`.
 
-### Aggregator.Example.WebHost project
+### AggregatR.Example.WebHost project
 
 This is a ASP.NET Core Web API project that also hosts a single-page Angular website.
 
@@ -217,7 +217,7 @@ Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduc
 
 ## Versioning
 
-We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/sweet-mustard/aggregator/tags). 
+We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/huysentruitw/AggregatR/tags). 
 
 ## License
 
