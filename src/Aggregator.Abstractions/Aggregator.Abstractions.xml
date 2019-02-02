@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Aggregator.Abstractions</name>
+    </assembly>
+    <members>
+        <member name="T:Aggregator.ICommand">
+            <summary>
+            Interface that identifies a command.
+            </summary>
+        </member>
+        <member name="T:Aggregator.ICommandHandler`1">
+            <summary>
+            Interface for a class is able to handle a command of the given type.
+            </summary>
+            <typeparam name="TCommand">The type of the command.</typeparam>
+        </member>
+        <member name="T:Aggregator.IEvent">
+            <summary>
+            Interface that identifies an event.
+            </summary>
+        </member>
+        <member name="T:Aggregator.IEventHandler`1">
+            <summary>
+            Interface for a class is able to handle an event of the given type.
+            </summary>
+            <typeparam name="TEvent">The type of the event.</typeparam>
+        </member>
+    </members>
+</doc>
