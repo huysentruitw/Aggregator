@@ -12,7 +12,7 @@ namespace Aggregator.Tests.Persistence
     [TestFixture]
     public class RepositoryTests
     {
-        private readonly Mock<IEventStore<string, IEvent>> _eventStoreMock = new Mock<IEventStore<string, IEvent>>();
+        private readonly Mock<IEventStore<string, object>> _eventStoreMock = new Mock<IEventStore<string, object>>();
 
         [SetUp]
         public void SetUp()
@@ -45,7 +45,7 @@ namespace Aggregator.Tests.Persistence
         {
             // Arrange
             var commandHandlingContext = new CommandHandlingContext();
-            commandHandlingContext.CreateUnitOfWork<string, IEvent>();
+            commandHandlingContext.CreateUnitOfWork<string, object>();
             var unknownIdentifier = Guid.NewGuid().ToString("N");
             _eventStoreMock.Setup(x => x.Contains(unknownIdentifier)).ReturnsAsync(false);
             var repository = new Repository<FakeAggregateRoot>(_eventStoreMock.Object, commandHandlingContext);
@@ -62,7 +62,7 @@ namespace Aggregator.Tests.Persistence
         {
             // Arrange
             var commandHandlingContext = new CommandHandlingContext();
-            commandHandlingContext.CreateUnitOfWork<string, IEvent>();
+            commandHandlingContext.CreateUnitOfWork<string, object>();
             var knownIdentifier = Guid.NewGuid().ToString("N");
             _eventStoreMock.Setup(x => x.Contains(knownIdentifier)).ReturnsAsync(true);
             var repository = new Repository<FakeAggregateRoot>(_eventStoreMock.Object, commandHandlingContext);
@@ -79,11 +79,11 @@ namespace Aggregator.Tests.Persistence
         {
             // Arrange
             var commandHandlingContext = new CommandHandlingContext();
-            commandHandlingContext.CreateUnitOfWork<string, IEvent>();
+            commandHandlingContext.CreateUnitOfWork<string, object>();
             var newIdentifier = Guid.NewGuid().ToString("N");
             var aggregateRoot = new FakeAggregateRoot();
-            var unitOfWork = commandHandlingContext.GetUnitOfWork<string, IEvent>();
-            unitOfWork.Attach(new AggregateRootEntity<string, IEvent>(newIdentifier, aggregateRoot, 1));
+            var unitOfWork = commandHandlingContext.GetUnitOfWork<string, object>();
+            unitOfWork.Attach(new AggregateRootEntity<string, object>(newIdentifier, aggregateRoot, 1));
 
             var repository = new Repository<FakeAggregateRoot>(_eventStoreMock.Object, commandHandlingContext);
 
@@ -99,9 +99,9 @@ namespace Aggregator.Tests.Persistence
         {
             // Arrange
             var commandHandlingContext = new CommandHandlingContext();
-            commandHandlingContext.CreateUnitOfWork<string, IEvent>();
+            commandHandlingContext.CreateUnitOfWork<string, object>();
             var unknownIdentifier = Guid.NewGuid().ToString("N");
-            _eventStoreMock.Setup(x => x.GetEvents(unknownIdentifier, 1)).ReturnsAsync(Array.Empty<IEvent>());
+            _eventStoreMock.Setup(x => x.GetEvents(unknownIdentifier, 1)).ReturnsAsync(Array.Empty<object>());
             var repository = new Repository<FakeAggregateRoot>(_eventStoreMock.Object, commandHandlingContext);
 
             // Act / Assert
@@ -110,7 +110,7 @@ namespace Aggregator.Tests.Persistence
             Assert.That(ex.Message, Is.EqualTo($"Exception for aggregate root with identifier '{unknownIdentifier}': Aggregate root not found"));
 
             // Arrange
-            _eventStoreMock.Setup(x => x.GetEvents(unknownIdentifier, 1)).ReturnsAsync((IEvent[])null);
+            _eventStoreMock.Setup(x => x.GetEvents(unknownIdentifier, 1)).ReturnsAsync((object[])null);
 
             // Act / Assert
             ex = Assert.ThrowsAsync<AggregateRootNotFoundException<string>>(() => repository.Get(unknownIdentifier));
@@ -123,9 +123,9 @@ namespace Aggregator.Tests.Persistence
         {
             // Arrange
             var commandHandlingContext = new CommandHandlingContext();
-            commandHandlingContext.CreateUnitOfWork<string, IEvent>();
+            commandHandlingContext.CreateUnitOfWork<string, object>();
             var knownIdentifier = Guid.NewGuid().ToString("N");
-            _eventStoreMock.Setup(x => x.GetEvents(knownIdentifier, 0)).ReturnsAsync(new IEvent[]
+            _eventStoreMock.Setup(x => x.GetEvents(knownIdentifier, 0)).ReturnsAsync(new object[]
             {
                 new EventA(),
                 new EventB(),
@@ -147,9 +147,9 @@ namespace Aggregator.Tests.Persistence
         {
             // Arrange
             var commandHandlingContext = new CommandHandlingContext();
-            var unitOfWork = commandHandlingContext.CreateUnitOfWork<string, IEvent>();
+            var unitOfWork = commandHandlingContext.CreateUnitOfWork<string, object>();
             var knownIdentifier = Guid.NewGuid().ToString("N");
-            _eventStoreMock.Setup(x => x.GetEvents(knownIdentifier, 0)).ReturnsAsync(new IEvent[]
+            _eventStoreMock.Setup(x => x.GetEvents(knownIdentifier, 0)).ReturnsAsync(new object[]
             {
                 new EventA(),
                 new EventB()
@@ -171,9 +171,9 @@ namespace Aggregator.Tests.Persistence
         {
             // Arrange
             var commandHandlingContext = new CommandHandlingContext();
-            var unitOfWork = commandHandlingContext.CreateUnitOfWork<string, IEvent>(); var identifier = Guid.NewGuid().ToString("N");
+            var unitOfWork = commandHandlingContext.CreateUnitOfWork<string, object>(); var identifier = Guid.NewGuid().ToString("N");
             var aggregateRoot = new FakeAggregateRoot();
-            unitOfWork.Attach(new AggregateRootEntity<string, IEvent>(identifier, aggregateRoot, 1));
+            unitOfWork.Attach(new AggregateRootEntity<string, object>(identifier, aggregateRoot, 1));
             var repository = new Repository<FakeAggregateRoot>(_eventStoreMock.Object, commandHandlingContext);
 
             // Act
@@ -189,7 +189,7 @@ namespace Aggregator.Tests.Persistence
         {
             // Arrange
             var commandHandlingContext = new CommandHandlingContext();
-            commandHandlingContext.CreateUnitOfWork<string, IEvent>();
+            commandHandlingContext.CreateUnitOfWork<string, object>();
             var repository = new Repository<FakeAggregateRoot>(_eventStoreMock.Object, commandHandlingContext);
 
             // Act / Assert
@@ -202,10 +202,10 @@ namespace Aggregator.Tests.Persistence
         {
             // Arrange
             var commandHandlingContext = new CommandHandlingContext();
-            var unitOfWork = commandHandlingContext.CreateUnitOfWork<string, IEvent>();
+            var unitOfWork = commandHandlingContext.CreateUnitOfWork<string, object>();
             var identifier = Guid.NewGuid().ToString("N");
             var aggregateRoot = new FakeAggregateRoot();
-            unitOfWork.Attach(new AggregateRootEntity<string, IEvent>(identifier, new FakeAggregateRoot(), 1));
+            unitOfWork.Attach(new AggregateRootEntity<string, object>(identifier, new FakeAggregateRoot(), 1));
             var repository = new Repository<FakeAggregateRoot>(_eventStoreMock.Object, commandHandlingContext);
 
             // Act / Assert
@@ -218,7 +218,7 @@ namespace Aggregator.Tests.Persistence
         {
             // Arrange
             var commandHandlingContext = new CommandHandlingContext();
-            commandHandlingContext.CreateUnitOfWork<string, IEvent>();
+            commandHandlingContext.CreateUnitOfWork<string, object>();
             var identifier = Guid.NewGuid().ToString("N");
             var aggregateRoot = new FakeAggregateRoot();
             _eventStoreMock.Setup(x => x.Contains(identifier)).ReturnsAsync(true);
@@ -234,7 +234,7 @@ namespace Aggregator.Tests.Persistence
         {
             // Arrange
             var commandHandlingContext = new CommandHandlingContext();
-            var unitOfWork = commandHandlingContext.CreateUnitOfWork<string, IEvent>();
+            var unitOfWork = commandHandlingContext.CreateUnitOfWork<string, object>();
             var identifier = Guid.NewGuid().ToString("N");
             var aggregateRoot = new FakeAggregateRoot();
             var repository = new Repository<FakeAggregateRoot>(_eventStoreMock.Object, commandHandlingContext);
@@ -260,8 +260,8 @@ namespace Aggregator.Tests.Persistence
             public int EventBCount { get; private set; } = 0;
         }
 
-        public class EventA : IEvent { }
+        public class EventA { }
 
-        public class EventB : IEvent { }
+        public class EventB { }
     }
 }

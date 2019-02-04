@@ -12,7 +12,6 @@ namespace Aggregator.Persistence.EventStore
 {
     public class EventStoreTransaction<TIdentifier, TEventBase> : IEventStoreTransaction<TIdentifier, TEventBase>
         where TIdentifier : IEquatable<TIdentifier>
-        where TEventBase : IEvent
     {
         private readonly IEventStoreConnection _connection;
         private readonly JsonSerializerSettings _jsonSerializerSettings;

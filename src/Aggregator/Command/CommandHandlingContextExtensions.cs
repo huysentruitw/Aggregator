@@ -1,15 +1,16 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using Aggregator.Internal;
 
 namespace Aggregator.Command
 {
+    [SuppressMessage("ReSharper", "InconsistentlySynchronizedField")]
     internal static class CommandHandlingContextExtensions
     {
         internal static readonly string UnitOfWorkKey = $"UnitOfWork.{Guid.NewGuid():N}";
 
         public static UnitOfWork<TIdentifier, TEventBase> CreateUnitOfWork<TIdentifier, TEventBase>(this CommandHandlingContext context)
             where TIdentifier : IEquatable<TIdentifier>
-            where TEventBase : IEvent
         {
             lock (context)
             {
@@ -24,7 +25,6 @@ namespace Aggregator.Command
 
         public static UnitOfWork<TIdentifier, TEventBase> GetUnitOfWork<TIdentifier, TEventBase>(this CommandHandlingContext context)
             where TIdentifier : IEquatable<TIdentifier>
-            where TEventBase : IEvent
             => context.Get<UnitOfWork<TIdentifier, TEventBase>>(UnitOfWorkKey);
     }
 }

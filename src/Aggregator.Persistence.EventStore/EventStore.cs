@@ -9,7 +9,7 @@ using Newtonsoft.Json;
 
 namespace Aggregator.Persistence.EventStore
 {
-    public class EventStore : EventStore<string, IEvent>
+    public class EventStore : EventStore<string, object>
     {
         internal EventStore(IEventStoreConnection connection)
             : base(connection)
@@ -25,7 +25,6 @@ namespace Aggregator.Persistence.EventStore
 
     public class EventStore<TIdentifier, TEventBase> : IEventStore<TIdentifier, TEventBase>, IDisposable
         where TIdentifier : IEquatable<TIdentifier>
-        where TEventBase : IEvent
     {
         private readonly IEventStoreConnection _connection;
         private readonly JsonSerializerSettings _jsonSerializerSettings;

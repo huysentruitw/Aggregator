@@ -7,9 +7,9 @@ using Aggregator.Internal;
 namespace Aggregator
 {
     /// <summary>
-    /// Base class for aggregate root entities based on events implementing <see cref="IEvent"/>.
+    /// Base class for aggregate root entities based on events deriving from <see cref="object"/>.
     /// </summary>
-    public abstract class AggregateRoot : AggregateRoot<IEvent>
+    public abstract class AggregateRoot : AggregateRoot<object>
     {
     }
 
@@ -20,7 +20,6 @@ namespace Aggregator
     public abstract class AggregateRoot<TEventBase>
         : IAggregateRootInitializer<TEventBase>
         , IAggregateRootChangeTracker<TEventBase>
-        where TEventBase : IEvent
     {
         private readonly Dictionary<Type, Action<TEventBase>> _handlers = new Dictionary<Type, Action<TEventBase>>();
         private readonly List<TEventBase> _changes = new List<TEventBase>();

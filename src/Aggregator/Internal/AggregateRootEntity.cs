@@ -4,7 +4,6 @@ namespace Aggregator.Internal
 {
     internal class AggregateRootEntity<TIdentifier, TEventBase>
         where TIdentifier : IEquatable<TIdentifier>
-        where TEventBase : IEvent
     {
         public TIdentifier Identifier { get; }
 

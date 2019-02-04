@@ -8,18 +8,18 @@ using Aggregator.Internal;
 namespace Aggregator.Persistence
 {
     /// <summary>
-    /// Implementation of <see cref="IRepository{TIdentifier, TEventBase, TAggregateRoot}"/> where the aggregate root identifier is a <see cref="string"/>, commands implement <see cref="ICommand"/> and events implement <see cref="IEvent"/>.
+    /// Implementation of <see cref="IRepository{TIdentifier, TEventBase, TAggregateRoot}"/> where the aggregate root identifier is a <see cref="string"/> and commands/events derive from <see cref="object"/>.
     /// </summary>
-    /// <typeparam name="TAggregateRoot"></typeparam>
-    public class Repository<TAggregateRoot> : Repository<string, IEvent, TAggregateRoot>, IRepository<TAggregateRoot>
-        where TAggregateRoot : AggregateRoot<IEvent>, new()
+    /// <typeparam name="TAggregateRoot">The aggregate root type.</typeparam>
+    public class Repository<TAggregateRoot> : Repository<string, object, TAggregateRoot>, IRepository<TAggregateRoot>
+        where TAggregateRoot : AggregateRoot, new()
     {
         /// <summary>
         /// Creates a new <see cref="Repository{TAggregateRoot}"/> instance.
         /// </summary>
         /// <param name="eventStore">The event store.</param>
         /// <param name="commandHandlingContext">The command handling context.</param>
-        public Repository(IEventStore<string, IEvent> eventStore, CommandHandlingContext commandHandlingContext)
+        public Repository(IEventStore<string, object> eventStore, CommandHandlingContext commandHandlingContext)
             : base(eventStore, commandHandlingContext)
         {
         }
@@ -33,7 +33,6 @@ namespace Aggregator.Persistence
     /// <typeparam name="TAggregateRoot">The aggregate root type.</typeparam>
     public class Repository<TIdentifier, TEventBase, TAggregateRoot> : IRepository<TIdentifier, TEventBase, TAggregateRoot>
         where TIdentifier : IEquatable<TIdentifier>
-        where TEventBase : IEvent
         where TAggregateRoot : AggregateRoot<TEventBase>, new()
     {
         private readonly IEventStore<TIdentifier, TEventBase> _eventStore;

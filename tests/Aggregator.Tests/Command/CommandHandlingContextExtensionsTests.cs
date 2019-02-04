@@ -15,7 +15,7 @@ namespace Aggregator.Tests.Command
             var context = new CommandHandlingContext();
 
             // Act
-            var unitOfWork = context.CreateUnitOfWork<string, IEvent>();
+            var unitOfWork = context.CreateUnitOfWork<string, object>();
 
             // Assert
             Assert.That(unitOfWork, Is.Not.Null);
@@ -26,10 +26,10 @@ namespace Aggregator.Tests.Command
         {
             // Arrange
             var context = new CommandHandlingContext();
-            context.CreateUnitOfWork<string, IEvent>();
+            context.CreateUnitOfWork<string, object>();
 
             // Act / Assert
-            var ex = Assert.Throws<InvalidOperationException>(() => context.CreateUnitOfWork<string, IEvent>());
+            var ex = Assert.Throws<InvalidOperationException>(() => context.CreateUnitOfWork<string, object>());
             Assert.That(ex.Message, Does.StartWith("Unit of work already created"));
         }
 
@@ -38,10 +38,10 @@ namespace Aggregator.Tests.Command
         {
             // Arrange
             var context = new CommandHandlingContext();
-            var unitOfWork = context.CreateUnitOfWork<string, IEvent>();
+            var unitOfWork = context.CreateUnitOfWork<string, object>();
 
             // Act
-            var unitOfWorkFromContext = context.Get<UnitOfWork<string, IEvent>>(CommandHandlingContextExtensions.UnitOfWorkKey);
+            var unitOfWorkFromContext = context.Get<UnitOfWork<string, object>>(CommandHandlingContextExtensions.UnitOfWorkKey);
 
             // Assert
             Assert.That(unitOfWorkFromContext, Is.EqualTo(unitOfWork));
@@ -51,12 +51,12 @@ namespace Aggregator.Tests.Command
         public void GetUnitOfWork_ShouldGetCorrectProperty()
         {
             // Arrange
-            var unitOfWork = new UnitOfWork<string, IEvent>();
+            var unitOfWork = new UnitOfWork<string, object>();
             var context = new CommandHandlingContext();
             context.Set(CommandHandlingContextExtensions.UnitOfWorkKey, unitOfWork);
 
             // Act
-            var unitOfWorkFromContext = context.GetUnitOfWork<string, IEvent>();
+            var unitOfWorkFromContext = context.GetUnitOfWork<string, object>();
 
             // Assert
             Assert.That(unitOfWorkFromContext, Is.EqualTo(unitOfWork));
@@ -67,10 +67,10 @@ namespace Aggregator.Tests.Command
         {
             // Arrange
             var context = new CommandHandlingContext();
-            var unitOfWork = context.CreateUnitOfWork<string, IEvent>();
+            var unitOfWork = context.CreateUnitOfWork<string, object>();
 
             // Act
-            var unitOfWorkFromContext = context.GetUnitOfWork<string, IEvent>();
+            var unitOfWorkFromContext = context.GetUnitOfWork<string, object>();
 
             // Assert
             Assert.That(unitOfWorkFromContext, Is.EqualTo(unitOfWork));
@@ -88,8 +88,8 @@ namespace Aggregator.Tests.Command
             Assert.That(ex.Message, Is.EqualTo($"Unable to cast object of type '{typeof(UnitOfWork<string, EventBase1>)}' to type '{typeof(UnitOfWork<string, EventBase2>)}'."));
         }
 
-        private class EventBase1 : IEvent { }
-
-        private class EventBase2 : IEvent { }
+        private class EventBase1 { }
+                                 
+        private class EventBase2 { }
     }
 }

@@ -8,9 +8,8 @@ namespace Aggregator.Persistence
     /// <summary>
     /// Interface for an event store transaction.
     /// </summary>
-    public interface IEventStoreTransaction<TIdentifier, TEventBase> : IDisposable
+    public interface IEventStoreTransaction<in TIdentifier, in TEventBase> : IDisposable
         where TIdentifier : IEquatable<TIdentifier>
-        where TEventBase : IEvent
     {
         /// <summary>
         /// Commit the transaction.

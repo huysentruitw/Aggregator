@@ -4,9 +4,9 @@ using System.Threading;
 namespace Aggregator.Command
 {
     /// <summary>
-    /// Class holindg the notification handlers called by <see cref="CommandProcessor"/>.
+    /// Class holding the notification handlers called by <see cref="CommandProcessor"/>.
     /// </summary>
-    public class CommandProcessorNotificationHandlers : CommandProcessorNotificationHandlers<string, ICommand, IEvent>
+    public class CommandProcessorNotificationHandlers : CommandProcessorNotificationHandlers<string, object, object>
     {
     }
 
@@ -15,8 +15,6 @@ namespace Aggregator.Command
     /// </summary>
     public class CommandProcessorNotificationHandlers<TIdentifier, TCommandBase, TEventBase>
         where TIdentifier : IEquatable<TIdentifier>
-        where TCommandBase : ICommand
-        where TEventBase : IEvent
     {
         /// <summary>
         /// Handler invoked right after the command handling context is created during the <see cref="CommandProcessor{TIdentifier, TCommandBase, TEventBase}.Process(TCommandBase, CancellationToken)"/> call.

@@ -1,7 +1,6 @@
 namespace Aggregator.Internal
 {
-    internal interface IAggregateRootChangeTracker<TEventBase>
-        where TEventBase : IEvent
+    internal interface IAggregateRootChangeTracker<out TEventBase>
     {
         bool HasChanges { get; }
 

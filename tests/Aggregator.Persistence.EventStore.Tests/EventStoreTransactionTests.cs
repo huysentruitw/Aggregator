@@ -23,16 +23,16 @@ namespace Aggregator.Persistence.EventStore.Tests
         public void StoreEvents_ShouldCallStartTransactionAsync()
         {
             var eventStoreConnectionMock = new Mock<IEventStoreConnection>();
-            var transaction = new EventStoreTransaction<string, IEvent>(eventStoreConnectionMock.Object, _jsonSerializerSettings);
+            var transaction = new EventStoreTransaction<string, object>(eventStoreConnectionMock.Object, _jsonSerializerSettings);
             // Will throw NRE because StartTransactionAsync returns null (as we can't easily mock an EventStoreTransaction)
-            Assert.ThrowsAsync<NullReferenceException>(() => transaction.StoreEvents("some_id", 1, Enumerable.Empty<IEvent>()));
+            Assert.ThrowsAsync<NullReferenceException>(() => transaction.StoreEvents("some_id", 1, Enumerable.Empty<object>()));
             eventStoreConnectionMock.Verify(x => x.StartTransactionAsync("some_id", 0, null), Times.Once);
         }
 
         [Test]
         public async Task StoreEvents_ShouldWriteEventDataToTransaction()
         {
-            var events = new IEvent[] { new EventA(), new EventB() };
+            var events = new object[] { new EventA(), new EventB() };
 
             EventData[] capturedEventData = null;
             var wrappedTransactionMock = new Mock<IWrappedTransaction>();
@@ -46,7 +46,7 @@ namespace Aggregator.Persistence.EventStore.Tests
                 .Setup(x => x(_eventStoreConnectionMock.Object, "some_id", 2))
                 .ReturnsAsync(wrappedTransactionMock.Object);
 
-            var transaction = new EventStoreTransaction<string, IEvent>(
+            var transaction = new EventStoreTransaction<string, object>(
                 connection: _eventStoreConnectionMock.Object,
                 jsonSerializerSettings: new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Auto },
                 createTransaction: createTransactionMock.Object);
@@ -69,16 +69,16 @@ namespace Aggregator.Persistence.EventStore.Tests
                 .Setup(x => x(_eventStoreConnectionMock.Object, "some_id", 0))
                 .ReturnsAsync(new Mock<IWrappedTransaction>().Object);
 
-            var transaction = new EventStoreTransaction<string, IEvent>(
+            var transaction = new EventStoreTransaction<string, object>(
                 connection: _eventStoreConnectionMock.Object,
                 jsonSerializerSettings: _jsonSerializerSettings,
                 createTransaction: createTransactionMock.Object);
 
-            await transaction.StoreEvents("some_id", 1, new IEvent[] { new EventA(), new EventB() });
+            await transaction.StoreEvents("some_id", 1, new object[] { new EventA(), new EventB() });
 
             createTransactionMock.Verify(x => x(It.IsAny<IEventStoreConnection>(), It.IsAny<string>(), It.IsAny<long>()), Times.Once);
 
-            await transaction.StoreEvents("some_id", 1, new IEvent[] { new EventA(), new EventB() });
+            await transaction.StoreEvents("some_id", 1, new object[] { new EventA(), new EventB() });
 
             createTransactionMock.Verify(x => x(It.IsAny<IEventStoreConnection>(), It.IsAny<string>(), It.IsAny<long>()), Times.Exactly(2));
         }
@@ -98,14 +98,14 @@ namespace Aggregator.Persistence.EventStore.Tests
                     return wrappedTransactionMock.Object;
                 });
 
-            var transaction = new EventStoreTransaction<string, IEvent>(
+            var transaction = new EventStoreTransaction<string, object>(
                 connection: _eventStoreConnectionMock.Object,
                 jsonSerializerSettings: _jsonSerializerSettings,
                 createTransaction: createTransactionMock.Object);
 
-            await transaction.StoreEvents("some_id", 1, new IEvent[] { new EventA(), new EventB() });
-            await transaction.StoreEvents("some_id", 1, new IEvent[] { new EventA(), new EventB() });
-            await transaction.StoreEvents("some_id", 1, new IEvent[] { new EventA(), new EventB() });
+            await transaction.StoreEvents("some_id", 1, new object[] { new EventA(), new EventB() });
+            await transaction.StoreEvents("some_id", 1, new object[] { new EventA(), new EventB() });
+            await transaction.StoreEvents("some_id", 1, new object[] { new EventA(), new EventB() });
 
             Assert.That(wrappedTransactionMocks, Has.Count.EqualTo(3));
             wrappedTransactionMocks[0].Verify(x => x.Rollback(), Times.Never);
@@ -157,14 +157,14 @@ namespace Aggregator.Persistence.EventStore.Tests
                     return wrappedTransactionMock.Object;
                 });
 
-            var transaction = new EventStoreTransaction<string, IEvent>(
+            var transaction = new EventStoreTransaction<string, object>(
                 connection: _eventStoreConnectionMock.Object,
                 jsonSerializerSettings: _jsonSerializerSettings,
                 createTransaction: createTransactionMock.Object);
 
-            await transaction.StoreEvents("some_id", 1, new IEvent[] { new EventA(), new EventB() });
-            await transaction.StoreEvents("some_id", 1, new IEvent[] { new EventA(), new EventB() });
-            await transaction.StoreEvents("some_id", 1, new IEvent[] { new EventA(), new EventB() });
+            await transaction.StoreEvents("some_id", 1, new object[] { new EventA(), new EventB() });
+            await transaction.StoreEvents("some_id", 1, new object[] { new EventA(), new EventB() });
+            await transaction.StoreEvents("some_id", 1, new object[] { new EventA(), new EventB() });
 
             Assert.That(wrappedTransactionMocks, Has.Count.EqualTo(3));
             wrappedTransactionMocks[0].Verify(x => x.Rollback(), Times.Never);
@@ -216,14 +216,14 @@ namespace Aggregator.Persistence.EventStore.Tests
                     return wrappedTransactionMock.Object;
                 });
 
-            var transaction = new EventStoreTransaction<string, IEvent>(
+            var transaction = new EventStoreTransaction<string, object>(
                 connection: _eventStoreConnectionMock.Object,
                 jsonSerializerSettings: _jsonSerializerSettings,
                 createTransaction: createTransactionMock.Object);
 
-            await transaction.StoreEvents("some_id", 1, new IEvent[] { new EventA(), new EventB() });
-            await transaction.StoreEvents("some_id", 1, new IEvent[] { new EventA(), new EventB() });
-            await transaction.StoreEvents("some_id", 1, new IEvent[] { new EventA(), new EventB() });
+            await transaction.StoreEvents("some_id", 1, new object[] { new EventA(), new EventB() });
+            await transaction.StoreEvents("some_id", 1, new object[] { new EventA(), new EventB() });
+            await transaction.StoreEvents("some_id", 1, new object[] { new EventA(), new EventB() });
 
             Assert.That(wrappedTransactionMocks, Has.Count.EqualTo(3));
             wrappedTransactionMocks[0].Verify(x => x.Rollback(), Times.Never);
@@ -245,8 +245,8 @@ namespace Aggregator.Persistence.EventStore.Tests
             wrappedTransactionMocks[2].Verify(x => x.Dispose(), Times.Once);
         }
 
-        private class EventA : IEvent { }
+        private class EventA { }
 
-        private class EventB : IEvent { }
+        private class EventB { }
     }
 }

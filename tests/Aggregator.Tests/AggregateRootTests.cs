@@ -13,7 +13,7 @@ namespace Aggregator.Tests
         [Test]
         public void Initialize_PassNullAsEvents_ShouldNotThrowException()
         {
-            IAggregateRootInitializer<IEvent> aggregateRoot = new Mock<FakeAggregateRoot>().Object;
+            IAggregateRootInitializer<object> aggregateRoot = new Mock<FakeAggregateRoot>().Object;
             Assert.DoesNotThrow(() => aggregateRoot.Initialize(null));
         }
 
@@ -22,9 +22,9 @@ namespace Aggregator.Tests
         {
             var eventA = new EventA();
             var eventB = new EventB();
-            var events = new IEvent[] { eventA, eventB, eventA };
+            var events = new object[] { eventA, eventB, eventA };
             var aggregateRootMock = new Mock<FakeAggregateRoot>();
-            ((IAggregateRootInitializer<IEvent>)aggregateRootMock.Object).Initialize(events);
+            ((IAggregateRootInitializer<object>)aggregateRootMock.Object).Initialize(events);
             aggregateRootMock.Verify(x => x.OnEventA(eventA), Times.Exactly(2));
             aggregateRootMock.Verify(x => x.OnEventB(eventB), Times.Once);
         }
@@ -32,10 +32,10 @@ namespace Aggregator.Tests
         [Test]
         public void Initialize_PassEvents_ShouldNotHaveChanges()
         {
-            var events = new IEvent[] { new EventA(), new EventB() };
+            var events = new object[] { new EventA(), new EventB() };
             var aggregateRoot = new Mock<FakeAggregateRoot>().Object;
-            ((IAggregateRootInitializer<IEvent>)aggregateRoot).Initialize(events);
-            var changeTracker = (IAggregateRootChangeTracker<IEvent>)aggregateRoot;
+            ((IAggregateRootInitializer<object>)aggregateRoot).Initialize(events);
+            var changeTracker = (IAggregateRootChangeTracker<object>)aggregateRoot;
             Assert.That(changeTracker.HasChanges, Is.False);
             Assert.That(changeTracker.GetChanges().Count(), Is.EqualTo(0));
         }
@@ -43,8 +43,8 @@ namespace Aggregator.Tests
         [Test]
         public void Initialize_PassUnhandledEvent_ShouldThrowException()
         {
-            var events = new IEvent[] { new EventA(), new EventC() };
-            IAggregateRootInitializer<IEvent> aggregateRoot = new Mock<FakeAggregateRoot>().Object;
+            var events = new object[] { new EventA(), new EventC() };
+            IAggregateRootInitializer<object> aggregateRoot = new Mock<FakeAggregateRoot>().Object;
             var ex = Assert.Throws<UnhandledEventException>(() => aggregateRoot.Initialize(events));
             Assert.That(ex.Message, Is.EqualTo("Unhandled event EventC"));
         }
@@ -84,7 +84,7 @@ namespace Aggregator.Tests
         {
             var aggregateRoot = new Mock<FakeAggregateRoot>().Object;
             aggregateRoot.ApplyBA();
-            var changeTracker = (IAggregateRootChangeTracker<IEvent>)aggregateRoot;
+            var changeTracker = (IAggregateRootChangeTracker<object>)aggregateRoot;
             Assert.That(changeTracker.HasChanges, Is.True);
             var changes = changeTracker.GetChanges().ToArray();
             Assert.That(changes, Has.Length.EqualTo(2));
@@ -125,11 +125,11 @@ namespace Aggregator.Tests
             public void ApplyNull() => Apply((EventA)null);
         }
 
-        public class EventA : IEvent { }
+        public class EventA { }
 
-        public class EventB : IEvent { }
+        public class EventB { }
 
-        public class EventC : IEvent { }
+        public class EventC { }
 
         public class RegisterTwiceAggregateRoot : AggregateRoot
         {

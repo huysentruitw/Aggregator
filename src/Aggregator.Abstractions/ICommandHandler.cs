@@ -1,11 +1,20 @@
+using System.Threading;
+using System.Threading.Tasks;
+
 namespace Aggregator
 {
     /// <summary>
-    /// Interface for a class is able to handle a command of the given type.
+    /// Interface for command handlers.
     /// </summary>
-    /// <typeparam name="TCommand">The type of the command.</typeparam>
-    public interface ICommandHandler<TCommand> : MediatR.IRequestHandler<TCommand>
-        where TCommand : ICommand
+    /// <typeparam name="TCommand">The type of the command this handler is able to handle.</typeparam>
+    public interface ICommandHandler<in TCommand>
     {
+        /// <summary>
+        /// Called when a command of the given type needs to be handled.
+        /// </summary>
+        /// <param name="command">The command.</param>
+        /// <param name="cancellationToken">A cancellation token that allows cancelling the process.</param>
+        /// <returns>An awaitable <see cref="Task"/>.</returns>
+        Task Handle(TCommand command, CancellationToken cancellationToken);
     }
 }

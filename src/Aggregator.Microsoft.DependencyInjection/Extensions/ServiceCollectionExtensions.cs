@@ -1,7 +1,7 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
-using Aggregator;
 using Aggregator.Command;
+using Aggregator.Event;
 using Aggregator.Microsoft.DependencyInjection;
 using Aggregator.Persistence;
 
@@ -20,10 +20,10 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <returns>The <see cref="IServiceCollection"/> instance.</returns>
         public static IServiceCollection AddAggregator(this IServiceCollection services)
         {
-            // Registrate the non-generic overrides on top of the generic base stuff
+            // Register the non-generic overrides on top of the generic base stuff
             services.AddSingleton<ICommandProcessor, CommandProcessor>();
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
-            return services.AddAggregator<string, ICommand, IEvent>();
+            return services.AddAggregator<string, object, object>();
         }
 
         /// <summary>
@@ -36,11 +36,10 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <returns>The <see cref="IServiceCollection"/> instance.</returns>
         public static IServiceCollection AddAggregator<TIdentifier, TCommandBase, TEventBase>(this IServiceCollection services)
             where TIdentifier : IEquatable<TIdentifier>
-            where TCommandBase : ICommand
-            where TEventBase : IEvent
         {
             services.AddScoped<CommandHandlingContext>();
             services.AddSingleton<ICommandProcessor<TCommandBase>, CommandProcessor<TIdentifier, TCommandBase, TEventBase>>();
+            services.AddSingleton<IEventDispatcher<TEventBase>, EventDispatcher<TEventBase>>();
             services.AddScoped(typeof(IRepository<,,>), typeof(Repository<,,>));
             services.AddSingleton<Aggregator.DI.IServiceScopeFactory, ServiceScopeFactory>();
             return services;

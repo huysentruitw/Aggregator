@@ -23,7 +23,7 @@ namespace Aggregator.Tests.Command
         public void OnPrepareContext_PrepareContextIsSet_ShouldCallPrepareContext()
         {
             // Arrange
-            var command = new Mock<ICommand>().Object;
+            var command = new Mock<object>().Object;
             var context = new CommandHandlingContext();
             var handlers = new CommandProcessorNotificationHandlers();
             var handlerMock = new Mock<Action<object, CommandHandlingContext>>();
@@ -51,12 +51,12 @@ namespace Aggregator.Tests.Command
         public void OnEnrichEvent_EnrichEventIsSet_ShouldCallEnrichEvent()
         {
             // Arrange
-            var @event = new Mock<IEvent>().Object;
-            var command = new Mock<ICommand>().Object;
-            var enrichedEvent = new Mock<IEvent>().Object;
+            var @event = new Mock<object>().Object;
+            var command = new Mock<object>().Object;
+            var enrichedEvent = new Mock<object>().Object;
             var context = new CommandHandlingContext();
             var handlers = new CommandProcessorNotificationHandlers();
-            var handlerMock = new Mock<Func<IEvent, ICommand, CommandHandlingContext, IEvent>>();
+            var handlerMock = new Mock<Func<object, object, CommandHandlingContext, object>>();
             handlerMock.Setup(x => x(@event, command, context)).Returns(enrichedEvent);
             handlers.EnrichEvent = handlerMock.Object;
 

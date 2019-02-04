@@ -83,7 +83,7 @@ namespace Aggregator.Persistence.EventStore.Tests
         {
             // Arrange
             var identifier = Guid.NewGuid().ToString("N");
-            var events = new IEvent[] { new EventB(), new EventA() };
+            var events = new object[] { new EventB(), new EventA() };
             _eventStoreConnectionMock
                 .Setup(x => x.ReadStreamEventsForwardAsync(identifier, 4, It.IsAny<int>(), false, null))
                 .ReturnsAsync(CreateStreamEventSlice(events, true));
@@ -109,7 +109,7 @@ namespace Aggregator.Persistence.EventStore.Tests
 
             // Assert
             Assert.That(transaction, Is.Not.Null);
-            Assert.That(transaction, Is.InstanceOf<EventStoreTransaction<string, IEvent>>());
+            Assert.That(transaction, Is.InstanceOf<EventStoreTransaction<string, object>>());
         }
 
         private static EventReadResult CreateEventReadResult(EventReadStatus status)
@@ -121,7 +121,7 @@ namespace Aggregator.Persistence.EventStore.Tests
             return result;
         }
 
-        private static StreamEventsSlice CreateStreamEventSlice(IEvent[] events, bool isEndOfStream)
+        private static StreamEventsSlice CreateStreamEventSlice(object[] events, bool isEndOfStream)
         {
             var result = (StreamEventsSlice)FormatterServices.GetUninitializedObject(typeof(StreamEventsSlice));
             typeof(StreamEventsSlice)
@@ -133,7 +133,7 @@ namespace Aggregator.Persistence.EventStore.Tests
             return result;
         }
 
-        private static ResolvedEvent[] CreateResolvedEvents(IEvent[] events)
+        private static ResolvedEvent[] CreateResolvedEvents(object[] events)
         {
             return events
                 .Select(x =>
@@ -157,7 +157,7 @@ namespace Aggregator.Persistence.EventStore.Tests
                 .ToArray();
         }
 
-        private class EventA : IEvent { }
-        private class EventB : IEvent { }
+        private class EventA { }
+        private class EventB { }
     }
 }

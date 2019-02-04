@@ -5,11 +5,11 @@ using Aggregator.Exceptions;
 namespace Aggregator.Persistence
 {
     /// <summary>
-    /// Interface for an aggregate root repository where the aggregate root identifier is a <see cref="string"/>, commands implement <see cref="ICommand"/> and events implement <see cref="IEvent"/>.
+    /// Interface for an aggregate root repository where the aggregate root identifier is a <see cref="string"/> and commands/events derive from <see cref="object"/>.
     /// </summary>
     /// <typeparam name="TAggregateRoot"></typeparam>
-    public interface IRepository<TAggregateRoot> : IRepository<string, IEvent, TAggregateRoot>
-        where TAggregateRoot : AggregateRoot<IEvent>, new()
+    public interface IRepository<TAggregateRoot> : IRepository<string, object, TAggregateRoot>
+        where TAggregateRoot : AggregateRoot, new()
     {
     }
 
@@ -19,9 +19,8 @@ namespace Aggregator.Persistence
     /// <typeparam name="TIdentifier">The identifier type.</typeparam>
     /// <typeparam name="TEventBase">The event base type.</typeparam>
     /// <typeparam name="TAggregateRoot">The aggregate root type.</typeparam>
-    public interface IRepository<TIdentifier, TEventBase, TAggregateRoot>
+    public interface IRepository<in TIdentifier, TEventBase, TAggregateRoot>
         where TIdentifier : IEquatable<TIdentifier>
-        where TEventBase : IEvent
         where TAggregateRoot : AggregateRoot<TEventBase>, new()
     {
         /// <summary>

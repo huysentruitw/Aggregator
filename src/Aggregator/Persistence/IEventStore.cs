@@ -9,9 +9,8 @@ namespace Aggregator.Persistence
     /// </summary>
     /// <typeparam name="TIdentifier">The identifier type.</typeparam>
     /// <typeparam name="TEventBase">The event base type.</typeparam>
-    public interface IEventStore<TIdentifier, TEventBase>
+    public interface IEventStore<in TIdentifier, TEventBase>
         where TIdentifier : IEquatable<TIdentifier>
-        where TEventBase : IEvent
     {
         /// <summary>
         /// Checks if an aggregate root with the given identifier exists.

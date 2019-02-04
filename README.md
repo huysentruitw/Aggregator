@@ -4,8 +4,6 @@
 
 Aggregator contains some fundamental base classes and interfaces for building a CQRS/ES based application.
 
-The library depends on [MediatR](https://github.com/jbogard/MediatR) for handling in-process commands and events.
-
 Supports .NET Core, .NET Standard, .NET Framework.
 
 ## Get it on NuGet

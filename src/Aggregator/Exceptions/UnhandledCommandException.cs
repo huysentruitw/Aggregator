@@ -8,7 +8,7 @@ namespace Aggregator.Exceptions
     /// </summary>
     public class UnhandledCommandException : Exception
     {
-        internal UnhandledCommandException(ICommand command)
+        internal UnhandledCommandException(object command)
             : base($"Unhandled command '{command.GetType().Name}'")
         {
             Command = command;
@@ -18,7 +18,7 @@ namespace Aggregator.Exceptions
         /// <summary>
         /// The unhandled command.
         /// </summary>
-        public ICommand Command { get; }
+        public object Command { get; }
 
         /// <summary>
         /// The type of the unhandled command.

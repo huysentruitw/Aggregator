@@ -6,31 +6,31 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Aggregator.DI;
+using Aggregator.Event;
 using Aggregator.Exceptions;
 using Aggregator.Persistence;
-using MediatR;
 
 namespace Aggregator.Command
 {
     /// <summary>
-    /// This class is responsible for processing commands where the aggregate root identifier is a <see cref="string"/>, the commands implement <see cref="ICommand"/> and the events implement <see cref="IEvent"/>.
+    /// This class is responsible for processing commands where the aggregate root identifier is a <see cref="string"/> and commands/events derive from <see cref="object"/>.
     /// Should be used as a singleton.
     /// </summary>
-    public class CommandProcessor : CommandProcessor<string, ICommand, IEvent>, ICommandProcessor
+    public class CommandProcessor : CommandProcessor<string, object, object>, ICommandProcessor
     {
         /// <summary>
         /// Constructs a new <see cref="CommandProcessor"/> instance.
         /// </summary>
-        /// <param name="mediator">The mediator instance.</param>
         /// <param name="serviceScopeFactory">The service scope factory.</param>
         /// <param name="eventStore">The event store.</param>
+        /// <param name="eventDispatcher">The event dispatcher.</param>
         /// <param name="notificationHandlers">Optional <see cref="CommandProcessorNotificationHandlers"/> instance.</param>
         public CommandProcessor(
-            IMediator mediator,
             IServiceScopeFactory serviceScopeFactory,
-            IEventStore<string, IEvent> eventStore,
+            IEventStore<string, object> eventStore,
+            IEventDispatcher<object> eventDispatcher,
             CommandProcessorNotificationHandlers notificationHandlers = null)
-            : base(mediator, serviceScopeFactory, eventStore, notificationHandlers)
+            : base(serviceScopeFactory, eventStore, eventDispatcher, notificationHandlers)
         {
         }
     }
@@ -44,30 +44,29 @@ namespace Aggregator.Command
     /// <typeparam name="TEventBase">The event base type.</typeparam>
     public class CommandProcessor<TIdentifier, TCommandBase, TEventBase> : ICommandProcessor<TCommandBase>
         where TIdentifier : IEquatable<TIdentifier>
-        where TCommandBase : ICommand
-        where TEventBase : IEvent
     {
-        private readonly IMediator _mediator;
+        private readonly ConcurrentDictionary<Type, MethodInfo> _executeMethodCache = new ConcurrentDictionary<Type, MethodInfo>();
         private readonly IServiceScopeFactory _serviceScopeFactory;
         private readonly IEventStore<TIdentifier, TEventBase> _eventStore;
+        private readonly IEventDispatcher<TEventBase> _eventDispatcher;
         private readonly CommandProcessorNotificationHandlers<TIdentifier, TCommandBase, TEventBase> _notificationHandlers;
 
         /// <summary>
         /// Constructs a new <see cref="CommandProcessor{TIdentifier, TCommandBase, TEventBase}"/> instance.
         /// </summary>
-        /// <param name="mediator">The mediator interface.</param>
         /// <param name="serviceScopeFactory">The service scope factory.</param>
         /// <param name="eventStore">The event store.</param>
+        /// <param name="eventDispatcher">The event dispatcher.</param>
         /// <param name="notificationHandlers">Optional <see cref="CommandProcessorNotificationHandlers{TIdentifier, TCommandBase, TEventBase}"/> instance.</param>
         public CommandProcessor(
-            IMediator mediator,
             IServiceScopeFactory serviceScopeFactory,
             IEventStore<TIdentifier, TEventBase> eventStore,
+            IEventDispatcher<TEventBase> eventDispatcher,
             CommandProcessorNotificationHandlers<TIdentifier, TCommandBase, TEventBase> notificationHandlers = null)
         {
-            _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
             _serviceScopeFactory = serviceScopeFactory ?? throw new ArgumentNullException(nameof(serviceScopeFactory));
             _eventStore = eventStore ?? throw new ArgumentNullException(nameof(eventStore));
+            _eventDispatcher = eventDispatcher ?? throw new ArgumentNullException(nameof(eventDispatcher));
             _notificationHandlers = notificationHandlers ?? new CommandProcessorNotificationHandlers<TIdentifier, TCommandBase, TEventBase>();
         }
 
@@ -88,14 +87,14 @@ namespace Aggregator.Command
 
                 var unitOfWork = context.CreateUnitOfWork<TIdentifier, TEventBase>();
 
-                try
-                {
-                    await _mediator.Send(command, cancellationToken).ConfigureAwait(false);
-                }
-                catch (ArgumentNullException ex) when (ex.ParamName == "source")
-                {
-                    throw new UnhandledCommandException(command);
-                }
+                var executeMethod = _executeMethodCache.GetOrAdd(command.GetType(), type =>
+                    typeof(CommandProcessor<TIdentifier, TCommandBase, TEventBase>)
+                        .GetMethod(nameof(Execute), BindingFlags.NonPublic | BindingFlags.Instance)
+                        ?.MakeGenericMethod(type))
+                    ?? throw new InvalidOperationException($"Couldn't make generic {nameof(Execute)} method");
+
+                await ((Task)executeMethod.Invoke(this, new object[] { command, serviceScope, cancellationToken })).ConfigureAwait(false);
+                cancellationToken.ThrowIfCancellationRequested();
 
                 if (!unitOfWork.HasChanges)
                 {
@@ -116,10 +115,9 @@ namespace Aggregator.Command
                             storedEvents.AddRange(events);
                         }
 
-                        foreach (var @event in storedEvents)
-                        {
-                            await _mediator.Publish(@event, cancellationToken).ConfigureAwait(false);
-                        }
+                        cancellationToken.ThrowIfCancellationRequested();
+                        await _eventDispatcher.Dispatch(storedEvents.ToArray(), cancellationToken).ConfigureAwait(false);
+                        cancellationToken.ThrowIfCancellationRequested();
 
                         await transaction.Commit().ConfigureAwait(false);
                     }
@@ -130,6 +128,18 @@ namespace Aggregator.Command
                     }
                 }
             }
+        }
+
+        private async Task Execute<TCommand>(TCommand command, IServiceScope serviceScope, CancellationToken cancellationToken)
+            where TCommand : TCommandBase
+        {
+            var handlers = serviceScope.GetServices<ICommandHandler<TCommand>>()?.ToArray();
+
+            if (handlers == null || !handlers.Any())
+                throw new UnhandledCommandException(command);
+
+            foreach (var handler in handlers)
+                await handler.Handle(command, cancellationToken).ConfigureAwait(false);
         }
     }
 }

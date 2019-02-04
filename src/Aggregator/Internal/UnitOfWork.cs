@@ -8,7 +8,6 @@ namespace Aggregator.Internal
 {
     internal sealed class UnitOfWork<TIdentifier, TEventBase>
         where TIdentifier : IEquatable<TIdentifier>
-        where TEventBase : IEvent
     {
         private readonly ConcurrentDictionary<TIdentifier, AggregateRootEntity<TIdentifier, TEventBase>> _entities
             = new ConcurrentDictionary<TIdentifier, AggregateRootEntity<TIdentifier, TEventBase>>();
