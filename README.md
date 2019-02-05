@@ -1,6 +1,6 @@
 # Aggregator
 
-[![Build status](https://ci.appveyor.com/api/projects/status/c53dm2n5vcguo3e8/branch/master?svg=true)](https://ci.appveyor.com/project/huysentruitw/aggregator/branch/master)
+[![Build status](https://ci.appveyor.com/api/projects/status/7uac3qe1fpcl973y/branch/master?svg=true)](https://ci.appveyor.com/project/huysentruitw/aggregator/branch/master)
 
 Aggregator contains some fundamental base classes and interfaces for building a CQRS/ES based application.
 
