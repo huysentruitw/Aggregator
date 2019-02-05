@@ -26,16 +26,22 @@ Autofac DI integration package:
 
 ## Usage
 
-### Generic interfaces and base types
+### Registering dependencies
 
-For flexibility, this library consists of generic base types and generic interfaces that lets you define your own base type for aggregate root identifiers (`TIdentifier`), commands (`TCommandBase`) and events (`TEventBase`). Most interfaces or base types have overloads that use `string` as aggregate root identifier type, and `object` as event and command base type which you can use in case your application doesn't have complex requirements.
+Registering the dependencies in an ASP.NET Core application, using Microsoft.Extensions.DependencyInjection, is pretty simple:
+* Install the Aggregator.Microsoft.DependencyInjection package
+* Call `app.AddAggregator();` inside the `Configure` method in Startup.cs
 
-### AggregateRoot
+If you prefer using Autofac, you can use the Aggregator.Autofac package which contains an Autofac module to ease the registration process.
+
+Need support for a different container? Feel free to [open an issue](https://github.com/huysentruitw/Aggregator/issues/new).
+
+### Aggregate roots
 
 The [`AggregateRoot`](./src/Aggregator/AggregateRoot.cs) or [`AggregateRoot<TEventBase>`](./src/Aggregator/AggregateRoot.cs) class is an abstract base class that should be used as a base for aggregate roots. It allows registering event handlers, initializing the aggregate by replaying events and keeping track of changes getting applied to the aggregate root.
 
 ```csharp
-class User : AggregateRoot
+sealed class User : AggregateRoot
 {
     private string _givenName;
     private string _surName;
@@ -96,45 +102,80 @@ The generic [`Repository<TAggregateRoot>`](./src/Aggregator/Persistence/Reposito
 
 This generic repository is registered as a scoped instance (when using one of the DI integration packages) as an instance should only exist for the lifetime of a single command being processed.
 
+### Commands and events
+
+Commands and events can be defined as simple POCO's. All Aggregator related classes have a generic variant which allows you to define a base type for commands and events for those who like type safety.
+
+Example command:
+
+```csharp
+class CreateUserCommand
+{
+    public string Id { get; set; }
+    public string EmailAddress { get; set; }
+    public string GivenName { get; set; }
+    public string Surname { get; set; }
+}
+```
+
+Example event:
+
+```csharp
+class UserCreatedEvent
+{
+    public string Id { get; set; }
+    public string EmailAddress { get; set; }
+    public string GivenName { get; set; }
+    public string Surname { get; set; }
+    public DateTimeOffset CreatedAtUtc { get; set; }
+}
+```
+
 ### Command handlers
 
-The library contains a generic interface definition [`ICommandHandler<TCommand>`](./src/Aggregator/Command/ICommandHandler.cs) that identifies command handlers.
+#### Definition
 
-For example:
+The library contains a generic interface definition [`ICommandHandler<TCommand>`](./src/Aggregator.Abstractions/Command/ICommandHandler.cs) that identifies command handlers.
 
 ```csharp
 class CreateUserCommandHandler : ICommandHandler<CreateUserCommand>
 {
-    public Task Handle(CreateUserCommand command)
+    public override Task Handle(CreateUserCommand command, CancellationToken cancellationToken)
     {
-        // Handle command
+        // Process the command...
     }
 }
 ```
 
-A great way to validate commands in the command handler is to use a validation library like [FluentValidation](https://github.com/JeremySkinner/FluentValidation):
+#### Registering command handlers
+
+Command handlers can be registered one-by-one or in one go using [Scrutor](https://github.com/khellang/Scrutor) for Microsoft.Extensions.DependencyInjection or `AsClosedTypesOf` when using Autofac.
+
+#### Add command validation to the command handler
+
+It's a good practice to validate commands before executing them. A great way to do this is to create a base class that uses [FluentValidation](https://github.com/JeremySkinner/FluentValidation).
 
 ```csharp
-using FluentValidation;
-
 abstract class SafeCommandHandler<TCommand>
     : AbstractValidator<TCommand>
     , ICommandHandler<TCommand>
 {
-    public Task Handle(TCommand command)
+    public async Task Handle(TCommand command, CancellationToken cancellationToken)
     {
         DefineRules();
-        Validate(command);
-        return HandleValidatedCommand(command);
+        this.ValidateAndThrow(command);
+        await HandleValidatedCommand(command, cancellationToken).ConfigureAwait(false);
     }
 
     protected abstract void DefineRules();
 
-    protected abstract Task HandleValidatedCommand(TCommand command);
+    protected abstract Task HandleValidatedCommand(TCommand command, CancellationToken cancellationToken);
 }
 ```
 
-Additionally, if a command handler needs to manipulate an aggregate, you could create some kind of persistent command handler:
+#### Using aggregate roots in a command handler
+
+Since most command handlers will manipulate an aggregate root, you can also create a base class that requires a repository.
 
 ```csharp
 abstract class PersistentCommandHandler<TCommand, TAggregateRoot>
@@ -143,9 +184,34 @@ abstract class PersistentCommandHandler<TCommand, TAggregateRoot>
 {
     protected readonly IRepository<TAggregateRoot> Repository;
 
-    public PersistentCommandHandler(IRepository<TAggregateRoot> repository)
+    protected PersistentCommandHandler(IRepository<TAggregateRoot> repository)
     {
-        Repository = repository ?? throw new ArgumentNullException(nameof(repository));
+        Repository = repository;
+    }
+}
+```
+
+Usage:
+
+```csharp
+sealed class UpdateTodoTitleCommandHandler
+    : PersistentCommandHandler<UpdateTodoTitleCommand, TodoAggregateRoot>
+{
+    public UpdateTodoTitleCommandHandler(IRepository<TodoAggregateRoot> repository)
+        : base(repository)
+    {
+    }
+
+    protected override void DefineRules()
+    {
+        RuleFor(x => x.Id).NotEmpty();
+        RuleFor(x => x.Title).NotEmpty();
+    }
+
+    protected override async Task HandleValidatedCommand(UpdateTodoTitleCommand command, CancellationToken cancellationToken)
+    {
+        var aggregateRoot = await Repository.Get(command.Id.ToString());
+        aggregateRoot.UpdateTitle(command.Title);
     }
 }
 ```
