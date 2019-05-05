@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Aggregator;
 using Aggregator.Command;
 using Aggregator.DI;
 using Aggregator.Event;
