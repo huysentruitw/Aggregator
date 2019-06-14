@@ -2,14 +2,13 @@ using System;
 using System.Collections.Generic;
 using Aggregator.DI;
 using Moq;
-using NUnit.Framework;
+using Xunit;
 
 namespace Aggregator.Tests.DI
 {
-    [TestFixture]
     public sealed class ServiceScopeExtensionMethodsTests
     {
-        [Test]
+        [Fact]
         public void GetService_ShouldRequestServiceFromServiceScope()
         {
             // Arrange
@@ -23,7 +22,7 @@ namespace Aggregator.Tests.DI
             serviceScopeMock.Verify(x => x.GetService(It.IsAny<Type>()), Times.Once);
         }
 
-        [Test]
+        [Fact]
         public void GetServices_ShouldRequestEnumerableListOfServiceFromServiceScope()
         {
             // Arrange

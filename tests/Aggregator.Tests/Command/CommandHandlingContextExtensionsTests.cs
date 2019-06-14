@@ -1,14 +1,14 @@
 using System;
 using Aggregator.Command;
 using Aggregator.Internal;
-using NUnit.Framework;
+using FluentAssertions;
+using Xunit;
 
 namespace Aggregator.Tests.Command
 {
-    [TestFixture]
     public class CommandHandlingContextExtensionsTests
     {
-        [Test]
+        [Fact]
         public void CreateUnitOfWork_ShouldReturnUnitOfWork()
         {
             // Arrange
@@ -18,10 +18,10 @@ namespace Aggregator.Tests.Command
             var unitOfWork = context.CreateUnitOfWork<string, object>();
 
             // Assert
-            Assert.That(unitOfWork, Is.Not.Null);
+            unitOfWork.Should().NotBeNull();
         }
 
-        [Test]
+        [Fact]
         public void CreateUnitOfWork_TwiceOnSameContext_ShouldThrowException()
         {
             // Arrange
@@ -29,11 +29,12 @@ namespace Aggregator.Tests.Command
             context.CreateUnitOfWork<string, object>();
 
             // Act / Assert
-            var ex = Assert.Throws<InvalidOperationException>(() => context.CreateUnitOfWork<string, object>());
-            Assert.That(ex.Message, Does.StartWith("Unit of work already created"));
+            Action action = () => context.CreateUnitOfWork<string, object>();
+            action.Should().Throw<InvalidOperationException>()
+                .WithMessage("Unit of work already created*");
         }
 
-        [Test]
+        [Fact]
         public void CreateUnitOfWork_ShouldSetCorrectProperty()
         {
             // Arrange
@@ -44,10 +45,10 @@ namespace Aggregator.Tests.Command
             var unitOfWorkFromContext = context.Get<UnitOfWork<string, object>>(CommandHandlingContextExtensions.UnitOfWorkKey);
 
             // Assert
-            Assert.That(unitOfWorkFromContext, Is.EqualTo(unitOfWork));
+            unitOfWorkFromContext.Should().Be(unitOfWork);
         }
 
-        [Test]
+        [Fact]
         public void GetUnitOfWork_ShouldGetCorrectProperty()
         {
             // Arrange
@@ -59,10 +60,10 @@ namespace Aggregator.Tests.Command
             var unitOfWorkFromContext = context.GetUnitOfWork<string, object>();
 
             // Assert
-            Assert.That(unitOfWorkFromContext, Is.EqualTo(unitOfWork));
+            unitOfWorkFromContext.Should().Be(unitOfWork);
         }
 
-        [Test]
+        [Fact]
         public void GetUnitOfWork_AfterSetUnitOfWork_ShouldReturnUnitOfWork()
         {
             // Arrange
@@ -73,10 +74,10 @@ namespace Aggregator.Tests.Command
             var unitOfWorkFromContext = context.GetUnitOfWork<string, object>();
 
             // Assert
-            Assert.That(unitOfWorkFromContext, Is.EqualTo(unitOfWork));
+            unitOfWorkFromContext.Should().Be(unitOfWork);
         }
 
-        [Test]
+        [Fact]
         public void GetUnitOfWork_WrongGenericType_ShouldThrowException()
         {
             // Arrange
@@ -84,12 +85,13 @@ namespace Aggregator.Tests.Command
             var unitOfWork = context.CreateUnitOfWork<string, EventBase1>();
 
             // Act / Assert
-            var ex = Assert.Throws<InvalidCastException>(() => context.GetUnitOfWork<string, EventBase2>());
-            Assert.That(ex.Message, Is.EqualTo($"Unable to cast object of type '{typeof(UnitOfWork<string, EventBase1>)}' to type '{typeof(UnitOfWork<string, EventBase2>)}'."));
+            Action action = () => context.GetUnitOfWork<string, EventBase2>();
+            action.Should().Throw<InvalidCastException>()
+                .WithMessage($"Unable to cast object of type '{typeof(UnitOfWork<string, EventBase1>)}' to type '{typeof(UnitOfWork<string, EventBase2>)}'.");
         }
 
         private class EventBase1 { }
-                                 
+
         private class EventBase2 { }
     }
 }

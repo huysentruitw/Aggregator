@@ -1,25 +1,26 @@
 using System;
 using Aggregator.Command;
+using FluentAssertions;
 using Moq;
-using NUnit.Framework;
+using Xunit;
 
 namespace Aggregator.Tests.Command
 {
-    [TestFixture]
     public sealed class CommandProcessorNotificationHandlersTests
     {
-        [Test]
+        [Fact]
         public void OnPrepareContext_PrepareContextIsNull_ShouldNotThrowException()
         {
             // Arrange
             var handlers = new CommandProcessorNotificationHandlers();
             handlers.PrepareContext = null;
 
-            // Act
-            Assert.DoesNotThrow(() => handlers.OnPrepareContext(null, null));
+            // Act & Assert
+            Action action = () => handlers.OnPrepareContext(null, null);
+            action.Should().NotThrow();
         }
 
-        [Test]
+        [Fact]
         public void OnPrepareContext_PrepareContextIsSet_ShouldCallPrepareContext()
         {
             // Arrange
@@ -28,7 +29,7 @@ namespace Aggregator.Tests.Command
             var handlers = new CommandProcessorNotificationHandlers();
             var handlerMock = new Mock<Action<object, CommandHandlingContext>>();
             handlers.PrepareContext = handlerMock.Object;
-            
+
             // Act
             handlers.OnPrepareContext(command, context);
 
@@ -36,18 +37,19 @@ namespace Aggregator.Tests.Command
             handlerMock.Verify(x => x(command, context), Times.Once);
         }
 
-        [Test]
+        [Fact]
         public void OnEnrichEvent_EnrichEventIsNull_ShouldNotThrowException()
         {
             // Arrange
             var handlers = new CommandProcessorNotificationHandlers();
             handlers.EnrichEvent = null;
 
-            // Act
-            Assert.DoesNotThrow(() => handlers.OnEnrichEvent(null, null, null));
+            // Act & Assert
+            Action action = () => handlers.OnEnrichEvent(null, null, null);
+            action.Should().NotThrow();
         }
 
-        [Test]
+        [Fact]
         public void OnEnrichEvent_EnrichEventIsSet_ShouldCallEnrichEvent()
         {
             // Arrange
@@ -65,7 +67,7 @@ namespace Aggregator.Tests.Command
 
             // Assert
             handlerMock.Verify(x => x(@event, command, context), Times.Once);
-            Assert.That(result, Is.EqualTo(enrichedEvent));
+            result.Should().Be(enrichedEvent);
         }
     }
 }

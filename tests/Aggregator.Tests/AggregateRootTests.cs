@@ -2,102 +2,142 @@ using System;
 using System.Linq;
 using Aggregator.Exceptions;
 using Aggregator.Internal;
+using FluentAssertions;
 using Moq;
-using NUnit.Framework;
+using Xunit;
 
 namespace Aggregator.Tests
 {
-    [TestFixture]
     public class AggregateRootTests
     {
-        [Test]
+        [Fact]
         public void Initialize_PassNullAsEvents_ShouldNotThrowException()
         {
+            // Arrange
             IAggregateRootInitializer<object> aggregateRoot = new Mock<FakeAggregateRoot>().Object;
-            Assert.DoesNotThrow(() => aggregateRoot.Initialize(null));
+
+            // Act & Assert
+            Action action = () => aggregateRoot.Initialize(null);
+            action.Should().NotThrow();
         }
 
-        [Test]
+        [Fact]
         public void Initialize_PassEvents_ShouldHandleEvents()
         {
+            // Arrange
             var eventA = new EventA();
             var eventB = new EventB();
             var events = new object[] { eventA, eventB, eventA };
             var aggregateRootMock = new Mock<FakeAggregateRoot>();
+
+            // Act
             ((IAggregateRootInitializer<object>)aggregateRootMock.Object).Initialize(events);
+
+            // Assert
             aggregateRootMock.Verify(x => x.OnEventA(eventA), Times.Exactly(2));
             aggregateRootMock.Verify(x => x.OnEventB(eventB), Times.Once);
         }
 
-        [Test]
+        [Fact]
         public void Initialize_PassEvents_ShouldNotHaveChanges()
         {
+            // Arrange
             var events = new object[] { new EventA(), new EventB() };
             var aggregateRoot = new Mock<FakeAggregateRoot>().Object;
+
+            // Act
             ((IAggregateRootInitializer<object>)aggregateRoot).Initialize(events);
+
+            // Assert
             var changeTracker = (IAggregateRootChangeTracker<object>)aggregateRoot;
-            Assert.That(changeTracker.HasChanges, Is.False);
-            Assert.That(changeTracker.GetChanges().Count(), Is.EqualTo(0));
+            changeTracker.HasChanges.Should().BeFalse();
+            changeTracker.GetChanges().Should().HaveCount(0);
         }
 
-        [Test]
+        [Fact]
         public void Initialize_PassUnhandledEvent_ShouldThrowException()
         {
+            // Assert
             var events = new object[] { new EventA(), new EventC() };
             IAggregateRootInitializer<object> aggregateRoot = new Mock<FakeAggregateRoot>().Object;
-            var ex = Assert.Throws<UnhandledEventException>(() => aggregateRoot.Initialize(events));
-            Assert.That(ex.Message, Is.EqualTo("Unhandled event EventC"));
+
+            // Act & Assert
+            Action action = () => aggregateRoot.Initialize(events);
+            action.Should().Throw<UnhandledEventException>()
+                .WithMessage("Unhandled event EventC");
         }
 
-        [Test]
+        [Fact]
         public void Register_RegisterForSameEventTwice_ShouldThrowException()
         {
-            var ex = Assert.Throws<HandlerForEventAlreadyRegisteredException>(() => new RegisterTwiceAggregateRoot());
-            Assert.That(ex.Message, Does.Contain("Handler for event EventA already registered"));
+            // Act & Assert
+            Action action = () => new RegisterTwiceAggregateRoot();
+            action.Should().Throw<HandlerForEventAlreadyRegisteredException>()
+                .WithMessage("*Handler for event EventA already registered*");
         }
 
-        [Test]
+        [Fact]
         public void Register_PassNullAsHandler_ShouldThrowException()
         {
-            var ex = Assert.Throws<ArgumentNullException>(() => new RegisterNullAggregateRoot());
-            Assert.That(ex.ParamName, Is.EqualTo("handler"));
+            // Act & Assert
+            Action action = () => new RegisterNullAggregateRoot();
+            action.Should().Throw<ArgumentNullException>()
+                .Which.ParamName.Should().Be("handler");
         }
 
-        [Test]
+        [Fact]
         public void Apply_PassNullAsEvent_ShouldThrowException()
         {
+            // Arrange
             var aggregateRoot = new Mock<FakeAggregateRoot>().Object;
-            var ex = Assert.Throws<ArgumentNullException>(() => aggregateRoot.ApplyNull());
-            Assert.That(ex.ParamName, Is.EqualTo("event"));
+
+            // Act & Assert
+            Action action = () => aggregateRoot.ApplyNull();
+            action.Should().Throw<ArgumentNullException>()
+                .Which.ParamName.Should().Be("event");
         }
 
-        [Test]
+        [Fact]
         public void Apply_PassKnownEvent_ShouldHandleEvent()
         {
+            // Arrange
             var aggregateRootMock = new Mock<FakeAggregateRoot>();
+
+            // Act
             aggregateRootMock.Object.ApplyB();
+
+            // Assert
             aggregateRootMock.Verify(x => x.OnEventB(It.IsAny<EventB>()), Times.Once);
         }
 
-        [Test]
+        [Fact]
         public void Apply_PassKnownEvents_ShouldHaveChanges()
         {
+            // Arrange
             var aggregateRoot = new Mock<FakeAggregateRoot>().Object;
+
+            // Act
             aggregateRoot.ApplyBA();
+
+            // Assert
             var changeTracker = (IAggregateRootChangeTracker<object>)aggregateRoot;
-            Assert.That(changeTracker.HasChanges, Is.True);
+            changeTracker.HasChanges.Should().BeTrue();
             var changes = changeTracker.GetChanges().ToArray();
-            Assert.That(changes, Has.Length.EqualTo(2));
-            Assert.That(changes[0].GetType(), Is.EqualTo(typeof(EventB)));
-            Assert.That(changes[1].GetType(), Is.EqualTo(typeof(EventA)));
+            changes.Should().HaveCount(2);
+            changes[0].Should().BeOfType<EventB>();
+            changes[1].Should().BeOfType<EventA>();
         }
 
-        [Test]
+        [Fact]
         public void Apply_UnhandledEvent_ShouldThrowException()
         {
+            // Arrange
             var aggregateRoot = new Mock<FakeAggregateRoot>().Object;
-            var ex = Assert.Throws<UnhandledEventException>(() => aggregateRoot.ApplyC());
-            Assert.That(ex.Message, Is.EqualTo($"Unhandled event EventC"));
+
+            // Act & Assert
+            Action action = () => aggregateRoot.ApplyC();
+            action.Should().Throw<UnhandledEventException>()
+                .WithMessage("Unhandled event EventC");
         }
 
         public abstract class FakeAggregateRoot : AggregateRoot

@@ -1,13 +1,13 @@
 using System;
 using Aggregator.Command;
-using NUnit.Framework;
+using FluentAssertions;
+using Xunit;
 
 namespace Aggregator.Tests.Command
 {
-    [TestFixture]
     public sealed class CommandHandlingContextTests
     {
-        [Test]
+        [Fact]
         public void SetGet_ShouldReturnValue()
         {
             // Arrange
@@ -20,33 +20,32 @@ namespace Aggregator.Tests.Command
             var result = context.Get<Test>(key);
 
             // Assert
-            Assert.That(result, Is.EqualTo(value));
+            result.Should().Be(value);
         }
 
-        [Test]
+        [Fact]
         public void Get_UnknownKey_ShouldReturnDefaultValue()
         {
             // Arrange
             var context = new CommandHandlingContext();
 
             // Act / Assert
-            Assert.That(context.Get<Test>("test"), Is.Null);
-            Assert.That(context.Get<int>("test"), Is.Zero);
+            context.Get<Test>("test").Should().BeNull();
+            context.Get<int>("test").Should().Be(0);
         }
 
-        [Test]
+        [Fact]
         public void Get_TypeMismatch_ShouldThrowException()
         {
             // Arrange
             var key = $"{Guid.NewGuid():N}";
             var value = new Test();
             var context = new CommandHandlingContext();
-
-            // Act
             context.Set(key, value);
 
             // Act / Assert
-            Assert.Throws<InvalidCastException>(() => context.Get<int>(key));
+            Action action = () => context.Get<int>(key);
+            action.Should().Throw<InvalidCastException>();
         }
 
         private sealed class Test { }

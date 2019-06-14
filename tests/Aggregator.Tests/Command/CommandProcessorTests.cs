@@ -9,108 +9,109 @@ using Aggregator.Event;
 using Aggregator.Exceptions;
 using Aggregator.Internal;
 using Aggregator.Persistence;
+using FluentAssertions;
 using Moq;
-using NUnit.Framework;
+using Xunit;
 
 namespace Aggregator.Tests.Command
 {
-    [TestFixture]
     public class CommandProcessorTests
     {
-        private readonly Mock<IServiceScopeFactory> _serviceScopeFactoryMock = new Mock<IServiceScopeFactory>();
-        private readonly Mock<IServiceScope> _serviceScopeMock = new Mock<IServiceScope>();
-        private readonly Mock<IEventDispatcher<object>> _eventDispatcherMock = new Mock<IEventDispatcher<object>>();
-        private readonly Mock<IEventStore<string, object>> _eventStoreMock = new Mock<IEventStore<string, object>>();
+        private Mock<IServiceScopeFactory> NewServiceScopeFactoryMock => new Mock<IServiceScopeFactory>();
 
-        [SetUp]
-        public void SetUp()
-        {
-            _eventDispatcherMock.Reset();
-            _eventStoreMock.Reset();
-            _serviceScopeMock.Reset();
-            _serviceScopeFactoryMock.Reset();
+        private Mock<IEventStore<string, object>> NewEventStoreMock => new Mock<IEventStore<string, object>>();
 
-            _serviceScopeMock
-                .Setup(x => x.GetService(typeof(CommandHandlingContext)))
-                .Returns(new CommandHandlingContext());
-            _serviceScopeFactoryMock
-                .Setup(x => x.CreateScope())
-                .Returns(_serviceScopeMock.Object);
-        }
+        private Mock<IEventDispatcher<object>> NewEventDispatcherMock => new Mock<IEventDispatcher<object>>();
 
-        [Test]
+        [Fact]
         public void Constructor_PassInvalidArguments_ShouldThrowException()
         {
             // Act / Assert
-            var ex = Assert.Throws<ArgumentNullException>(() => new CommandProcessor(null, _eventStoreMock.Object, _eventDispatcherMock.Object));
-            Assert.That(ex.ParamName, Is.EqualTo("serviceScopeFactory"));
+            Action action = () => new CommandProcessor(null, NewEventStoreMock.Object, NewEventDispatcherMock.Object);
+            action.Should().Throw<ArgumentNullException>()
+                .Which.ParamName.Should().Be("serviceScopeFactory");
 
-            ex = Assert.Throws<ArgumentNullException>(() => new CommandProcessor(_serviceScopeFactoryMock.Object, null, _eventDispatcherMock.Object));
-            Assert.That(ex.ParamName, Is.EqualTo("eventStore"));
+            action = () => new CommandProcessor(NewServiceScopeFactoryMock.Object, null, NewEventDispatcherMock.Object);
+            action.Should().Throw<ArgumentNullException>()
+                .Which.ParamName.Should().Be("eventStore");
 
-            ex = Assert.Throws<ArgumentNullException>(() => new CommandProcessor(_serviceScopeFactoryMock.Object, _eventStoreMock.Object, null));
-            Assert.That(ex.ParamName, Is.EqualTo("eventDispatcher"));
+            action = () => new CommandProcessor(NewServiceScopeFactoryMock.Object, NewEventStoreMock.Object, null);
+            action.Should().Throw<ArgumentNullException>()
+                .Which.ParamName.Should().Be("eventDispatcher");
         }
 
-        [Test]
+        [Fact]
         public void Process_PassNullAsCommand_ShouldThrowException()
         {
             // Arrange
-            var processor = new CommandProcessor(_serviceScopeFactoryMock.Object, _eventStoreMock.Object, _eventDispatcherMock.Object);
+            var processor = new CommandProcessor(NewServiceScopeFactoryMock.Object, NewEventStoreMock.Object, NewEventDispatcherMock.Object);
 
             // Act / Assert
-            var ex = Assert.ThrowsAsync<ArgumentNullException>(() => processor.Process(null));
-            Assert.That(ex.ParamName, Is.EqualTo("command"));
+            Func<Task> action = () => processor.Process(null);
+            action.Should().Throw<ArgumentNullException>()
+                .Which.ParamName.Should().Be("command");
         }
 
-        [Test]
+        [Fact]
         public async Task Process_PassCommand_ShouldCreateServiceScope()
         {
             // Arrange
-            _serviceScopeMock
+            var serviceScopeMock = new Mock<IServiceScope>();
+            var serviceScopeFactoryMock = NewServiceScopeFactoryMock;
+            serviceScopeFactoryMock.Setup(x => x.CreateScope()).Returns(() => serviceScopeMock.Object);
+            serviceScopeMock.Setup(x => x.GetService(typeof(CommandHandlingContext))).Returns(new CommandHandlingContext());
+            serviceScopeMock
                 .Setup(x => x.GetService(typeof(IEnumerable<ICommandHandler<FakeCommand>>)))
                 .Returns(new[] { new Mock<ICommandHandler<FakeCommand>>().Object });
-            var processor = new CommandProcessor(_serviceScopeFactoryMock.Object, _eventStoreMock.Object, _eventDispatcherMock.Object);
+            var processor = new CommandProcessor(serviceScopeFactoryMock.Object, NewEventStoreMock.Object, NewEventDispatcherMock.Object);
 
             // Act
             await processor.Process(new FakeCommand());
 
             // Assert
-            _serviceScopeFactoryMock.Verify(x => x.CreateScope(), Times.Once);
+            serviceScopeFactoryMock.Verify(x => x.CreateScope(), Times.Once);
         }
 
-        [Test]
+        [Fact]
         public async Task Process_PassCommand_ShouldResolveContextAndHandlersFromScope()
         {
             // Arrange
-            _serviceScopeMock
+            var serviceScopeMock = new Mock<IServiceScope>();
+            var serviceScopeFactoryMock = NewServiceScopeFactoryMock;
+            serviceScopeFactoryMock.Setup(x => x.CreateScope()).Returns(() => serviceScopeMock.Object);
+            serviceScopeMock.Setup(x => x.GetService(typeof(CommandHandlingContext))).Returns(new CommandHandlingContext());
+            serviceScopeMock
                 .Setup(x => x.GetService(typeof(IEnumerable<ICommandHandler<FakeCommand>>)))
                 .Returns(new[] { new Mock<ICommandHandler<FakeCommand>>().Object });
-            var processor = new CommandProcessor(_serviceScopeFactoryMock.Object, _eventStoreMock.Object, _eventDispatcherMock.Object);
+            var processor = new CommandProcessor(serviceScopeFactoryMock.Object, NewEventStoreMock.Object, NewEventDispatcherMock.Object);
 
             // Act
             await processor.Process(new FakeCommand());
 
             // Assert
-            _serviceScopeMock.Verify(x => x.GetService(typeof(CommandHandlingContext)), Times.Once);
-            _serviceScopeMock.Verify(x => x.GetService(typeof(IEnumerable<ICommandHandler<FakeCommand>>)), Times.Once);
-            _serviceScopeMock.Verify(x => x.GetService(It.IsAny<Type>()), Times.Exactly(2));
+            serviceScopeMock.Verify(x => x.GetService(typeof(CommandHandlingContext)), Times.Once);
+            serviceScopeMock.Verify(x => x.GetService(typeof(IEnumerable<ICommandHandler<FakeCommand>>)), Times.Once);
+            serviceScopeMock.Verify(x => x.GetService(It.IsAny<Type>()), Times.Exactly(2));
         }
 
-        [Test]
+        [Fact]
         public async Task Process_PassCommand_ShouldForwardCommandToHandlers()
         {
             // Arrange
+            var serviceScopeMock = new Mock<IServiceScope>();
+            var serviceScopeFactoryMock = NewServiceScopeFactoryMock;
+            serviceScopeFactoryMock.Setup(x => x.CreateScope()).Returns(() => serviceScopeMock.Object);
+            serviceScopeMock.Setup(x => x.GetService(typeof(CommandHandlingContext))).Returns(new CommandHandlingContext());
             var handlerMocks = new[]
             {
                 new Mock<ICommandHandler<FakeCommand>>(),
                 new Mock<ICommandHandler<FakeCommand>>()
             };
-            _serviceScopeMock
+            serviceScopeMock
                 .Setup(x => x.GetService(typeof(IEnumerable<ICommandHandler<FakeCommand>>)))
                 .Returns(handlerMocks.Select(x => x.Object));
             var command = new FakeCommand();
-            var processor = new CommandProcessor(_serviceScopeFactoryMock.Object, _eventStoreMock.Object, _eventDispatcherMock.Object);
+            var processor = new CommandProcessor(serviceScopeFactoryMock.Object, NewEventStoreMock.Object, NewEventDispatcherMock.Object);
 
             // Act
             await processor.Process(command);
@@ -120,217 +121,265 @@ namespace Aggregator.Tests.Command
             handlerMocks[1].Verify(x => x.Handle(command, default(CancellationToken)), Times.Once);
         }
 
-        [Test]
+        [Fact]
         public void Process_PassUnhandledCommand_ShouldThrowException()
         {
+            // Arrange
+            var serviceScopeMock = new Mock<IServiceScope>();
+            var serviceScopeFactoryMock = NewServiceScopeFactoryMock;
+            serviceScopeFactoryMock.Setup(x => x.CreateScope()).Returns(() => serviceScopeMock.Object);
+            serviceScopeMock.Setup(x => x.GetService(typeof(CommandHandlingContext))).Returns(new CommandHandlingContext());
             var command = new FakeCommand();
-            var processor = new CommandProcessor(_serviceScopeFactoryMock.Object, _eventStoreMock.Object, _eventDispatcherMock.Object);
-            var ex = Assert.ThrowsAsync<UnhandledCommandException>(() => processor.Process(command));
-            Assert.That(ex.Command, Is.EqualTo(command));
-            Assert.That(ex.CommandType, Is.EqualTo(typeof(FakeCommand)));
-            Assert.That(ex.Message, Is.EqualTo("Unhandled command 'FakeCommand'"));
+            var processor = new CommandProcessor(serviceScopeFactoryMock.Object, NewEventStoreMock.Object, NewEventDispatcherMock.Object);
+
+            // Act & Assert
+            Func<Task> action = () => processor.Process(command);
+            var ex = action.Should().Throw<UnhandledCommandException>()
+                .WithMessage("Unhandled command 'FakeCommand'")
+                .Which;
+            ex.Command.Should().Be(command);
+            ex.CommandType.Should().Be(typeof(FakeCommand));
         }
 
-        [Test]
+        [Fact]
         public async Task Process_NoChangedAggregateRootsInUnitOfWork_ShouldNotBeginEventStoreTransaction()
         {
             // Arrange
-            _serviceScopeMock
+            var serviceScopeMock = new Mock<IServiceScope>();
+            var serviceScopeFactoryMock = NewServiceScopeFactoryMock;
+            serviceScopeFactoryMock.Setup(x => x.CreateScope()).Returns(() => serviceScopeMock.Object);
+            serviceScopeMock.Setup(x => x.GetService(typeof(CommandHandlingContext))).Returns(new CommandHandlingContext());
+            serviceScopeMock
                 .Setup(x => x.GetService(typeof(IEnumerable<ICommandHandler<FakeCommand>>)))
                 .Returns(new[] { new Mock<ICommandHandler<FakeCommand>>().Object });
-            var processor = new CommandProcessor(_serviceScopeFactoryMock.Object, _eventStoreMock.Object, _eventDispatcherMock.Object);
+            var eventStoreMock = NewEventStoreMock;
+            var processor = new CommandProcessor(serviceScopeFactoryMock.Object, eventStoreMock.Object, NewEventDispatcherMock.Object);
 
             // Act
             await processor.Process(new FakeCommand());
 
             // Assert
-            _eventStoreMock.Verify(x => x.BeginTransaction(It.IsAny<CommandHandlingContext>()), Times.Never);
+            eventStoreMock.Verify(x => x.BeginTransaction(It.IsAny<CommandHandlingContext>()), Times.Never);
         }
 
-        [Test]
+        [Fact]
         public async Task Process_ChangedAggregateRootsInUnitOfWork_ShouldCommitChangesToEventStore()
         {
             // Arrange
+            var serviceScopeMock = new Mock<IServiceScope>();
+            var serviceScopeFactoryMock = NewServiceScopeFactoryMock;
+            serviceScopeFactoryMock.Setup(x => x.CreateScope()).Returns(() => serviceScopeMock.Object);
             var commandHandlingContext = new CommandHandlingContext();
-            _serviceScopeMock
+            serviceScopeMock
                 .Setup(x => x.GetService(typeof(CommandHandlingContext)))
                 .Returns(commandHandlingContext);
-            _serviceScopeMock
+            serviceScopeMock
                 .Setup(x => x.GetService(typeof(IEnumerable<ICommandHandler<FakeCommand>>)))
                 .Returns(new[] { new FakeCommandHandler(commandHandlingContext, x => x.DoSomething()) });
             object[] capturedEvents = null;
             var transactionMock = new Mock<IEventStoreTransaction<string, object>>();
             transactionMock
                 .Setup(x => x.StoreEvents("some_id", 5, It.IsAny<IEnumerable<object>>(), default(CancellationToken)))
+#pragma warning disable IDE1006 // Naming Styles
                 .Callback<string, long, IEnumerable<object>, CancellationToken>((_, __, events, ___) => capturedEvents = events.ToArray())
+#pragma warning restore IDE1006 // Naming Styles
                 .Returns(Task.CompletedTask);
-            _eventStoreMock
+            var eventStoreMock = NewEventStoreMock;
+            eventStoreMock
                 .Setup(x => x.BeginTransaction(It.IsAny<CommandHandlingContext>()))
                 .Returns(transactionMock.Object);
-            var processor = new CommandProcessor(_serviceScopeFactoryMock.Object, _eventStoreMock.Object, _eventDispatcherMock.Object);
+            var processor = new CommandProcessor(serviceScopeFactoryMock.Object, eventStoreMock.Object, NewEventDispatcherMock.Object);
 
             // Act
             await processor.Process(new FakeCommand());
 
             // Assert
-            _eventStoreMock.Verify(x => x.BeginTransaction(It.IsAny<CommandHandlingContext>()), Times.Once);
-            Assert.That(capturedEvents, Is.Not.Null);
-            Assert.That(capturedEvents, Has.Length.EqualTo(2));
-            Assert.That(capturedEvents[0], Is.InstanceOf<FakeEvent2>());
-            Assert.That(capturedEvents[1], Is.InstanceOf<FakeEvent1>());
+            eventStoreMock.Verify(x => x.BeginTransaction(It.IsAny<CommandHandlingContext>()), Times.Once);
+            capturedEvents.Should().NotBeNull();
+            capturedEvents.Should().HaveCount(2);
+            capturedEvents[0].Should().BeOfType<FakeEvent2>();
+            capturedEvents[1].Should().BeOfType<FakeEvent1>();
 
             transactionMock.Verify(x => x.Commit(), Times.Once);
             transactionMock.Verify(x => x.Rollback(), Times.Never);
             transactionMock.Verify(x => x.Dispose(), Times.Once);
         }
 
-        [Test]
+        [Fact]
         public void Process_ApplyingEventToAggregateThrowsException_ShouldNotBeginTransaction()
         {
             // Arrange
+            var serviceScopeMock = new Mock<IServiceScope>();
+            var serviceScopeFactoryMock = NewServiceScopeFactoryMock;
+            serviceScopeFactoryMock.Setup(x => x.CreateScope()).Returns(() => serviceScopeMock.Object);
             var commandHandlingContext = new CommandHandlingContext();
-            _serviceScopeMock
+            serviceScopeMock
                 .Setup(x => x.GetService(typeof(CommandHandlingContext)))
                 .Returns(commandHandlingContext);
-            _serviceScopeMock
+            serviceScopeMock
                 .Setup(x => x.GetService(typeof(IEnumerable<ICommandHandler<FakeCommand>>)))
                 .Returns(new[] { new FakeCommandHandler(commandHandlingContext, x => x.DoSomethingBad()) });
             var transactionMock = new Mock<IEventStoreTransaction<string, object>>();
-            _eventStoreMock
+            var eventStoreMock = NewEventStoreMock;
+            eventStoreMock
                 .Setup(x => x.BeginTransaction(It.IsAny<CommandHandlingContext>()))
                 .Returns(transactionMock.Object);
-            var processor = new CommandProcessor(_serviceScopeFactoryMock.Object, _eventStoreMock.Object, _eventDispatcherMock.Object);
+            var processor = new CommandProcessor(serviceScopeFactoryMock.Object, eventStoreMock.Object, NewEventDispatcherMock.Object);
 
             // Act / Assert
-            Assert.ThrowsAsync<KeyNotFoundException>(() => processor.Process(new FakeCommand()));
-
-            _eventStoreMock.Verify(x => x.BeginTransaction(It.IsAny<CommandHandlingContext>()), Times.Never);
+            Func<Task> action = () => processor.Process(new FakeCommand());
+            action.Should().Throw<KeyNotFoundException>();
+            eventStoreMock.Verify(x => x.BeginTransaction(It.IsAny<CommandHandlingContext>()), Times.Never);
         }
 
-        [Test]
+        [Fact]
         public void Process_StoreEventsThrowsException_ShouldRollbackTransactionAndRethrowException()
         {
             // Arrange
+            var serviceScopeMock = new Mock<IServiceScope>();
+            var serviceScopeFactoryMock = NewServiceScopeFactoryMock;
+            serviceScopeFactoryMock.Setup(x => x.CreateScope()).Returns(() => serviceScopeMock.Object);
             var commandHandlingContext = new CommandHandlingContext();
-            _serviceScopeMock
+            serviceScopeMock
                 .Setup(x => x.GetService(typeof(CommandHandlingContext)))
                 .Returns(commandHandlingContext);
-            _serviceScopeMock
+            serviceScopeMock
                 .Setup(x => x.GetService(typeof(IEnumerable<ICommandHandler<FakeCommand>>)))
                 .Returns(new[] { new FakeCommandHandler(commandHandlingContext, x => x.DoSomething()) });
             var transactionMock = new Mock<IEventStoreTransaction<string, object>>();
             transactionMock
                 .Setup(x => x.StoreEvents("some_id", 5, It.IsAny<IEnumerable<object>>(), default(CancellationToken)))
                 .Callback(() => throw new InvalidOperationException("StoreEvents failed"));
-            _eventStoreMock
+            var eventStoreMock = NewEventStoreMock;
+            eventStoreMock
                 .Setup(x => x.BeginTransaction(It.IsAny<CommandHandlingContext>()))
                 .Returns(transactionMock.Object);
-            var processor = new CommandProcessor(_serviceScopeFactoryMock.Object, _eventStoreMock.Object, _eventDispatcherMock.Object);
+            var processor = new CommandProcessor(serviceScopeFactoryMock.Object, eventStoreMock.Object, NewEventDispatcherMock.Object);
 
             // Act / Assert
-            var ex = Assert.ThrowsAsync<InvalidOperationException>(() => processor.Process(new FakeCommand()));
-            Assert.That(ex.Message, Is.EqualTo("StoreEvents failed"));
-            _eventStoreMock.Verify(x => x.BeginTransaction(It.IsAny<CommandHandlingContext>()), Times.Once);
+            Func<Task> action = () => processor.Process(new FakeCommand());
+            action.Should().Throw<InvalidOperationException>()
+                .WithMessage("StoreEvents failed");
+            eventStoreMock.Verify(x => x.BeginTransaction(It.IsAny<CommandHandlingContext>()), Times.Once);
 
             transactionMock.Verify(x => x.Commit(), Times.Never);
             transactionMock.Verify(x => x.Rollback(), Times.Once);
             transactionMock.Verify(x => x.Dispose(), Times.Once);
         }
 
-        [Test]
+        [Fact]
         public void Process_DispatchThrowsException_ShouldRollbackTransactionAndRethrowException()
         {
             // Arrange
+            var serviceScopeMock = new Mock<IServiceScope>();
+            var serviceScopeFactoryMock = NewServiceScopeFactoryMock;
+            serviceScopeFactoryMock.Setup(x => x.CreateScope()).Returns(() => serviceScopeMock.Object);
             var commandHandlingContext = new CommandHandlingContext();
-            _serviceScopeMock
+            serviceScopeMock
                 .Setup(x => x.GetService(typeof(CommandHandlingContext)))
                 .Returns(commandHandlingContext);
-            _serviceScopeMock
+            serviceScopeMock
                 .Setup(x => x.GetService(typeof(IEnumerable<ICommandHandler<FakeCommand>>)))
                 .Returns(new[] { new FakeCommandHandler(commandHandlingContext, x => x.DoSomething()) });
-            _eventDispatcherMock
+            var eventDispatcherMock = NewEventDispatcherMock;
+            eventDispatcherMock
                 .Setup(x => x.Dispatch(It.IsAny<object[]>(), default(CancellationToken)))
                 .Callback(() => throw new InvalidOperationException("Dispatch failed"));
             var transactionMock = new Mock<IEventStoreTransaction<string, object>>();
-            _eventStoreMock
+            var eventStoreMock = NewEventStoreMock;
+            eventStoreMock
                 .Setup(x => x.BeginTransaction(It.IsAny<CommandHandlingContext>()))
                 .Returns(transactionMock.Object);
-            var processor = new CommandProcessor(_serviceScopeFactoryMock.Object, _eventStoreMock.Object, _eventDispatcherMock.Object);
+            var processor = new CommandProcessor(serviceScopeFactoryMock.Object, eventStoreMock.Object, eventDispatcherMock.Object);
 
             // Act / Assert
-            var ex = Assert.ThrowsAsync<InvalidOperationException>(() => processor.Process(new FakeCommand()));
-            Assert.That(ex.Message, Is.EqualTo("Dispatch failed"));
-            _eventStoreMock.Verify(x => x.BeginTransaction(It.IsAny<CommandHandlingContext>()), Times.Once);
+            Func<Task> action = () => processor.Process(new FakeCommand());
+            action.Should().Throw<InvalidOperationException>()
+                .WithMessage("Dispatch failed");
+            eventStoreMock.Verify(x => x.BeginTransaction(It.IsAny<CommandHandlingContext>()), Times.Once);
 
             transactionMock.Verify(x => x.Commit(), Times.Never);
             transactionMock.Verify(x => x.Rollback(), Times.Once);
             transactionMock.Verify(x => x.Dispose(), Times.Once);
         }
 
-        [Test]
+        [Fact]
         public async Task Process_NoChangedAggregateRootsInUnitOfWork_ShouldNotDispatchAnyEvent()
         {
             // Arrange
-            _serviceScopeMock
+            var serviceScopeMock = new Mock<IServiceScope>();
+            var serviceScopeFactoryMock = NewServiceScopeFactoryMock;
+            serviceScopeFactoryMock.Setup(x => x.CreateScope()).Returns(() => serviceScopeMock.Object);
+            serviceScopeMock.Setup(x => x.GetService(typeof(CommandHandlingContext))).Returns(new CommandHandlingContext());
+            serviceScopeMock
                 .Setup(x => x.GetService(typeof(IEnumerable<ICommandHandler<FakeCommand>>)))
                 .Returns(new[] { new Mock<ICommandHandler<FakeCommand>>().Object });
-            var processor = new CommandProcessor(_serviceScopeFactoryMock.Object, _eventStoreMock.Object, _eventDispatcherMock.Object);
+            var eventDispatcherMock = NewEventDispatcherMock;
+            var processor = new CommandProcessor(serviceScopeFactoryMock.Object, NewEventStoreMock.Object, eventDispatcherMock.Object);
 
             // Act
             await processor.Process(new FakeCommand());
 
             // Arrange
-            _eventDispatcherMock.Verify(x => x.Dispatch(It.IsAny<object[]>(), It.IsAny<CancellationToken>()), Times.Never);
+            eventDispatcherMock.Verify(x => x.Dispatch(It.IsAny<object[]>(), It.IsAny<CancellationToken>()), Times.Never);
         }
 
-        [Test]
+        [Fact]
         public async Task Process_ChangedAggregateRootsInUnitOfWork_ShouldDispatchEvents()
         {
             // Arrange
+            var serviceScopeMock = new Mock<IServiceScope>();
+            var serviceScopeFactoryMock = NewServiceScopeFactoryMock;
+            serviceScopeFactoryMock.Setup(x => x.CreateScope()).Returns(() => serviceScopeMock.Object);
             var commandHandlingContext = new CommandHandlingContext();
-            _serviceScopeMock
+            serviceScopeMock
                 .Setup(x => x.GetService(typeof(CommandHandlingContext)))
                 .Returns(commandHandlingContext);
-            _serviceScopeMock
+            serviceScopeMock
                 .Setup(x => x.GetService(typeof(IEnumerable<ICommandHandler<FakeCommand>>)))
                 .Returns(new[] { new FakeCommandHandler(commandHandlingContext, x => x.DoSomething()) });
             object[] dispatchedEvents = null;
-            _eventDispatcherMock
+            var eventDispatcherMock = NewEventDispatcherMock;
+            eventDispatcherMock
                 .Setup(x => x.Dispatch(It.IsAny<object[]>(), default(CancellationToken)))
                 .Callback<object[], CancellationToken>((events, _) => dispatchedEvents = events)
                 .Returns(Task.CompletedTask);
             var transactionMock = new Mock<IEventStoreTransaction<string, object>>();
-            _eventStoreMock
+            var eventStoreMock = NewEventStoreMock;
+            eventStoreMock
                 .Setup(x => x.BeginTransaction(It.IsAny<CommandHandlingContext>()))
                 .Returns(transactionMock.Object);
-            var processor = new CommandProcessor(_serviceScopeFactoryMock.Object, _eventStoreMock.Object, _eventDispatcherMock.Object);
+            var processor = new CommandProcessor(serviceScopeFactoryMock.Object, eventStoreMock.Object, eventDispatcherMock.Object);
 
             // Act
             await processor.Process(new FakeCommand());
 
             // Assert
-            _eventDispatcherMock.Verify(x => x.Dispatch(It.IsAny<object[]>(), default(CancellationToken)), Times.Once);
-            Assert.That(dispatchedEvents, Is.Not.Null);
-            Assert.That(dispatchedEvents, Has.Length.EqualTo(2));
-            Assert.That(dispatchedEvents[0], Is.InstanceOf<FakeEvent2>());
-            Assert.That(dispatchedEvents[1], Is.InstanceOf<FakeEvent1>());
+            eventDispatcherMock.Verify(x => x.Dispatch(It.IsAny<object[]>(), default(CancellationToken)), Times.Once);
+            dispatchedEvents.Should().NotBeNull();
+            dispatchedEvents.Should().HaveCount(2);
+            dispatchedEvents[0].Should().BeOfType<FakeEvent2>();
+            dispatchedEvents[1].Should().BeOfType<FakeEvent1>();
         }
 
-        [Test]
+        [Fact]
         public async Task Process_WithPrepareContextNotificationHandler_ShouldCallPrepareContextNotificationHandler()
         {
             // Arrange
+            var serviceScopeMock = new Mock<IServiceScope>();
+            var serviceScopeFactoryMock = NewServiceScopeFactoryMock;
+            serviceScopeFactoryMock.Setup(x => x.CreateScope()).Returns(() => serviceScopeMock.Object);
             var commandHandlingContext = new CommandHandlingContext();
-            _serviceScopeMock
+            serviceScopeMock
                 .Setup(x => x.GetService(typeof(CommandHandlingContext)))
                 .Returns(commandHandlingContext);
-            _serviceScopeMock
+            serviceScopeMock
                 .Setup(x => x.GetService(typeof(IEnumerable<ICommandHandler<FakeCommand>>)))
                 .Returns(new[] { new Mock<ICommandHandler<FakeCommand>>().Object });
             var command = new FakeCommand();
             var prepareContextMock = new Mock<Action<object, CommandHandlingContext>>();
             var notificationHandlers = new CommandProcessorNotificationHandlers { PrepareContext = prepareContextMock.Object };
-            var processor = new CommandProcessor(_serviceScopeFactoryMock.Object, _eventStoreMock.Object, _eventDispatcherMock.Object, notificationHandlers);
+            var processor = new CommandProcessor(serviceScopeFactoryMock.Object, NewEventStoreMock.Object, NewEventDispatcherMock.Object, notificationHandlers);
 
             // Act
             await processor.Process(command);
@@ -340,22 +389,27 @@ namespace Aggregator.Tests.Command
             prepareContextMock.Verify(x => x(It.IsAny<object>(), It.IsAny<CommandHandlingContext>()), Times.Once);
         }
 
-        [Test]
+#pragma warning disable IDE1006 // Naming Styles
+        [Fact]
         public async Task Process_WithEnrichEventNotificationHandler_ShouldCallEnrichEventNotificationHandler()
         {
             // Arrange
             object capturedEvent1 = null;
             object capturedEvent2 = null;
             IEnumerable<object> capturedStoredEvents = null;
+            var serviceScopeMock = new Mock<IServiceScope>();
+            var serviceScopeFactoryMock = NewServiceScopeFactoryMock;
+            serviceScopeFactoryMock.Setup(x => x.CreateScope()).Returns(() => serviceScopeMock.Object);
             var commandHandlingContext = new CommandHandlingContext();
-            _serviceScopeMock
+            serviceScopeMock
                 .Setup(x => x.GetService(typeof(CommandHandlingContext)))
                 .Returns(commandHandlingContext);
-            _serviceScopeMock
+            serviceScopeMock
                 .Setup(x => x.GetService(typeof(IEnumerable<ICommandHandler<FakeCommand>>)))
                 .Returns(new[] { new FakeCommandHandler(commandHandlingContext, x => x.DoSomething()) });
             var transactionMock = new Mock<IEventStoreTransaction<string, object>>();
-            _eventStoreMock
+            var eventStoreMock = NewEventStoreMock;
+            eventStoreMock
                 .Setup(x => x.BeginTransaction(It.IsAny<CommandHandlingContext>()))
                 .Returns(transactionMock.Object);
             transactionMock
@@ -375,23 +429,24 @@ namespace Aggregator.Tests.Command
                 .Callback<object, object, CommandHandlingContext>((x, _, __) => capturedEvent2 = x)
                 .Returns(event2);
             var notificationHandlers = new CommandProcessorNotificationHandlers { EnrichEvent = enrichEventMock.Object };
-            var processor = new CommandProcessor(_serviceScopeFactoryMock.Object, _eventStoreMock.Object, _eventDispatcherMock.Object, notificationHandlers);
+            var processor = new CommandProcessor(serviceScopeFactoryMock.Object, eventStoreMock.Object, NewEventDispatcherMock.Object, notificationHandlers);
 
             // Act
             await processor.Process(command);
 
             // Assert
-            Assert.That(capturedEvent1, Is.Not.Null);
-            Assert.That(capturedEvent2, Is.Not.Null);
-            Assert.That(capturedStoredEvents, Is.Not.Null);
+            capturedEvent1.Should().NotBeNull();
+            capturedEvent2.Should().NotBeNull();
+            capturedStoredEvents.Should().NotBeNull();
 
             enrichEventMock.Verify(x => x(capturedEvent1, command, commandHandlingContext), Times.Once);
             enrichEventMock.Verify(x => x(capturedEvent2, command, commandHandlingContext), Times.Once);
 
             transactionMock.Verify(x => x.StoreEvents("some_id", 5, capturedStoredEvents, default(CancellationToken)), Times.Once);
-            Assert.That(capturedStoredEvents, Does.Contain(event1));
-            Assert.That(capturedStoredEvents, Does.Contain(event2));
+            capturedStoredEvents.Should().Contain(event1);
+            capturedStoredEvents.Should().Contain(event2);
         }
+#pragma warning restore IDE1006 // Naming Styles
 
         #region Test infrastructure
 
