@@ -10,6 +10,11 @@ using Newtonsoft.Json;
 
 namespace Aggregator.Persistence.EventStore
 {
+    /// <summary>
+    /// Implementation of <see cref="IEventStoreTransaction{TIdentifier, TEventBase}"/> for eventstore.
+    /// </summary>
+    /// <typeparam name="TIdentifier">The identifier type.</typeparam>
+    /// <typeparam name="TEventBase">The event base type.</typeparam>
     public class EventStoreTransaction<TIdentifier, TEventBase> : IEventStoreTransaction<TIdentifier, TEventBase>
         where TIdentifier : IEquatable<TIdentifier>
     {
@@ -28,11 +33,18 @@ namespace Aggregator.Persistence.EventStore
             _createTransaction = createTransaction ?? CreateTransaction;
         }
 
+        /// <summary>
+        /// Rolls back pending transactions.
+        /// </summary>
         public void Dispose()
         {
             Rollback();
         }
 
+        /// <summary>
+        /// Commits pending transactions.
+        /// </summary>
+        /// <returns>A <see cref="Task"/>.</returns>
         public async Task Commit()
         {
             while (_pendingTransactions.Any())
@@ -44,6 +56,10 @@ namespace Aggregator.Persistence.EventStore
             }
         }
 
+        /// <summary>
+        /// Rolls back pending transactions.
+        /// </summary>
+        /// <returns>A <see cref="Task"/>.</returns>
         public Task Rollback()
         {
             while (_pendingTransactions.Any())
@@ -57,6 +73,14 @@ namespace Aggregator.Persistence.EventStore
             return Task.CompletedTask;
         }
 
+        /// <summary>
+        /// Stores one or more events for a given aggregate root.
+        /// </summary>
+        /// <param name="identifier">The aggregate root identifier.</param>
+        /// <param name="expectedVersion">The expected version of the event stream of the aggregate root.</param>
+        /// <param name="events">The events to store.</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
+        /// <returns>A <see cref="Task"/>.</returns>
         public async Task StoreEvents(TIdentifier identifier, long expectedVersion, IEnumerable<TEventBase> events, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();

@@ -10,10 +10,10 @@
     <AssemblyOriginatorKeyFile>keyfile.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+  <PropertyGroup Condition="'$(TargetFramework)'=='netstandard2.0'">
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarningsAsErrors />
-    <DocumentationFile>C:\projects\contrib\Aggregator\src\Aggregator.Microsoft.DependencyInjection\Aggregator.Microsoft.DependencyInjection.xml</DocumentationFile>
+    <DocumentationFile>bin\Debug\netstandard2.0\Aggregator.Microsoft.DependencyInjection.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
