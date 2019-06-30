@@ -1,20 +1,21 @@
 using System;
 using Autofac;
-using NUnit.Framework;
+using FluentAssertions;
+using Xunit;
 
 namespace Aggregator.Autofac.Tests
 {
-    [TestFixture]
     public class ServiceScopeFactoryTests
     {
-        [Test]
+        [Fact]
         public void Constructor_PassNullAsParentLifetimeScope_ShouldThrowException()
         {
-            // Assert
-            Assert.Throws<ArgumentNullException>(() => new ServiceScopeFactory(null));
+            // Act & Assert
+            Action action = () => new ServiceScopeFactory(null);
+            action.Should().Throw<ArgumentNullException>();
         }
 
-        [Test]
+        [Fact]
         public void CreateScope_ShouldCreateAndUseChildScope()
         {
             // Arrange
@@ -27,9 +28,9 @@ namespace Aggregator.Autofac.Tests
             var scope = factory.CreateScope();
 
             // Assert
-            Assert.That(scope, Is.Not.Null);
-            Assert.That(capturedChildScope, Is.Not.Null);
-            Assert.That(scope.GetService(typeof(ILifetimeScope)), Is.EqualTo(capturedChildScope));
+            scope.Should().NotBeNull();
+            capturedChildScope.Should().NotBeNull();
+            scope.GetService(typeof(ILifetimeScope)).Should().Be(capturedChildScope);
         }
     }
 }

@@ -1,13 +1,13 @@
 using Autofac;
+using FluentAssertions;
 using Moq;
-using NUnit.Framework;
+using Xunit;
 
 namespace Aggregator.Autofac.Tests
 {
-    [TestFixture]
     public class ServiceScopeTests
     {
-        [Test]
+        [Fact]
         public void Dispose_ShouldDisposeLifetimeScope()
         {
             // Arrange
@@ -22,7 +22,7 @@ namespace Aggregator.Autofac.Tests
             lifetimeScopeMock.Verify(x => x.Dispose(), Times.Once);
         }
 
-        [Test]
+        [Fact]
         public void GetService_ShouldResolveServicesFromLifetimeScope()
         {
             // Arrange
@@ -35,7 +35,7 @@ namespace Aggregator.Autofac.Tests
             var result = scope.GetService(typeof(DummyService));
 
             // Assert
-            Assert.That(result, Is.EqualTo(service));
+            result.Should().Be(service);
         }
 
         private sealed class DummyService { }
