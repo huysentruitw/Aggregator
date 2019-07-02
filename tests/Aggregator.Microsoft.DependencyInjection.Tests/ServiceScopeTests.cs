@@ -1,14 +1,14 @@
 using System;
+using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
-using NUnit.Framework;
+using Xunit;
 
 namespace Aggregator.Microsoft.DependencyInjection.Tests
 {
-    [TestFixture]
     public class ServiceScopeTests
     {
-        [Test]
+        [Fact]
         public void Dispose_ShouldDisposeServiceScope()
         {
             // Arrange
@@ -23,7 +23,7 @@ namespace Aggregator.Microsoft.DependencyInjection.Tests
             microsoftServiceScopeMock.Verify(x => x.Dispose(), Times.Once);
         }
 
-        [Test]
+        [Fact]
         public void GetService_ShouldResolveServicesFromServiceScope()
         {
             // Arrange
@@ -38,8 +38,7 @@ namespace Aggregator.Microsoft.DependencyInjection.Tests
             var result = scope.GetService(typeof(DummyService));
 
             // Assert
-            Assert.That(result, Is.Not.Null);
-            Assert.That(result, Is.EqualTo(service));
+            result.Should().Be(service);
         }
 
         private sealed class DummyService { }

@@ -1,21 +1,22 @@
 using System;
+using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
-using NUnit.Framework;
+using Xunit;
 
 namespace Aggregator.Microsoft.DependencyInjection.Tests
 {
-    [TestFixture]
     public class ServiceScopeFactoryTests
     {
-        [Test]
+        [Fact]
         public void Constructor_PassNullAsParentLifetimeScope_ShouldThrowException()
         {
-            // Assert
-            Assert.Throws<ArgumentNullException>(() => new ServiceScopeFactory(null));
+            // Act & Assert
+            Action action = () => new ServiceScopeFactory(null);
+            action.Should().Throw<ArgumentNullException>();
         }
 
-        [Test]
+        [Fact]
         public void CreateScope_ShouldCreateAndUseChildScope()
         {
             // Arrange
@@ -42,8 +43,8 @@ namespace Aggregator.Microsoft.DependencyInjection.Tests
 
             // Assert
             microsoftServiceScopeFactoryMock.Verify(x => x.CreateScope(), Times.Once);
-            Assert.That(scope, Is.Not.Null);
-            Assert.That(scope.GetService(typeof(int)), Is.EqualTo(1234));
+            scope.Should().NotBeNull();
+            scope.GetService(typeof(int)).Should().Be(1234);
         }
     }
 }
