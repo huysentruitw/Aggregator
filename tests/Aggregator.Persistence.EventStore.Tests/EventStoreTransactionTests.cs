@@ -4,13 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using EventStore.ClientAPI;
+using FluentAssertions;
 using Moq;
 using Newtonsoft.Json;
-using NUnit.Framework;
+using Xunit;
 
 namespace Aggregator.Persistence.EventStore.Tests
 {
-    [TestFixture]
     public class EventStoreTransactionTests
     {
         private readonly Mock<IEventStoreConnection> _eventStoreConnectionMock = new Mock<IEventStoreConnection>();
@@ -19,17 +19,18 @@ namespace Aggregator.Persistence.EventStore.Tests
             TypeNameHandling = TypeNameHandling.Auto
         };
 
-        [Test]
+        [Fact]
         public void StoreEvents_ShouldCallStartTransactionAsync()
         {
             var eventStoreConnectionMock = new Mock<IEventStoreConnection>();
             var transaction = new EventStoreTransaction<string, object>(eventStoreConnectionMock.Object, _jsonSerializerSettings);
             // Will throw NRE because StartTransactionAsync returns null (as we can't easily mock an EventStoreTransaction)
-            Assert.ThrowsAsync<NullReferenceException>(() => transaction.StoreEvents("some_id", 1, Enumerable.Empty<object>()));
+            Func<Task> action = () => transaction.StoreEvents("some_id", 1, Enumerable.Empty<object>());
+            action.Should().Throw<NullReferenceException>();
             eventStoreConnectionMock.Verify(x => x.StartTransactionAsync("some_id", 0, null), Times.Once);
         }
 
-        [Test]
+        [Fact]
         public async Task StoreEvents_ShouldWriteEventDataToTransaction()
         {
             var events = new object[] { new EventA(), new EventB() };
@@ -55,13 +56,13 @@ namespace Aggregator.Persistence.EventStore.Tests
 
             createTransactionMock.Verify(x => x(It.IsAny<IEventStoreConnection>(), It.IsAny<string>(), It.IsAny<long>()), Times.Once);
 
-            Assert.That(capturedEventData, Is.Not.Null, "WriteAsync method of wrapped transaction not called");
-            Assert.That(capturedEventData, Has.Length.EqualTo(2));
-            Assert.That(Encoding.UTF8.GetString(capturedEventData[0].Data), Is.EqualTo("{\"$type\":\"Aggregator.Persistence.EventStore.Tests.EventStoreTransactionTests+EventA, Aggregator.Persistence.EventStore.Tests\"}"));
-            Assert.That(Encoding.UTF8.GetString(capturedEventData[1].Data), Is.EqualTo("{\"$type\":\"Aggregator.Persistence.EventStore.Tests.EventStoreTransactionTests+EventB, Aggregator.Persistence.EventStore.Tests\"}"));
+            capturedEventData.Should().NotBeNull(because: "WriteAsync method of wrapped transaction not called");
+            capturedEventData.Should().HaveCount(2);
+            Encoding.UTF8.GetString(capturedEventData[0].Data).Should().Be("{\"$type\":\"Aggregator.Persistence.EventStore.Tests.EventStoreTransactionTests+EventA, Aggregator.Persistence.EventStore.Tests\"}");
+            Encoding.UTF8.GetString(capturedEventData[1].Data).Should().Be("{\"$type\":\"Aggregator.Persistence.EventStore.Tests.EventStoreTransactionTests+EventB, Aggregator.Persistence.EventStore.Tests\"}");
         }
 
-        [Test]
+        [Fact]
         public async Task StoreEvents_ShouldCreateAPendingTransactionForEachCall()
         {
             var createTransactionMock = new Mock<Func<IEventStoreConnection, string, long, Task<IWrappedTransaction>>>();
@@ -83,7 +84,7 @@ namespace Aggregator.Persistence.EventStore.Tests
             createTransactionMock.Verify(x => x(It.IsAny<IEventStoreConnection>(), It.IsAny<string>(), It.IsAny<long>()), Times.Exactly(2));
         }
 
-        [Test]
+        [Fact]
         public async Task Commit_ShouldCommitAndDisposeAllPendingTransactions()
         {
             var wrappedTransactionMocks = new List<Mock<IWrappedTransaction>>();
@@ -107,7 +108,7 @@ namespace Aggregator.Persistence.EventStore.Tests
             await transaction.StoreEvents("some_id", 1, new object[] { new EventA(), new EventB() });
             await transaction.StoreEvents("some_id", 1, new object[] { new EventA(), new EventB() });
 
-            Assert.That(wrappedTransactionMocks, Has.Count.EqualTo(3));
+            wrappedTransactionMocks.Should().HaveCount(3);
             wrappedTransactionMocks[0].Verify(x => x.Rollback(), Times.Never);
             wrappedTransactionMocks[1].Verify(x => x.Rollback(), Times.Never);
             wrappedTransactionMocks[2].Verify(x => x.Rollback(), Times.Never);
@@ -142,7 +143,7 @@ namespace Aggregator.Persistence.EventStore.Tests
             wrappedTransactionMocks[2].Verify(x => x.Dispose(), Times.Once);
         }
 
-        [Test]
+        [Fact]
         public async Task Rollback_ShouldRollbackAndDisposeAllPendingTransactions()
         {
             var wrappedTransactionMocks = new List<Mock<IWrappedTransaction>>();
@@ -166,7 +167,7 @@ namespace Aggregator.Persistence.EventStore.Tests
             await transaction.StoreEvents("some_id", 1, new object[] { new EventA(), new EventB() });
             await transaction.StoreEvents("some_id", 1, new object[] { new EventA(), new EventB() });
 
-            Assert.That(wrappedTransactionMocks, Has.Count.EqualTo(3));
+            wrappedTransactionMocks.Should().HaveCount(3);
             wrappedTransactionMocks[0].Verify(x => x.Rollback(), Times.Never);
             wrappedTransactionMocks[1].Verify(x => x.Rollback(), Times.Never);
             wrappedTransactionMocks[2].Verify(x => x.Rollback(), Times.Never);
@@ -201,7 +202,7 @@ namespace Aggregator.Persistence.EventStore.Tests
             wrappedTransactionMocks[2].Verify(x => x.Dispose(), Times.Once);
         }
 
-        [Test]
+        [Fact]
         public async Task Dispose_ShouldRollbackAndDisposeAllPendingTransaction()
         {
             var wrappedTransactionMocks = new List<Mock<IWrappedTransaction>>();
@@ -225,7 +226,7 @@ namespace Aggregator.Persistence.EventStore.Tests
             await transaction.StoreEvents("some_id", 1, new object[] { new EventA(), new EventB() });
             await transaction.StoreEvents("some_id", 1, new object[] { new EventA(), new EventB() });
 
-            Assert.That(wrappedTransactionMocks, Has.Count.EqualTo(3));
+            wrappedTransactionMocks.Should().HaveCount(3);
             wrappedTransactionMocks[0].Verify(x => x.Rollback(), Times.Never);
             wrappedTransactionMocks[1].Verify(x => x.Rollback(), Times.Never);
             wrappedTransactionMocks[2].Verify(x => x.Rollback(), Times.Never);
