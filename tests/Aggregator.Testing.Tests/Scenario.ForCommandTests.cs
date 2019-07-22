@@ -1,35 +1,38 @@
 using System;
 using Aggregator.Testing.Tests.TestDomain;
-using NUnit.Framework;
+using FluentAssertions;
+using Xunit;
 
 namespace Aggregator.Testing.Tests
 {
-    [TestFixture]
     public sealed partial class ScenarioTests
     {
-        [Test]
+        [Fact]
         public void ForCommand_ShouldReturnCommandContinuation()
         {
             // Act
             var commandContinuation = Scenario.ForCommand(() => Person.Register("Indy Struyck"));
 
             // Assert
-            Assert.That(commandContinuation, Is.Not.Null);
+            commandContinuation.Should().NotBeNull();
         }
 
-        [Test]
+        [Fact]
         public void ForCommand_ConstructorIsNull_ShouldThrowArgumentNullException()
         {
-            // Act & Assert
-            var exception = Assert.Throws<ArgumentNullException>(() => Scenario.ForCommand<Person>(null));
-            Assert.That(exception.ParamName, Is.EqualTo("constructor"));
+            // Act
+            Action action = () => Scenario.ForCommand<Person>(null);
+
+            // Assert
+            action.Should().Throw<ArgumentNullException>()
+                .Which.ParamName.Should().Be("constructor");
         }
 
-        [Test]
+        [Fact]
         public void ForCommand_ExpectedEvents_Assert_ShouldNotThrowException()
         {
             // Act
-            TestDelegate action = () =>
+            Action action = () =>
                 Scenario
                     .ForCommand(Person.Factory)
                     .Given(new PersonRegisteredEvent { Name = "Kenny DT"  })
@@ -41,17 +44,17 @@ namespace Aggregator.Testing.Tests
                     .Assert();
 
             // Assert
-            Assert.DoesNotThrow(action);
+            action.Should().NotThrow();
         }
 
-        [Test]
+        [Fact]
         public void ForCommand_ExpectedEventWithWrongContent_Assert_ShouldThrowException()
         {
             // Arrange
-            var expectedMessage = "Expected member Name.OldValue to be \"Kenny D\" with a length of 7, but \"Kenny DT\" has a length of 8";
+            var expectedMessage = "Expected event:*\"Kenny D\"*but got event:*\"Kenny DT\"*";
 
             // Act
-            TestDelegate action = () =>
+            Action action = () =>
                 Scenario
                     .ForCommand(Person.Factory)
                     .Given(new PersonRegisteredEvent { Name = "Kenny DT" })
@@ -63,18 +66,18 @@ namespace Aggregator.Testing.Tests
                     .Assert();
 
             // Assert
-            var exception = Assert.Throws<AssertionException>(action);
-            Assert.That(exception.Message, Does.StartWith(expectedMessage));
+            action.Should().Throw<AggregatorTestingException>()
+                .WithMessage(expectedMessage);
         }
 
-        [Test]
+        [Fact]
         public void ForCommand_DifferentEvent_Assert_ShouldThrowException()
         {
             // Arrange
-            var expectedMessage = "Expected type to be Aggregator.Testing.Tests.TestDomain.PersonDeletedEvent, but found Aggregator.Testing.Tests.TestDomain.PersonNameUpdatedEvent";
+            var expectedMessage = "Expected event at index 0 to be of type Aggregator.Testing.Tests.TestDomain.PersonDeletedEvent, but got an event of type Aggregator.Testing.Tests.TestDomain.PersonNameUpdatedEvent instead";
 
             // Act
-            TestDelegate action = () =>
+            Action action = () =>
                 Scenario
                     .ForCommand(Person.Factory)
                     .Given(new PersonRegisteredEvent { Name = "Kenny DT" })
@@ -86,15 +89,15 @@ namespace Aggregator.Testing.Tests
                     .Assert();
 
             // Assert
-            var exception = Assert.Throws<AssertionException>(action);
-            Assert.That(exception.Message, Does.StartWith(expectedMessage));
+            action.Should().Throw<AggregatorTestingException>()
+                .WithMessage(expectedMessage);
         }
 
-        [Test]
+        [Fact]
         public void ForCommand_UpdateOnDeletedAggregate_AssertOnExpectedThrownException_ShouldSucceed()
         {
             // Act
-            TestDelegate action = () =>
+            Action action = () =>
                 Scenario
                     .ForCommand(Person.Factory)
                     .Given(
@@ -105,14 +108,39 @@ namespace Aggregator.Testing.Tests
                     .Assert();
 
             // Assert
-            Assert.DoesNotThrow(action);
+            action.Should().NotThrow();
         }
 
-        [Test]
+        [Fact]
+        public void ForCommand_UpdateOnDeletedAggregate_AssertOnExpectedThrowExceptionButWithDifferentPropertyValues_ShouldThrowException()
+        {
+            // Arrange
+            var expectedMessage = "Expected exception:*Other name*to be thrown, but got exception:*Jan Itan*";
+
+            // Act
+            Action action = () =>
+                Scenario
+                    .ForCommand(Person.Factory)
+                    .Given(
+                        new PersonRegisteredEvent { Name = "Jan Itan" },
+                        new PersonDeletedEvent { Name = "Jan Itan" })
+                    .When(person => person.UpdateName("Jan Kanban"))
+                    .Throws(new PersonDeletedException("Other name"))
+                    .Assert();
+
+            // Assert
+            action.Should().Throw<AggregatorTestingException>()
+                .WithMessage(expectedMessage);
+        }
+
+        [Fact]
         public void ForCommand_UpdateOnDeletedAggregate_AssertOnDifferentThrownException_ShouldThrowException()
         {
+            // Arrange
+            var expectedMessage = "Expected an exception of type System.InvalidOperationException to be thrown, but got an exception of type Aggregator.Testing.Tests.TestDomain.PersonDeletedException instead";
+
             // Act
-            TestDelegate action = () =>
+            Action action = () =>
                 Scenario
                     .ForCommand(Person.Factory)
                     .Given(
@@ -123,7 +151,8 @@ namespace Aggregator.Testing.Tests
                     .Assert();
 
             // Assert
-            Assert.Throws<AssertionException>(action);
+            action.Should().Throw<AggregatorTestingException>()
+                .WithMessage(expectedMessage);
         }
     }
 }

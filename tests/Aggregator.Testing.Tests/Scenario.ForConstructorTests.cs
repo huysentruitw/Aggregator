@@ -1,36 +1,39 @@
 using System;
 using System.Text;
 using Aggregator.Testing.Tests.TestDomain;
-using NUnit.Framework;
+using FluentAssertions;
+using Xunit;
 
 namespace Aggregator.Testing.Tests
 {
-    [TestFixture]
     public sealed partial class ScenarioTests
     {
-        [Test]
+        [Fact]
         public void ForConstructor_ShouldReturnConstructorContinuation()
         {
             // Act
             var constructorContinuation = Scenario.ForConstructor(() => Person.Register("Indy Struyck"));
 
             // Assert
-            Assert.That(constructorContinuation, Is.Not.Null);
+            constructorContinuation.Should().NotBeNull();
         }
 
-        [Test]
+        [Fact]
         public void ForConstructor_ConstructorIsNull_ShouldThrowArgumentNullException()
         {
-            // Act & Assert
-            var exception = Assert.Throws<ArgumentNullException>(() => Scenario.ForConstructor<Person>(null));
-            Assert.That(exception.ParamName, Is.EqualTo("constructor"));
+            // Act
+            Action action = () => Scenario.ForConstructor<Person>(null);
+
+            // Assert
+            action.Should().Throw<ArgumentNullException>()
+                .Which.ParamName.Should().Be("constructor");
         }
 
-        [Test]
+        [Fact]
         public void ForConstructor_ExpectedEvent_Assert_ShouldNotThrowException()
         {
             // Act
-            TestDelegate action = () =>
+            Action action = () =>
                 Scenario
                     .ForConstructor(() => Person.Register("Kenny Di Tunnel"))
                     .Then(new PersonRegisteredEvent
@@ -40,20 +43,17 @@ namespace Aggregator.Testing.Tests
                     .Assert();
 
             // Assert
-            Assert.DoesNotThrow(action);
+            action.Should().NotThrow();
         }
 
-        [Test]
+        [Fact]
         public void ForConstructor_ExpectedEventWithWrongContent_Assert_ShouldThrowException()
         {
             // Arrange
-            var expectedMessage = new StringBuilder();
-            expectedMessage.AppendLine("Expected member Name to be ");
-            expectedMessage.AppendLine("\"Marieke Rechte\" with a length of 14, but ");
-            expectedMessage.Append("\"Kenny Di Tunnel\" has a length of 15");
+            var expectedMessage = "Expected event:*\"Marieke Rechte\"*but got event:*\"Kenny Di Tunnel\"*";
 
             // Act
-            TestDelegate action = () =>
+            Action action = () =>
                 Scenario
                     .ForConstructor(() => Person.Register("Kenny Di Tunnel"))
                     .Then(new PersonRegisteredEvent
@@ -63,18 +63,18 @@ namespace Aggregator.Testing.Tests
                     .Assert();
 
             // Assert
-            var exception = Assert.Throws<AssertionException>(action);
-            Assert.That(exception.Message, Does.StartWith(expectedMessage.ToString()));
+            action.Should().Throw<AggregatorTestingException>()
+                .WithMessage(expectedMessage);
         }
 
-        [Test]
+        [Fact]
         public void ForConstructor_DifferentEvent_Assert_ShouldThrowException()
         {
             // Arrange
-            var expectedMessage = "Expected type to be Aggregator.Testing.Tests.TestDomain.PersonNameUpdatedEvent, but found Aggregator.Testing.Tests.TestDomain.PersonRegisteredEvent";
-            
+            var expectedMessage = "Expected event at index 0 to be of type Aggregator.Testing.Tests.TestDomain.PersonNameUpdatedEvent, but got an event of type Aggregator.Testing.Tests.TestDomain.PersonRegisteredEvent instead";
+
             // Act
-            TestDelegate action = () =>
+            Action action = () =>
                 Scenario
                     .ForConstructor(() => Person.Register("Kenny Di Tunnel"))
                     .Then(new PersonNameUpdatedEvent
@@ -84,8 +84,8 @@ namespace Aggregator.Testing.Tests
                     .Assert();
 
             // Assert
-            var exception = Assert.Throws<AssertionException>(action);
-            Assert.That(exception.Message, Does.StartWith(expectedMessage.ToString()));
+            action.Should().Throw<AggregatorTestingException>()
+                .WithMessage(expectedMessage);
         }
     }
 }
