@@ -24,6 +24,10 @@ Autofac DI integration package:
 
     PM> Install-Package Aggregator.Autofac
 
+Testing package:
+
+    PM> Install-Package Aggregator.Testing
+
 ## Usage
 
 ### Registering dependencies
