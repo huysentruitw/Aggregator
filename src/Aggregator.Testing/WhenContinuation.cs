@@ -17,7 +17,6 @@ namespace Aggregator.Testing
 
         public ThenContinuation<TAggregateRoot, TEventBase> Then(params TEventBase[] expectedEvents)
         {
-            if (!expectedEvents.Any()) throw new ArgumentException("Array should not be empty", nameof(expectedEvents));
             return new ThenContinuation<TAggregateRoot, TEventBase>(_aggregateRoot, _action, expectedEvents);
         }
 
