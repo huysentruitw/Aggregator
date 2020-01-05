@@ -238,3 +238,4 @@ _Pvt_Extensions
 *.ncrunchsolution
 _testing/
 *.DotSettings
+.idea
