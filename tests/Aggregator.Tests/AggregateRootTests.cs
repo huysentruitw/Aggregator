@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Aggregator.Exceptions;
 using Aggregator.Internal;
@@ -8,6 +9,7 @@ using Xunit;
 
 namespace Aggregator.Tests
 {
+    [SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
     public class AggregateRootTests
     {
         [Fact]
@@ -142,7 +144,7 @@ namespace Aggregator.Tests
 
         public abstract class FakeAggregateRoot : AggregateRoot
         {
-            public FakeAggregateRoot()
+            protected FakeAggregateRoot()
             {
                 Register<EventA>(OnEventA);
                 Register<EventB>(OnEventB);
@@ -154,6 +156,7 @@ namespace Aggregator.Tests
 
             public void ApplyB() => Apply(new EventB());
 
+            // ReSharper disable once InconsistentNaming
             public void ApplyBA()
             {
                 Apply(new EventB());
