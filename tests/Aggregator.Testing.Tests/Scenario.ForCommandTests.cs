@@ -154,5 +154,24 @@ namespace Aggregator.Testing.Tests
             action.Should().Throw<AggregatorTestingException>()
                 .WithMessage(expectedMessage);
         }
+
+        [Fact]
+        public void ForCommand_ExpectExceptionToBeThrownButNothingIsBeingThrown_ShouldThrowException()
+        {
+            // Arrange
+            var expectedMessage = "Expected an exception of type System.InvalidOperationException to be thrown, but no exception was thrown instead";
+
+            // Act
+            Action action = () =>
+                Scenario
+                    .ForCommand(Person.Factory)
+                    .When(person => person.UpdateName("Piet Huysentruyt"))
+                    .Throws<InvalidOperationException>()
+                    .Assert();
+
+            // Assert
+            action.Should().Throw<AggregatorTestingException>()
+                .WithMessage(expectedMessage);
+        }
     }
 }

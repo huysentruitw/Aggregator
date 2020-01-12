@@ -33,5 +33,11 @@ namespace Aggregator.Testing
             ((IAggregateRootInitializer<TEventBase>)_aggregateRoot).Initialize(initialEvents);
             return new GivenContinuation<TAggregateRoot, TEventBase>(_aggregateRoot);
         }
+
+        public WhenContinuation<TAggregateRoot, TEventBase> When(Action<TAggregateRoot> whenAction)
+        {
+            if (whenAction == null) throw new ArgumentNullException(nameof(whenAction));
+            return new WhenContinuation<TAggregateRoot, TEventBase>(_aggregateRoot, whenAction);
+        }
     }
 }

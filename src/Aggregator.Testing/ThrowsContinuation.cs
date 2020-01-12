@@ -35,7 +35,7 @@ namespace Aggregator.Testing
                 _action();
                 throw new AggregatorTestingException($"Expected an exception of type {expectedExceptionType} to be thrown, but no exception was thrown instead");
             }
-            catch (Exception ex)
+            catch (Exception ex) when (!(ex is AggregatorTestingException))
             {
                 var exceptionType = ex.GetType();
 
