@@ -4,7 +4,7 @@
 
 Aggregator contains some fundamental base classes and interfaces for building a CQRS/ES based application.
 
-Supports .NET Core, .NET Standard, .NET Framework.
+Supports .NET Standard 2.0 and 2.1 (.NET Core 2.2 and 3.1).
 
 ## Get it on NuGet
 
