@@ -68,7 +68,6 @@ sealed class User : AggregateRoot
         {
             GivenName = givenName,
             Surname = surname,
-            DateCreatedUtc = DateTimeOffset.UtcNow,
             // ...
         });
 
@@ -80,7 +79,6 @@ sealed class User : AggregateRoot
         {
             GivenName = UpdatedInfo.From(_givenName).To(givenName),
             Surname = _surname,
-            DateUpdatedUtc = DateTimeOffset.UtcNow,
             // ...
         });
     }
@@ -252,6 +250,44 @@ There's an integration NuGet package available for using EventStore (`Aggregator
 The `CommandProcessor` also depends on an implementation of [`IEventDispatcher<TEventBase>`](./src/Aggregator/Event/IEventDispatcher.cs) which will be used to dispatch one or more events that were generated during the processing of a single command inside the command domain. The implementation of the `IEventDispatcher<TEventBase>` interface is responsible for forwarding events to classes that implement the [`IEventHandler<TEvent>`](./src/Aggregator/Event/IEventHandler.cs) interface inside the command domain. A typical example of classes that listen to one or more events are Process Managers (sometimes referred to as Sagas) that act on events, keep track of some kind of long running state and send out commands depending on that state. Since the work and state of process managers is important, the `CommandProcessor` will also rollback the event store transaction in case something goes wrong during event dispatching.
 
 [`EventDispatcher<TEventBase>`](./src/Aggregator/Event/EventDispatcher.cs) is a default implementation that can be used for dispatching events.
+
+## Testing Aggregates
+
+The package Aggregator.Testing can be used to write unit-tests against your aggregate roots.
+
+### Testing static constructors
+
+```csharp
+Scenario
+    .ForConstructor(() => User.Create("John", "Doe"))
+    .Then(new CreatedUserEvent
+    {
+        GivenName = "John",
+        Surname = "Doe",
+    })
+    .Assert();
+```
+
+### Testing aggregate commands
+
+```csharp
+Scenario
+    .ForCommand(User.Factory)
+    .Given(
+        new CreatedUserEvent
+        {
+            GivenName = "John",
+            Surname = "Doe",
+        })
+    .When(user => user.SetGivenName("Jon"))
+    .Then(
+        new UpdatedUserGivenNameEvent
+        {
+            GivenName = UpdatedInfo.From("John").To("Jon"),
+            Surname = "Doe",
+        })
+    .Assert();
+```
 
 ## Contributing
 
