@@ -104,28 +104,19 @@ namespace Aggregator.Command
                 using (var transaction = _eventStore.BeginTransaction(context))
                 {
                     var storedEvents = new List<TEventBase>();
-
-                    try
+                    foreach (var aggregateRootEntity in unitOfWork.GetChanges())
                     {
-                        foreach (var aggregateRootEntity in unitOfWork.GetChanges())
-                        {
-                            var events = aggregateRootEntity.GetChanges();
-                            events = events.Select(x => _notificationHandlers.OnEnrichEvent(x, command, context)).ToArray();
-                            await transaction.StoreEvents(aggregateRootEntity.Identifier, aggregateRootEntity.ExpectedVersion, events, cancellationToken).ConfigureAwait(false);
-                            storedEvents.AddRange(events);
-                        }
-
-                        cancellationToken.ThrowIfCancellationRequested();
-                        await _eventDispatcher.Dispatch(storedEvents.ToArray(), cancellationToken).ConfigureAwait(false);
-                        cancellationToken.ThrowIfCancellationRequested();
-
-                        await transaction.Commit().ConfigureAwait(false);
+                        var events = aggregateRootEntity.GetChanges();
+                        events = events.Select(x => _notificationHandlers.OnEnrichEvent(x, command, context)).ToArray();
+                        await transaction.StoreEvents(aggregateRootEntity.Identifier, aggregateRootEntity.ExpectedVersion, events, cancellationToken).ConfigureAwait(false);
+                        storedEvents.AddRange(events);
                     }
-                    catch
-                    {
-                        await transaction.Rollback().ConfigureAwait(false);
-                        throw;
-                    }
+
+                    cancellationToken.ThrowIfCancellationRequested();
+                    await _eventDispatcher.Dispatch(storedEvents.ToArray(), cancellationToken).ConfigureAwait(false);
+                    cancellationToken.ThrowIfCancellationRequested();
+
+                    await transaction.Commit().ConfigureAwait(false);
                 }
             }
         }

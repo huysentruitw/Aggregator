@@ -263,7 +263,6 @@ namespace Aggregator.Tests.Command
             eventStoreMock.Verify(x => x.BeginTransaction(It.IsAny<CommandHandlingContext>()), Times.Once);
 
             transactionMock.Verify(x => x.Commit(), Times.Never);
-            transactionMock.Verify(x => x.Rollback(), Times.Once);
             transactionMock.Verify(x => x.Dispose(), Times.Once);
         }
 
@@ -299,7 +298,6 @@ namespace Aggregator.Tests.Command
             eventStoreMock.Verify(x => x.BeginTransaction(It.IsAny<CommandHandlingContext>()), Times.Once);
 
             transactionMock.Verify(x => x.Commit(), Times.Never);
-            transactionMock.Verify(x => x.Rollback(), Times.Once);
             transactionMock.Verify(x => x.Dispose(), Times.Once);
         }
 
