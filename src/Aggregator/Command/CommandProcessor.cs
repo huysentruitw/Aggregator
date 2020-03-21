@@ -76,7 +76,7 @@ namespace Aggregator.Command
         /// <param name="command">The command to process.</param>
         /// <param name="cancellationToken">A cancellation token that allows cancelling the process.</param>
         /// <returns>An awaitable <see cref="Task"/>.</returns>
-        public async Task Process(TCommandBase command, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task Process(TCommandBase command, CancellationToken cancellationToken = default)
         {
             if (command == null) throw new ArgumentNullException(nameof(command));
 

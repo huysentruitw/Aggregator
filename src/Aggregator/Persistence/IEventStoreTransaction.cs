@@ -29,6 +29,6 @@ namespace Aggregator.Persistence
         /// <param name="events">The events to store for the aggregate root.</param>
         /// <param name="cancellationToken">A cancellation token that allows cancelling the process.</param>
         /// <returns>An awaitable <see cref="Task"/>.</returns>
-        Task StoreEvents(TIdentifier identifier, long expectedVersion, IEnumerable<TEventBase> events, CancellationToken cancellationToken = default(CancellationToken));
+        Task StoreEvents(TIdentifier identifier, long expectedVersion, IEnumerable<TEventBase> events, CancellationToken cancellationToken = default);
     }
 }

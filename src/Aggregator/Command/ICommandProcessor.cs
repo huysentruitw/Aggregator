@@ -22,6 +22,6 @@ namespace Aggregator.Command
         /// <param name="command">The command to process.</param>
         /// <param name="cancellationToken">A cancellation token that allows cancelling the process.</param>
         /// <returns>An awaitable <see cref="Task"/>.</returns>
-        Task Process(TCommandBase command, CancellationToken cancellationToken = default(CancellationToken));
+        Task Process(TCommandBase command, CancellationToken cancellationToken = default);
     }
 }

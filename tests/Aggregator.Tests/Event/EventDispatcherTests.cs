@@ -29,10 +29,10 @@ namespace Aggregator.Tests.Event
             var dispatcher = new EventDispatcher<object>(serviceScopeFactoryMock.Object);
 
             // Act / Assert
-            Func<Task> action = () => dispatcher.Dispatch(null, default(CancellationToken));
+            Func<Task> action = () => dispatcher.Dispatch(null, default);
             action.Should().NotThrow();
 
-            action = () => dispatcher.Dispatch(Array.Empty<object>(), default(CancellationToken));
+            action = () => dispatcher.Dispatch(Array.Empty<object>(), default);
             action.Should().NotThrow();
         }
 
@@ -48,7 +48,7 @@ namespace Aggregator.Tests.Event
             var dispatcher = new EventDispatcher<object>(serviceScopeFactoryMock.Object);
 
             // Act
-            await dispatcher.Dispatch(new[] { new EventA() }, default(CancellationToken));
+            await dispatcher.Dispatch(new[] { new EventA() }, default);
 
             // Assert
             serviceScopeFactoryMock.Verify(x => x.CreateScope(), Times.Once);
@@ -66,7 +66,7 @@ namespace Aggregator.Tests.Event
             var dispatcher = new EventDispatcher<object>(serviceScopeFactoryMock.Object);
 
             // Act
-            await dispatcher.Dispatch(new[] { new EventA() }, default(CancellationToken));
+            await dispatcher.Dispatch(new[] { new EventA() }, default);
 
             // Assert
             eventHandlingScopeMock.Verify(x => x.Dispose(), Times.Once);
@@ -81,12 +81,12 @@ namespace Aggregator.Tests.Event
             var dispatcher = new EventDispatcher<object>(fakeServiceScopeFactory);
 
             // Act
-            await dispatcher.Dispatch(new[] { singleEvent }, default(CancellationToken));
+            await dispatcher.Dispatch(new[] { singleEvent }, default);
 
             // Assert
-            fakeServiceScopeFactory.EventAHandlerMock.Verify(x => x.Handle(It.IsAny<EventA>(), default(CancellationToken)), Times.Never);
-            fakeServiceScopeFactory.EventBHandlerMock.Verify(x => x.Handle(It.IsAny<EventB>(), default(CancellationToken)), Times.Once);
-            fakeServiceScopeFactory.EventBHandlerMock.Verify(x => x.Handle(singleEvent, default(CancellationToken)), Times.Once);
+            fakeServiceScopeFactory.EventAHandlerMock.Verify(x => x.Handle(It.IsAny<EventA>(), default), Times.Never);
+            fakeServiceScopeFactory.EventBHandlerMock.Verify(x => x.Handle(It.IsAny<EventB>(), default), Times.Once);
+            fakeServiceScopeFactory.EventBHandlerMock.Verify(x => x.Handle(singleEvent, default), Times.Once);
         }
 
         [Fact]
@@ -99,13 +99,13 @@ namespace Aggregator.Tests.Event
             var dispatcher = new EventDispatcher<object>(fakeServiceScopeFactory);
 
             // Act
-            await dispatcher.Dispatch(new object[] { eventB, eventA }, default(CancellationToken));
+            await dispatcher.Dispatch(new object[] { eventB, eventA }, default);
 
             // Assert
-            fakeServiceScopeFactory.EventAHandlerMock.Verify(x => x.Handle(It.IsAny<EventA>(), default(CancellationToken)), Times.Once);
-            fakeServiceScopeFactory.EventAHandlerMock.Verify(x => x.Handle(eventA, default(CancellationToken)), Times.Once);
-            fakeServiceScopeFactory.EventBHandlerMock.Verify(x => x.Handle(It.IsAny<EventB>(), default(CancellationToken)), Times.Once);
-            fakeServiceScopeFactory.EventBHandlerMock.Verify(x => x.Handle(eventB, default(CancellationToken)), Times.Once);
+            fakeServiceScopeFactory.EventAHandlerMock.Verify(x => x.Handle(It.IsAny<EventA>(), default), Times.Once);
+            fakeServiceScopeFactory.EventAHandlerMock.Verify(x => x.Handle(eventA, default), Times.Once);
+            fakeServiceScopeFactory.EventBHandlerMock.Verify(x => x.Handle(It.IsAny<EventB>(), default), Times.Once);
+            fakeServiceScopeFactory.EventBHandlerMock.Verify(x => x.Handle(eventB, default), Times.Once);
         }
 
         public class FakeServiceScopeFactory : IServiceScopeFactory

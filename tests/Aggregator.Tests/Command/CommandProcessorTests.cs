@@ -117,8 +117,8 @@ namespace Aggregator.Tests.Command
             await processor.Process(command);
 
             // Assert
-            handlerMocks[0].Verify(x => x.Handle(command, default(CancellationToken)), Times.Once);
-            handlerMocks[1].Verify(x => x.Handle(command, default(CancellationToken)), Times.Once);
+            handlerMocks[0].Verify(x => x.Handle(command, default), Times.Once);
+            handlerMocks[1].Verify(x => x.Handle(command, default), Times.Once);
         }
 
         [Fact]
@@ -179,7 +179,7 @@ namespace Aggregator.Tests.Command
             object[] capturedEvents = null;
             var transactionMock = new Mock<IEventStoreTransaction<string, object>>();
             transactionMock
-                .Setup(x => x.StoreEvents("some_id", 5, It.IsAny<IEnumerable<object>>(), default(CancellationToken)))
+                .Setup(x => x.StoreEvents("some_id", 5, It.IsAny<IEnumerable<object>>(), default))
 #pragma warning disable IDE1006 // Naming Styles
                 .Callback<string, long, IEnumerable<object>, CancellationToken>((_, __, events, ___) => capturedEvents = events.ToArray())
 #pragma warning restore IDE1006 // Naming Styles
@@ -248,7 +248,7 @@ namespace Aggregator.Tests.Command
                 .Returns(new[] { new FakeCommandHandler(commandHandlingContext, x => x.DoSomething()) });
             var transactionMock = new Mock<IEventStoreTransaction<string, object>>();
             transactionMock
-                .Setup(x => x.StoreEvents("some_id", 5, It.IsAny<IEnumerable<object>>(), default(CancellationToken)))
+                .Setup(x => x.StoreEvents("some_id", 5, It.IsAny<IEnumerable<object>>(), default))
                 .Callback(() => throw new InvalidOperationException("StoreEvents failed"));
             var eventStoreMock = NewEventStoreMock;
             eventStoreMock
@@ -283,7 +283,7 @@ namespace Aggregator.Tests.Command
                 .Returns(new[] { new FakeCommandHandler(commandHandlingContext, x => x.DoSomething()) });
             var eventDispatcherMock = NewEventDispatcherMock;
             eventDispatcherMock
-                .Setup(x => x.Dispatch(It.IsAny<object[]>(), default(CancellationToken)))
+                .Setup(x => x.Dispatch(It.IsAny<object[]>(), default))
                 .Callback(() => throw new InvalidOperationException("Dispatch failed"));
             var transactionMock = new Mock<IEventStoreTransaction<string, object>>();
             var eventStoreMock = NewEventStoreMock;
@@ -341,7 +341,7 @@ namespace Aggregator.Tests.Command
             object[] dispatchedEvents = null;
             var eventDispatcherMock = NewEventDispatcherMock;
             eventDispatcherMock
-                .Setup(x => x.Dispatch(It.IsAny<object[]>(), default(CancellationToken)))
+                .Setup(x => x.Dispatch(It.IsAny<object[]>(), default))
                 .Callback<object[], CancellationToken>((events, _) => dispatchedEvents = events)
                 .Returns(Task.CompletedTask);
             var transactionMock = new Mock<IEventStoreTransaction<string, object>>();
@@ -355,7 +355,7 @@ namespace Aggregator.Tests.Command
             await processor.Process(new FakeCommand());
 
             // Assert
-            eventDispatcherMock.Verify(x => x.Dispatch(It.IsAny<object[]>(), default(CancellationToken)), Times.Once);
+            eventDispatcherMock.Verify(x => x.Dispatch(It.IsAny<object[]>(), default), Times.Once);
             dispatchedEvents.Should().NotBeNull();
             dispatchedEvents.Should().HaveCount(2);
             dispatchedEvents[0].Should().BeOfType<FakeEvent2>();
@@ -413,7 +413,7 @@ namespace Aggregator.Tests.Command
                 .Setup(x => x.BeginTransaction(It.IsAny<CommandHandlingContext>()))
                 .Returns(transactionMock.Object);
             transactionMock
-                .Setup(x => x.StoreEvents("some_id", 5, It.IsAny<IEnumerable<object>>(), default(CancellationToken)))
+                .Setup(x => x.StoreEvents("some_id", 5, It.IsAny<IEnumerable<object>>(), default))
                 .Callback<string, long, IEnumerable<object>, CancellationToken>((_, __, x, ___) => capturedStoredEvents = x)
                 .Returns(Task.CompletedTask);
             var command = new FakeCommand();
@@ -442,7 +442,7 @@ namespace Aggregator.Tests.Command
             enrichEventMock.Verify(x => x(capturedEvent1, command, commandHandlingContext), Times.Once);
             enrichEventMock.Verify(x => x(capturedEvent2, command, commandHandlingContext), Times.Once);
 
-            transactionMock.Verify(x => x.StoreEvents("some_id", 5, capturedStoredEvents, default(CancellationToken)), Times.Once);
+            transactionMock.Verify(x => x.StoreEvents("some_id", 5, capturedStoredEvents, default), Times.Once);
             capturedStoredEvents.Should().Contain(event1);
             capturedStoredEvents.Should().Contain(event2);
         }
