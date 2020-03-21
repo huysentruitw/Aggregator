@@ -56,8 +56,7 @@ namespace Aggregator.Testing
 
     internal sealed class ExceptionContractResolver : DefaultContractResolver
     {
-        private static readonly string[] IgnoredProperties = new[]
-        {
+        private static readonly string[] IgnoredProperties = {
             nameof(Exception.InnerException),
             nameof(Exception.StackTrace),
             nameof(Exception.HelpLink),
