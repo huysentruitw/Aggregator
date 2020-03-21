@@ -7,6 +7,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
 		CONTRIBUTING.md = CONTRIBUTING.md
+		Directory.Build.props = Directory.Build.props
 		Jenkinsfile = Jenkinsfile
 		LICENSE.txt = LICENSE.txt
 		README.md = README.md
@@ -32,7 +33,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aggregator.Abstractions", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aggregator.Testing", "src\Aggregator.Testing\Aggregator.Testing.csproj", "{9B270C3A-0CA4-4C92-BA2A-142D4C93978C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aggregator.Testing.Tests", "tests\Aggregator.Testing.Tests\Aggregator.Testing.Tests.csproj", "{2BD073F6-614F-41CB-8FE3-12CC248C9123}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aggregator.Testing.Tests", "tests\Aggregator.Testing.Tests\Aggregator.Testing.Tests.csproj", "{2BD073F6-614F-41CB-8FE3-12CC248C9123}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
