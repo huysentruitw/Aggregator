@@ -81,7 +81,7 @@ namespace Aggregator.Persistence.EventStore
         /// <param name="events">The events to store.</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
         /// <returns>A <see cref="Task"/>.</returns>
-        public async Task StoreEvents(TIdentifier identifier, long expectedVersion, IEnumerable<TEventBase> events, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task StoreEvents(TIdentifier identifier, long expectedVersion, IEnumerable<TEventBase> events, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
             var transaction = await _createTransaction(_connection, identifier.ToString(), expectedVersion - 1).ConfigureAwait(false);

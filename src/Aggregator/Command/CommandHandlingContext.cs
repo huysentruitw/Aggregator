@@ -25,6 +25,6 @@ namespace Aggregator.Command
         /// <param name="key">The property key.</param>
         /// <returns>The property value or default in case the property was not found.</returns>
         public T Get<T>(string key)
-            => _properties.TryGetValue(key, out var value) ? (T)value : default(T);
+            => _properties.TryGetValue(key, out var value) ? (T)value : default;
     }
 }
