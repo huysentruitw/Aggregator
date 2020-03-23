@@ -12,8 +12,10 @@ namespace Aggregator.Tests.Command
         public void OnPrepareContext_PrepareContextIsNull_ShouldNotThrowException()
         {
             // Arrange
-            var handlers = new CommandProcessorNotificationHandlers();
-            handlers.PrepareContext = null;
+            var handlers = new CommandProcessorNotificationHandlers
+            {
+                PrepareContext = null
+            };
 
             // Act & Assert
             Action action = () => handlers.OnPrepareContext(null, null);
@@ -41,8 +43,10 @@ namespace Aggregator.Tests.Command
         public void OnEnrichEvent_EnrichEventIsNull_ShouldNotThrowException()
         {
             // Arrange
-            var handlers = new CommandProcessorNotificationHandlers();
-            handlers.EnrichEvent = null;
+            var handlers = new CommandProcessorNotificationHandlers
+            {
+                EnrichEvent = null
+            };
 
             // Act & Assert
             Action action = () => handlers.OnEnrichEvent(null, null, null);

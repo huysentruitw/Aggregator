@@ -15,7 +15,7 @@ namespace Aggregator.Tests.DI
             var serviceScopeMock = new Mock<IServiceScope>();
 
             // Act
-            ServiceScopeExtensionMethods.GetService<A>(serviceScopeMock.Object);
+            serviceScopeMock.Object.GetService<A>();
 
             // Assert
             serviceScopeMock.Verify(x => x.GetService(typeof(A)), Times.Once);
@@ -29,7 +29,7 @@ namespace Aggregator.Tests.DI
             var serviceScopeMock = new Mock<IServiceScope>();
 
             // Act
-            ServiceScopeExtensionMethods.GetServices<A>(serviceScopeMock.Object);
+            serviceScopeMock.Object.GetServices<A>();
 
             // Assert
             serviceScopeMock.Verify(x => x.GetService(typeof(IEnumerable<A>)), Times.Once);

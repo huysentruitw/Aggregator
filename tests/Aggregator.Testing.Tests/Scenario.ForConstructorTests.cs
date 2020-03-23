@@ -1,5 +1,4 @@
 using System;
-using System.Text;
 using Aggregator.Testing.Tests.TestDomain;
 using FluentAssertions;
 using Xunit;

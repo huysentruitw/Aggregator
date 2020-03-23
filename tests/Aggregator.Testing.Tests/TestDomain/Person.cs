@@ -1,5 +1,3 @@
-using System;
-
 namespace Aggregator.Testing.Tests.TestDomain
 {
     public class Person : AggregateRoot
