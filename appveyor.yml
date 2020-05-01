@@ -20,7 +20,7 @@ build_script:
 
 test_script:
 - ps: >-
-    .\packages\OpenCover.4.7.922\tools\OpenCover.Console.exe -register -target:"C:/Program Files/dotnet/dotnet.exe" -targetargs:"test --logger:trx;LogFileName=results.trx /p:DebugType=full" -output:"coverage.xml" -excludebyattribute:*.ExcludeFromCodeCoverageAttribute -hideskipped:attribute -filter:"+[Aggregator*]* -[Aggregator.Tests*]*"
+    .\packages\OpenCover.4.7.922\tools\OpenCover.Console.exe -register -target:"C:/Program Files/dotnet/dotnet.exe" -targetargs:"test --logger:trx;LogFileName=results.trx /p:DebugType=full" -output:"coverage.xml" -excludebyattribute:*.ExcludeFromCodeCoverageAttribute -hideskipped:attribute -filter:"+[Aggregator*]* -[Aggregator.*.Tests*]* -[Aggregator.Tests*]*"
 
     $env:PATH = 'C:\msys64\usr\bin;' + $env:PATH
 
