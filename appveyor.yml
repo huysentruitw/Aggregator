@@ -19,6 +19,9 @@ build_script:
 
 test_script:
   - ps: dotnet test --configuration Release --no-build /p:GeneratePackageOnBuild=false
+
+artifacts:
+  - path: '**\*.nupkg'
   
 deploy:
 - provider: NuGet
