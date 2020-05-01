@@ -20,7 +20,7 @@ namespace Aggregator.Persistence.EventStore
         }
 
         /// <summary>
-        /// Constructs a new <see cref="EventStore"/> instance.
+        /// Initializes a new instance of the <see cref="EventStore"/> class.
         /// </summary>
         /// <param name="connectionString">The connection string.</param>
         [ExcludeFromCodeCoverage]
@@ -33,8 +33,8 @@ namespace Aggregator.Persistence.EventStore
     /// <summary>
     /// The generic eventstore implementation.
     /// </summary>
-    /// <typeparam name="TIdentifier">The </typeparam>
-    /// <typeparam name="TEventBase"></typeparam>
+    /// <typeparam name="TIdentifier">The type of the aggregate identifier.</typeparam>
+    /// <typeparam name="TEventBase">The event base type.</typeparam>
     public class EventStore<TIdentifier, TEventBase> : IEventStore<TIdentifier, TEventBase>, IDisposable
         where TIdentifier : IEquatable<TIdentifier>
     {
@@ -49,12 +49,12 @@ namespace Aggregator.Persistence.EventStore
             {
                 DefaultValueHandling = DefaultValueHandling.Include,
                 NullValueHandling = NullValueHandling.Ignore,
-                TypeNameHandling = TypeNameHandling.Auto
+                TypeNameHandling = TypeNameHandling.Auto,
             };
         }
 
         /// <summary>
-        /// Constructs a new <see cref="EventStore"/> instance.
+        /// Initializes a new instance of the <see cref="EventStore{TIdentifier, TEventBase}"/> class.
         /// </summary>
         /// <param name="connectionString">The connection string.</param>
         [ExcludeFromCodeCoverage]
@@ -79,7 +79,7 @@ namespace Aggregator.Persistence.EventStore
         /// <returns>True if an event stream exists, false when not.</returns>
         public async Task<bool> Contains(TIdentifier identifier)
         {
-            var result = await _connection.ReadEventAsync(identifier.ToString(), 0, false).ConfigureAwait(false);
+            EventReadResult result = await _connection.ReadEventAsync(identifier.ToString(), 0, false).ConfigureAwait(false);
             return result.Status == EventReadStatus.Success;
         }
 
@@ -120,7 +120,7 @@ namespace Aggregator.Persistence.EventStore
         [ExcludeFromCodeCoverage]
         private static IEventStoreConnection Connect(string connectionString)
         {
-            var connection = EventStoreConnection.Create(connectionString);
+            IEventStoreConnection connection = EventStoreConnection.Create(connectionString);
             connection.ConnectAsync().Wait();
             return connection;
         }

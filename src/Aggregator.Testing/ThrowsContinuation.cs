@@ -12,7 +12,7 @@ namespace Aggregator.Testing
     {
         private static readonly JsonSerializerSettings JsonSettings = new JsonSerializerSettings
         {
-            ContractResolver = new ExceptionContractResolver()
+            ContractResolver = new ExceptionContractResolver(),
         };
 
         private readonly TAggregateRoot _aggregateRoot;
@@ -28,7 +28,7 @@ namespace Aggregator.Testing
 
         public void Assert()
         {
-            var expectedExceptionType = _expectedException.GetType();
+            Type expectedExceptionType = _expectedException.GetType();
 
             try
             {
@@ -37,7 +37,7 @@ namespace Aggregator.Testing
             }
             catch (Exception ex) when (!(ex is AggregatorTestingException))
             {
-                var exceptionType = ex.GetType();
+                Type exceptionType = ex.GetType();
 
                 if (exceptionType != expectedExceptionType)
                 {
@@ -56,7 +56,8 @@ namespace Aggregator.Testing
 
     internal sealed class ExceptionContractResolver : DefaultContractResolver
     {
-        private static readonly string[] IgnoredProperties = {
+        private static readonly string[] IgnoredProperties =
+        {
             nameof(Exception.InnerException),
             nameof(Exception.StackTrace),
             nameof(Exception.HelpLink),
@@ -66,7 +67,7 @@ namespace Aggregator.Testing
 
         protected override IList<JsonProperty> CreateProperties(Type type, MemberSerialization memberSerialization)
         {
-            var allProperties = base.CreateProperties(type, memberSerialization);
+            IList<JsonProperty> allProperties = base.CreateProperties(type, memberSerialization);
             return allProperties.Where(x => !IgnoredProperties.Contains(x.PropertyName)).ToList();
         }
     }

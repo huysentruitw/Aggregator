@@ -7,7 +7,11 @@ namespace Aggregator.Testing.Tests.TestDomain
 
         private Person()
         {
-            Register<PersonRegisteredEvent>(e => { _name = e.Name; _isDeleted = false; });
+            Register<PersonRegisteredEvent>(e =>
+            {
+                _name = e.Name;
+                _isDeleted = false;
+            });
             Register<PersonNameUpdatedEvent>(e => { _name = e.Name.NewValue; });
             Register<PersonDeletedEvent>(e => { _isDeleted = true; });
         }
@@ -32,7 +36,7 @@ namespace Aggregator.Testing.Tests.TestDomain
 
             Apply(new PersonNameUpdatedEvent
             {
-                Name = new UpdatedInfo<string>(_name, name)
+                Name = new UpdatedInfo<string>(_name, name),
             });
         }
 
@@ -42,7 +46,7 @@ namespace Aggregator.Testing.Tests.TestDomain
 
             Apply(new PersonDeletedEvent
             {
-                Name = _name
+                Name = _name,
             });
         }
 

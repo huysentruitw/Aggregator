@@ -11,7 +11,7 @@ namespace Aggregator.Microsoft.DependencyInjection
         private readonly IServiceProvider _serviceProvider;
 
         /// <summary>
-        /// Creates a new <see cref="ServiceScopeFactory"/> instance.
+        /// Initializes a new instance of the <see cref="ServiceScopeFactory"/> class.
         /// </summary>
         /// <param name="serviceProvider">The parent service provider.</param>
         public ServiceScopeFactory(IServiceProvider serviceProvider)

@@ -7,7 +7,7 @@ namespace Aggregator.Persistence
     /// <summary>
     /// Interface for an aggregate root repository where the aggregate root identifier is a <see cref="string"/> and commands/events derive from <see cref="object"/>.
     /// </summary>
-    /// <typeparam name="TAggregateRoot"></typeparam>
+    /// <typeparam name="TAggregateRoot">The aggregate root type.</typeparam>
     public interface IRepository<TAggregateRoot> : IRepository<string, object, TAggregateRoot>
         where TAggregateRoot : AggregateRoot, new()
     {
@@ -35,7 +35,7 @@ namespace Aggregator.Persistence
         /// </summary>
         /// <param name="identifier">The identifier.</param>
         /// <returns>The aggregate root.</returns>
-        /// <exception cref="AggregateRootNotFoundException{TIdentifier}"></exception>
+        /// <exception cref="AggregateRootNotFoundException{TIdentifier}">Thrown when the aggregate root was not found.</exception>
         Task<TAggregateRoot> Get(TIdentifier identifier);
 
         /// <summary>
@@ -44,7 +44,7 @@ namespace Aggregator.Persistence
         /// <param name="identifier">The aggregate root identifier.</param>
         /// <param name="aggregateRoot">The aggregate root.</param>
         /// <returns>An awaitable <see cref="Task"/>.</returns>
-        /// <exception cref="AggregateRootAlreadyExistsException{TIdentifier}"></exception>
+        /// <exception cref="AggregateRootAlreadyExistsException{TIdentifier}">Thrown when the aggregate root already exists.</exception>
         Task Add(TIdentifier identifier, TAggregateRoot aggregateRoot);
     }
 }

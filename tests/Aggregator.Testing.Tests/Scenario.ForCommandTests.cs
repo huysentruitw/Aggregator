@@ -35,11 +35,11 @@ namespace Aggregator.Testing.Tests
             Action action = () =>
                 Scenario
                     .ForCommand(Person.Factory)
-                    .Given(new PersonRegisteredEvent { Name = "Kenny DT"  })
+                    .Given(new PersonRegisteredEvent { Name = "Kenny DT" })
                     .When(person => person.UpdateName("Kenny Di Tunnel"))
                     .Then(new PersonNameUpdatedEvent
                     {
-                        Name = new UpdatedInfo<string>("Kenny DT", "Kenny Di Tunnel")
+                        Name = new UpdatedInfo<string>("Kenny DT", "Kenny Di Tunnel"),
                     })
                     .Assert();
 
@@ -51,7 +51,7 @@ namespace Aggregator.Testing.Tests
         public void ForCommand_ExpectedEventWithWrongContent_Assert_ShouldThrowException()
         {
             // Arrange
-            var expectedMessage = "Expected event:*\"Kenny D\"*but got event:*\"Kenny DT\"*";
+            const string expectedMessage = "Expected event:*\"Kenny D\"*but got event:*\"Kenny DT\"*";
 
             // Act
             Action action = () =>
@@ -61,7 +61,7 @@ namespace Aggregator.Testing.Tests
                     .When(person => person.UpdateName("Kenny Di Tunnel"))
                     .Then(new PersonNameUpdatedEvent
                     {
-                        Name = new UpdatedInfo<string>("Kenny D", "Kenny Di Tunnel")
+                        Name = new UpdatedInfo<string>("Kenny D", "Kenny Di Tunnel"),
                     })
                     .Assert();
 
@@ -74,7 +74,7 @@ namespace Aggregator.Testing.Tests
         public void ForCommand_DifferentEvent_Assert_ShouldThrowException()
         {
             // Arrange
-            var expectedMessage = "Expected event at index 0 to be of type Aggregator.Testing.Tests.TestDomain.PersonDeletedEvent, but got an event of type Aggregator.Testing.Tests.TestDomain.PersonNameUpdatedEvent instead";
+            const string expectedMessage = "Expected event at index 0 to be of type Aggregator.Testing.Tests.TestDomain.PersonDeletedEvent, but got an event of type Aggregator.Testing.Tests.TestDomain.PersonNameUpdatedEvent instead";
 
             // Act
             Action action = () =>
@@ -84,7 +84,7 @@ namespace Aggregator.Testing.Tests
                     .When(person => person.UpdateName("Kenny Di Tunnel"))
                     .Then(new PersonDeletedEvent
                     {
-                        Name = "Kenny Di Tunnel"
+                        Name = "Kenny Di Tunnel",
                     })
                     .Assert();
 
@@ -115,7 +115,7 @@ namespace Aggregator.Testing.Tests
         public void ForCommand_UpdateOnDeletedAggregate_AssertOnExpectedThrowExceptionButWithDifferentPropertyValues_ShouldThrowException()
         {
             // Arrange
-            var expectedMessage = "Expected exception:*Other name*to be thrown, but got exception:*Jan Itan*";
+            const string expectedMessage = "Expected exception:*Other name*to be thrown, but got exception:*Jan Itan*";
 
             // Act
             Action action = () =>
@@ -137,7 +137,7 @@ namespace Aggregator.Testing.Tests
         public void ForCommand_UpdateOnDeletedAggregate_AssertOnDifferentThrownException_ShouldThrowException()
         {
             // Arrange
-            var expectedMessage = "Expected an exception of type System.InvalidOperationException to be thrown, but got an exception of type Aggregator.Testing.Tests.TestDomain.PersonDeletedException instead";
+            const string expectedMessage = "Expected an exception of type System.InvalidOperationException to be thrown, but got an exception of type Aggregator.Testing.Tests.TestDomain.PersonDeletedException instead";
 
             // Act
             Action action = () =>
@@ -159,7 +159,7 @@ namespace Aggregator.Testing.Tests
         public void ForCommand_ExpectExceptionToBeThrownButNothingIsBeingThrown_ShouldThrowException()
         {
             // Arrange
-            var expectedMessage = "Expected an exception of type System.InvalidOperationException to be thrown, but no exception was thrown instead";
+            const string expectedMessage = "Expected an exception of type System.InvalidOperationException to be thrown, but no exception was thrown instead";
 
             // Act
             Action action = () =>

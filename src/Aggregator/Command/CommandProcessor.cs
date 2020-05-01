@@ -19,7 +19,7 @@ namespace Aggregator.Command
     public class CommandProcessor : CommandProcessor<string, object, object>, ICommandProcessor
     {
         /// <summary>
-        /// Constructs a new <see cref="CommandProcessor"/> instance.
+        /// Initializes a new instance of the <see cref="CommandProcessor"/> class.
         /// </summary>
         /// <param name="serviceScopeFactory">The service scope factory.</param>
         /// <param name="eventStore">The event store.</param>
@@ -52,7 +52,7 @@ namespace Aggregator.Command
         private readonly CommandProcessorNotificationHandlers<TIdentifier, TCommandBase, TEventBase> _notificationHandlers;
 
         /// <summary>
-        /// Constructs a new <see cref="CommandProcessor{TIdentifier, TCommandBase, TEventBase}"/> instance.
+        /// Initializes a new instance of the <see cref="CommandProcessor{TIdentifier, TCommandBase, TEventBase}"/> class.
         /// </summary>
         /// <param name="serviceScopeFactory">The service scope factory.</param>
         /// <param name="eventStore">The event store.</param>

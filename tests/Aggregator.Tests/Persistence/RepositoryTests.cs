@@ -12,7 +12,6 @@ namespace Aggregator.Tests.Persistence
 {
     public class RepositoryTests
     {
-
         [Fact]
         public void Constructor_PassInvalidEventStoreArgument_ShouldThrowException()
         {
@@ -134,7 +133,7 @@ namespace Aggregator.Tests.Persistence
             {
                 new EventA(),
                 new EventB(),
-                new EventA()
+                new EventA(),
             });
             var repository = new Repository<FakeAggregateRoot>(eventStoreMock.Object, commandHandlingContext);
 
@@ -158,7 +157,7 @@ namespace Aggregator.Tests.Persistence
             eventStoreMock.Setup(x => x.GetEvents(knownIdentifier, 0)).ReturnsAsync(new object[]
             {
                 new EventA(),
-                new EventB()
+                new EventB(),
             });
             var repository = new Repository<FakeAggregateRoot>(eventStoreMock.Object, commandHandlingContext);
 
@@ -177,7 +176,8 @@ namespace Aggregator.Tests.Persistence
         {
             // Arrange
             var commandHandlingContext = new CommandHandlingContext();
-            var unitOfWork = commandHandlingContext.CreateUnitOfWork<string, object>(); var identifier = Guid.NewGuid().ToString("N");
+            var unitOfWork = commandHandlingContext.CreateUnitOfWork<string, object>();
+            var identifier = Guid.NewGuid().ToString("N");
             var aggregateRoot = new FakeAggregateRoot();
             unitOfWork.Attach(new AggregateRootEntity<string, object>(identifier, aggregateRoot, 1));
             var eventStoreMock = NewEventStoreMock;
@@ -269,12 +269,17 @@ namespace Aggregator.Tests.Persistence
             }
 
             public int EventACount { get; private set; } = 0;
+
             public int EventBCount { get; private set; } = 0;
         }
 
-        public class EventA { }
+        public class EventA
+        {
+        }
 
-        public class EventB { }
+        public class EventB
+        {
+        }
 
         private Mock<IEventStore<string, object>> NewEventStoreMock => new Mock<IEventStore<string, object>>();
     }

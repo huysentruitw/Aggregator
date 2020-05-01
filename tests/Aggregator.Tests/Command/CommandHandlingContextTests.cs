@@ -48,6 +48,8 @@ namespace Aggregator.Tests.Command
             action.Should().Throw<InvalidCastException>();
         }
 
-        private sealed class Test { }
+        private sealed class Test
+        {
+        }
     }
 }

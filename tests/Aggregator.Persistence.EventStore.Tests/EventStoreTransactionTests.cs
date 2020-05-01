@@ -16,7 +16,7 @@ namespace Aggregator.Persistence.EventStore.Tests
         private readonly Mock<IEventStoreConnection> _eventStoreConnectionMock = new Mock<IEventStoreConnection>();
         private readonly JsonSerializerSettings _jsonSerializerSettings = new JsonSerializerSettings
         {
-            TypeNameHandling = TypeNameHandling.Auto
+            TypeNameHandling = TypeNameHandling.Auto,
         };
 
         [Fact]
@@ -24,6 +24,7 @@ namespace Aggregator.Persistence.EventStore.Tests
         {
             var eventStoreConnectionMock = new Mock<IEventStoreConnection>();
             var transaction = new EventStoreTransaction<string, object>(eventStoreConnectionMock.Object, _jsonSerializerSettings);
+
             // Will throw NRE because StartTransactionAsync returns null (as we can't easily mock an EventStoreTransaction)
             Func<Task> action = () => transaction.StoreEvents("some_id", 1, Enumerable.Empty<object>());
             action.Should().Throw<NullReferenceException>();
@@ -246,8 +247,12 @@ namespace Aggregator.Persistence.EventStore.Tests
             wrappedTransactionMocks[2].Verify(x => x.Dispose(), Times.Once);
         }
 
-        private class EventA { }
+        private class EventA
+        {
+        }
 
-        private class EventB { }
+        private class EventB
+        {
+        }
     }
 }

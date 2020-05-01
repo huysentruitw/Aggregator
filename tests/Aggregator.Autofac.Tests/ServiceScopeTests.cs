@@ -38,6 +38,8 @@ namespace Aggregator.Autofac.Tests
             result.Should().Be(service);
         }
 
-        private sealed class DummyService { }
+        private sealed class DummyService
+        {
+        }
     }
 }

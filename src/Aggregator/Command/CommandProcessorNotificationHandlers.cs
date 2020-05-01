@@ -13,11 +13,14 @@ namespace Aggregator.Command
     /// <summary>
     /// Class holding the notification handlers called by <see cref="CommandProcessor{TIdentifier, TCommandBase, TEventBase}"/>.
     /// </summary>
+    /// <typeparam name="TIdentifier">The type of the aggregate identifier.</typeparam>
+    /// <typeparam name="TCommandBase">The command base type.</typeparam>
+    /// <typeparam name="TEventBase">The event base type.</typeparam>
     public class CommandProcessorNotificationHandlers<TIdentifier, TCommandBase, TEventBase>
         where TIdentifier : IEquatable<TIdentifier>
     {
         /// <summary>
-        /// Handler invoked right after the command handling context is created during the <see cref="CommandProcessor{TIdentifier, TCommandBase, TEventBase}.Process(TCommandBase, CancellationToken)"/> call.
+        /// Gets or sets a handler that gets invoked right after the command handling context is created during the <see cref="CommandProcessor{TIdentifier, TCommandBase, TEventBase}.Process(TCommandBase, CancellationToken)"/> call.
         /// </summary>
         public Action<TCommandBase, CommandHandlingContext> PrepareContext { get; set; } = null;
 
@@ -30,7 +33,7 @@ namespace Aggregator.Command
             => PrepareContext?.Invoke(command, context);
 
         /// <summary>
-        /// Handler invoked right after events are retrieved from the unit-of-work and before storing/dispatching events.
+        /// Gets or sets a handler that gets invoked right after events are retrieved from the unit-of-work and before storing/dispatching events.
         /// </summary>
         public Func<TEventBase, TCommandBase, CommandHandlingContext, TEventBase> EnrichEvent { get; set; } = null;
 

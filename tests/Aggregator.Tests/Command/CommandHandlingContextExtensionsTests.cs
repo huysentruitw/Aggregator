@@ -90,8 +90,12 @@ namespace Aggregator.Tests.Command
                 .WithMessage($"Unable to cast object of type '{typeof(UnitOfWork<string, EventBase1>)}' to type '{typeof(UnitOfWork<string, EventBase2>)}'.");
         }
 
-        private class EventBase1 { }
+        private class EventBase1
+        {
+        }
 
-        private class EventBase2 { }
+        private class EventBase2
+        {
+        }
     }
 }

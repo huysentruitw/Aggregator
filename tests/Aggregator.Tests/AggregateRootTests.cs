@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Aggregator.Exceptions;
 using Aggregator.Internal;
@@ -9,7 +8,6 @@ using Xunit;
 
 namespace Aggregator.Tests
 {
-    [SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
     public class AggregateRootTests
     {
         [Fact]
@@ -168,11 +166,17 @@ namespace Aggregator.Tests
             public void ApplyNull() => Apply((EventA)null);
         }
 
-        public class EventA { }
+        public class EventA
+        {
+        }
 
-        public class EventB { }
+        public class EventB
+        {
+        }
 
-        public class EventC { }
+        public class EventC
+        {
+        }
 
         public class RegisterTwiceAggregateRoot : AggregateRoot
         {

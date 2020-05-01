@@ -18,8 +18,7 @@ namespace Aggregator
     /// </summary>
     /// <typeparam name="TEventBase">The event base type.</typeparam>
     public abstract class AggregateRoot<TEventBase>
-        : IAggregateRootInitializer<TEventBase>
-        , IAggregateRootChangeTracker<TEventBase>
+        : IAggregateRootInitializer<TEventBase>, IAggregateRootChangeTracker<TEventBase>
     {
         private readonly Dictionary<Type, Action<TEventBase>> _handlers = new Dictionary<Type, Action<TEventBase>>();
         private readonly List<TEventBase> _changes = new List<TEventBase>();

@@ -147,7 +147,9 @@ namespace Aggregator.Tests.Internal
             public void ApplyA() => Apply(new EventA());
         }
 
-        public class EventA { }
+        public class EventA
+        {
+        }
 
         private FakeAggregateRoot[] CreateAggregateRoots()
             => Enumerable.Range(1, 4)

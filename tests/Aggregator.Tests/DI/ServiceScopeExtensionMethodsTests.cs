@@ -36,6 +36,8 @@ namespace Aggregator.Tests.DI
             serviceScopeMock.Verify(x => x.GetService(It.IsAny<Type>()), Times.Once);
         }
 
-        private sealed class A { }
+        private sealed class A
+        {
+        }
     }
 }

@@ -17,7 +17,7 @@ namespace Microsoft.Extensions.DependencyInjection
         /// Extension method that registers dependencies for the Aggregator library.
         /// </summary>
         /// <param name="services">The <see cref="IServiceCollection"/> instance.</param>
-        /// <returns>The <see cref="IServiceCollection"/> instance.</returns>
+        /// <returns>The <see cref="IServiceCollection"/> instance for chaining.</returns>
         public static IServiceCollection AddAggregator(this IServiceCollection services)
         {
             // Register the non-generic overrides on top of the generic base stuff
@@ -33,7 +33,7 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <typeparam name="TCommandBase">The command base type.</typeparam>
         /// <typeparam name="TEventBase">The event base type.</typeparam>
         /// <param name="services">The <see cref="IServiceCollection"/> instance.</param>
-        /// <returns>The <see cref="IServiceCollection"/> instance.</returns>
+        /// <returns>The <see cref="IServiceCollection"/> instance for chaining.</returns>
         public static IServiceCollection AddAggregator<TIdentifier, TCommandBase, TEventBase>(this IServiceCollection services)
             where TIdentifier : IEquatable<TIdentifier>
         {

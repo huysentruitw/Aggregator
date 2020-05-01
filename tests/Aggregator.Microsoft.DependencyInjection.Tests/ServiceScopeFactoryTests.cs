@@ -37,7 +37,7 @@ namespace Aggregator.Microsoft.DependencyInjection.Tests
                 .Setup(x => x.GetService(typeof(int)))
                 .Returns(1234);
             var factory = new ServiceScopeFactory(systemParentServiceProviderMock.Object);
-            
+
             // Act
             var scope = factory.CreateScope();
 

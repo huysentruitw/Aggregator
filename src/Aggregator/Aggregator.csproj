@@ -7,6 +7,7 @@
     <Authors>Wouter Huysentruit</Authors>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>keyfile.snk</AssemblyOriginatorKeyFile>
+    <CodeAnalysisRuleSet>..\..\ca.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -14,6 +15,13 @@
     <WarningsAsErrors />
     <DocumentationFile>bin\Aggregator.xml</DocumentationFile>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Aggregator.Abstractions\Aggregator.Abstractions.csproj" />

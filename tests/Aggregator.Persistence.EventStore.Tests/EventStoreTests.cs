@@ -137,9 +137,9 @@ namespace Aggregator.Persistence.EventStore.Tests
             return events
                 .Select(x =>
                 {
-                    var data = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(x, typeof(object), new JsonSerializerSettings
+                    byte[] data = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(x, typeof(object), new JsonSerializerSettings
                     {
-                        TypeNameHandling = TypeNameHandling.Auto
+                        TypeNameHandling = TypeNameHandling.Auto,
                     }));
 
                     var @event = (RecordedEvent)FormatterServices.GetUninitializedObject(typeof(RecordedEvent));
@@ -156,7 +156,12 @@ namespace Aggregator.Persistence.EventStore.Tests
                 .ToArray();
         }
 
-        private class EventA { }
-        private class EventB { }
+        private class EventA
+        {
+        }
+
+        private class EventB
+        {
+        }
     }
 }

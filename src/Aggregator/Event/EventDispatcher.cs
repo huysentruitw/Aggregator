@@ -19,7 +19,7 @@ namespace Aggregator.Event
         private readonly IServiceScopeFactory _serviceScopeFactory;
 
         /// <summary>
-        /// Constructs a new <see cref="EventDispatcher{TEventBase}"/> instance.
+        /// Initializes a new instance of the <see cref="EventDispatcher{TEventBase}"/> class.
         /// </summary>
         /// <param name="serviceScopeFactory">The service scope factory.</param>
         public EventDispatcher(IServiceScopeFactory serviceScopeFactory)

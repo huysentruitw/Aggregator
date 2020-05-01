@@ -125,7 +125,9 @@ namespace Aggregator.Tests.Event
                     _factory = factory;
                 }
 
-                public void Dispose() { }
+                public void Dispose()
+                {
+                }
 
                 public object GetService(Type serviceType)
                 {
@@ -138,8 +140,12 @@ namespace Aggregator.Tests.Event
             }
         }
 
-        public class EventA { }
+        public class EventA
+        {
+        }
 
-        public class EventB { }
+        public class EventB
+        {
+        }
     }
 }

@@ -111,7 +111,9 @@ namespace Aggregator.Persistence.EventStore
     internal interface IWrappedTransaction : IDisposable
     {
         Task WriteAsync(EventData[] eventData);
+
         Task CommitAsync();
+
         void Rollback();
     }
 
