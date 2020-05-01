@@ -1,0 +1,13 @@
+install:
+  - ps: dotnet tool install -g GitVersion.Tool
+
+assembly_info:
+  patch: false
+
+before_build:
+  - ps: nuget restore
+  - ps: $NuGetVersion = & "dotnet gitversion /output json /showvariable NuGetVersion" 2>&1
+  - ps: echo $NuGetVersion
+
+build:
+  - ps: dotnet build
