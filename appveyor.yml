@@ -13,8 +13,6 @@ assembly_info:
 before_build:
   - nuget restore
   - ps: $NuGetVersion = (cmd /c dotnet gitversion /output json /showvariable NuGetVersion 2`>`&1)
-  - ps: echo $NuGetVersion
-  - cmd: echo %NuGetVersion%
 
-build:
-  verbosity: minimal
+build_script:
+  - ps: dotnet build Aggregator.sln --configuration Release /p:Version=$NuGetVersion
