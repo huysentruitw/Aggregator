@@ -19,9 +19,8 @@ build_script:
   - ps: dotnet build Aggregator.sln --configuration Release /p:Version=$NuGetVersion
 
 test_script:
-  - ps: >-
+- ps: >-
     .\packages\OpenCover.4.7.922\tools\OpenCover.Console.exe -register -target:"C:/Program Files/dotnet/dotnet.exe" -targetargs:"test --logger:trx;LogFileName=results.trx /p:DebugType=full" -output:"coverage.xml" -excludebyattribute:*.ExcludeFromCodeCoverageAttribute -hideskipped:attribute -filter:"+[Aggregator*]* -[Aggregator.Tests*]*"
-
 
     $env:PATH = 'C:\msys64\usr\bin;' + $env:PATH
 
