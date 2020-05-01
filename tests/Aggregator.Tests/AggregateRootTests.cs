@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Aggregator.Exceptions;
 using Aggregator.Internal;
@@ -8,7 +9,7 @@ using Xunit;
 
 namespace Aggregator.Tests
 {
-    public class AggregateRootTests
+    public sealed class AggregateRootTests
     {
         [Fact]
         public void Initialize_PassNullAsEvents_ShouldNotThrowException()
@@ -43,7 +44,7 @@ namespace Aggregator.Tests
         {
             // Arrange
             var events = new object[] { new EventA(), new EventB() };
-            var aggregateRoot = new Mock<FakeAggregateRoot>().Object;
+            AggregateRoot aggregateRoot = Mock.Of<FakeAggregateRoot>();
 
             // Act
             ((IAggregateRootInitializer<object>)aggregateRoot).Initialize(events);
@@ -89,7 +90,7 @@ namespace Aggregator.Tests
         public void Apply_PassNullAsEvent_ShouldThrowException()
         {
             // Arrange
-            var aggregateRoot = new Mock<FakeAggregateRoot>().Object;
+            FakeAggregateRoot aggregateRoot = Mock.Of<FakeAggregateRoot>();
 
             // Act & Assert
             Action action = () => aggregateRoot.ApplyNull();
@@ -114,7 +115,7 @@ namespace Aggregator.Tests
         public void Apply_PassKnownEvents_ShouldHaveChanges()
         {
             // Arrange
-            var aggregateRoot = new Mock<FakeAggregateRoot>().Object;
+            FakeAggregateRoot aggregateRoot = Mock.Of<FakeAggregateRoot>();
 
             // Act
             aggregateRoot.ApplyBA();
@@ -122,7 +123,7 @@ namespace Aggregator.Tests
             // Assert
             var changeTracker = (IAggregateRootChangeTracker<object>)aggregateRoot;
             changeTracker.HasChanges.Should().BeTrue();
-            var changes = changeTracker.GetChanges().ToArray();
+            object[] changes = changeTracker.GetChanges().ToArray();
             changes.Should().HaveCount(2);
             changes[0].Should().BeOfType<EventB>();
             changes[1].Should().BeOfType<EventA>();
@@ -132,7 +133,7 @@ namespace Aggregator.Tests
         public void Apply_UnhandledEvent_ShouldThrowException()
         {
             // Arrange
-            var aggregateRoot = new Mock<FakeAggregateRoot>().Object;
+            FakeAggregateRoot aggregateRoot = Mock.Of<FakeAggregateRoot>();
 
             // Act & Assert
             Action action = () => aggregateRoot.ApplyC();
@@ -140,6 +141,7 @@ namespace Aggregator.Tests
                 .WithMessage("Unhandled event EventC");
         }
 
+        [SuppressMessage("ReSharper", "MemberCanBePrivate.Global", Justification = "Needs to be public for Mock")]
         public abstract class FakeAggregateRoot : AggregateRoot
         {
             protected FakeAggregateRoot()
@@ -166,19 +168,19 @@ namespace Aggregator.Tests
             public void ApplyNull() => Apply((EventA)null);
         }
 
-        public class EventA
+        public sealed class EventA
         {
         }
 
-        public class EventB
+        public sealed class EventB
         {
         }
 
-        public class EventC
+        private sealed class EventC
         {
         }
 
-        public class RegisterTwiceAggregateRoot : AggregateRoot
+        private sealed class RegisterTwiceAggregateRoot : AggregateRoot
         {
             public RegisterTwiceAggregateRoot()
             {
@@ -187,7 +189,7 @@ namespace Aggregator.Tests
             }
         }
 
-        public class RegisterNullAggregateRoot : AggregateRoot
+        private sealed class RegisterNullAggregateRoot : AggregateRoot
         {
             public RegisterNullAggregateRoot()
             {
