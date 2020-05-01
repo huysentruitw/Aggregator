@@ -5,15 +5,16 @@ image: Visual Studio 2019
 configuration: Release
 
 install:
-  - ps: dotnet tool install -g GitVersion.Tool
+  - cmd: dotnet tool install -g GitVersion.Tool
 
 assembly_info:
   patch: false
 
 before_build:
-  - ps: nuget restore
-  - ps: $NuGetVersion = & "dotnet gitversion /output json /showvariable NuGetVersion" 2>&1
+  - nuget restore
+  - ps: $NuGetVersion = (cmd /c dotnet gitversion /output json /showvariable NuGetVersion 2`>`&1)
   - ps: echo $NuGetVersion
+  - cmd: echo %NuGetVersion%
 
 build:
   verbosity: minimal
