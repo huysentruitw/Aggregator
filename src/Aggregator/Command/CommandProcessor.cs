@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Aggregator.DI;
 using Aggregator.Event;
 using Aggregator.Exceptions;
+using Aggregator.Internal;
 using Aggregator.Persistence;
 
 namespace Aggregator.Command
@@ -70,27 +71,23 @@ namespace Aggregator.Command
             _notificationHandlers = notificationHandlers ?? new CommandProcessorNotificationHandlers<TIdentifier, TCommandBase, TEventBase>();
         }
 
-        /// <summary>
-        /// Processes a single command.
-        /// </summary>
-        /// <param name="command">The command to process.</param>
-        /// <param name="cancellationToken">A cancellation token that allows cancelling the process.</param>
-        /// <returns>An awaitable <see cref="Task"/>.</returns>
+        /// <inheritdoc/>
         public async Task Process(TCommandBase command, CancellationToken cancellationToken = default)
         {
             if (command == null) throw new ArgumentNullException(nameof(command));
 
-            using (var serviceScope = _serviceScopeFactory.CreateScope())
+            using (IServiceScope serviceScope = _serviceScopeFactory.CreateScope())
             {
-                var context = serviceScope.GetService<CommandHandlingContext>();
+                CommandHandlingContext context = serviceScope.GetService<CommandHandlingContext>();
                 _notificationHandlers.OnPrepareContext(command, context);
 
-                var unitOfWork = context.CreateUnitOfWork<TIdentifier, TEventBase>();
+                UnitOfWork<TIdentifier, TEventBase> unitOfWork = context.CreateUnitOfWork<TIdentifier, TEventBase>();
 
-                var executeMethod = _executeMethodCache.GetOrAdd(command.GetType(), type =>
-                    typeof(CommandProcessor<TIdentifier, TCommandBase, TEventBase>)
-                        .GetMethod(nameof(Execute), BindingFlags.NonPublic | BindingFlags.Instance)
-                        ?.MakeGenericMethod(type))
+                MethodInfo executeMethod =
+                    _executeMethodCache.GetOrAdd(command.GetType(), type =>
+                        typeof(CommandProcessor<TIdentifier, TCommandBase, TEventBase>)
+                            .GetMethod(nameof(Execute), BindingFlags.NonPublic | BindingFlags.Instance)
+                            ?.MakeGenericMethod(type))
                     ?? throw new InvalidOperationException($"Couldn't make generic {nameof(Execute)} method");
 
                 await ((Task)executeMethod.Invoke(this, new object[] { command, serviceScope, cancellationToken })).ConfigureAwait(false);
@@ -101,15 +98,15 @@ namespace Aggregator.Command
                     return;
                 }
 
-                using (var transaction = _eventStore.BeginTransaction(context))
+                using (IEventStoreTransaction<TIdentifier, TEventBase> transaction = _eventStore.BeginTransaction(context))
                 {
                     var storedEvents = new List<TEventBase>();
 
                     try
                     {
-                        foreach (var aggregateRootEntity in unitOfWork.GetChanges())
+                        foreach (AggregateRootEntity<TIdentifier, TEventBase> aggregateRootEntity in unitOfWork.GetChanges())
                         {
-                            var events = aggregateRootEntity.GetChanges();
+                            TEventBase[] events = aggregateRootEntity.GetChanges();
                             events = events.Select(x => _notificationHandlers.OnEnrichEvent(x, command, context)).ToArray();
                             await transaction.StoreEvents(aggregateRootEntity.Identifier, aggregateRootEntity.ExpectedVersion, events, cancellationToken).ConfigureAwait(false);
                             storedEvents.AddRange(events);
@@ -133,12 +130,12 @@ namespace Aggregator.Command
         private async Task Execute<TCommand>(TCommand command, IServiceScope serviceScope, CancellationToken cancellationToken)
             where TCommand : TCommandBase
         {
-            var handlers = serviceScope.GetServices<ICommandHandler<TCommand>>()?.ToArray();
+            ICommandHandler<TCommand>[] handlers = serviceScope.GetServices<ICommandHandler<TCommand>>()?.ToArray();
 
             if (handlers == null || !handlers.Any())
                 throw new UnhandledCommandException(command);
 
-            foreach (var handler in handlers)
+            foreach (ICommandHandler<TCommand> handler in handlers)
                 await handler.Handle(command, cancellationToken).ConfigureAwait(false);
         }
     }
