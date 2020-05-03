@@ -5,7 +5,7 @@ using Aggregator.Exceptions;
 namespace Aggregator.Persistence
 {
     /// <summary>
-    /// Interface for an aggregate root repository where the aggregate root identifier is a <see cref="string"/> and commands/events derive from <see cref="object"/>.
+    /// Interface for an aggregate root repository where the aggregate root identifier is a <see cref="string"/> and events derive from <see cref="object"/>.
     /// </summary>
     /// <typeparam name="TAggregateRoot">The aggregate root type.</typeparam>
     public interface IRepository<TAggregateRoot> : IRepository<string, object, TAggregateRoot>
