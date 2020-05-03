@@ -1,6 +1,5 @@
 ﻿using System;
 using Aggregator.Testing;
-using AutoFixture;
 using KanbanStyle.Domain.Entities;
 using KanbanStyle.Domain.Exceptions;
 using KanbanStyle.Domain.Identifiers;
@@ -11,8 +10,6 @@ namespace KanbanStyle.Domain.Tests.Entities
 {
     public sealed class BoardTests
     {
-        private static Fixture Fixture = new Fixture();
-
         [Fact]
         public void Create_ShouldApplyBoardCreatedEvent()
         {
