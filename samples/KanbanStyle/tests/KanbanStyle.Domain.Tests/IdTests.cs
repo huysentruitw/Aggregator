@@ -4,7 +4,7 @@ using Aggregator;
 using FluentAssertions;
 using Xunit;
 
-namespace KanbanStyle.Domain.Tests.Identifiers
+namespace KanbanStyle.Domain.Tests
 {
     public sealed class IdTests
     {
