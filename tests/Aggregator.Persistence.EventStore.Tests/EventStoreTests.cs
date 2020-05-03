@@ -1,10 +1,12 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 using EventStore.ClientAPI;
+using EventStore.ClientAPI.SystemData;
 using FluentAssertions;
 using Moq;
 using Newtonsoft.Json;
@@ -12,15 +14,14 @@ using Xunit;
 
 namespace Aggregator.Persistence.EventStore.Tests
 {
+    [SuppressMessage("ReSharper", "ObjectCreationAsStatement", Justification = "Testing constructors")]
     public class EventStoreTests
     {
-        private Mock<IEventStoreConnection> NewEventStoreConnectionMock => new Mock<IEventStoreConnection>();
-
         [Fact]
         public void Constructor_PassInvalidConnection_ShouldThrowException()
         {
             // Act & Assert
-            Action action = () => new EventStore((IEventStoreConnection)null);
+            Action action = () => new EventStore(connection: null);
             action.Should().Throw<ArgumentNullException>()
                 .Which.ParamName.Should().Be("connection");
         }
@@ -29,9 +30,8 @@ namespace Aggregator.Persistence.EventStore.Tests
         public void Dispose_ShouldDisposeUnderlyingConnection()
         {
             // Arrange
-            var eventStoreConnectionMock = NewEventStoreConnectionMock;
+            var eventStoreConnectionMock = new Mock<IEventStoreConnection>();
             var eventStore = new EventStore(eventStoreConnectionMock.Object);
-            eventStoreConnectionMock.Verify(x => x.Dispose(), Times.Never);
 
             // Act
             eventStore.Dispose();
@@ -45,9 +45,9 @@ namespace Aggregator.Persistence.EventStore.Tests
         {
             // Arrange
             var identifier = Guid.NewGuid().ToString("N");
-            var eventStoreConnectionMock = NewEventStoreConnectionMock;
+            var eventStoreConnectionMock = new Mock<IEventStoreConnection>();
             eventStoreConnectionMock
-                .Setup(x => x.ReadEventAsync(identifier, 0, false, null))
+                .Setup(x => x.ReadEventAsync(identifier, 0, It.IsAny<bool>(), It.IsAny<UserCredentials>()))
                 .ReturnsAsync(CreateEventReadResult(EventReadStatus.NoStream));
             var eventStore = new EventStore(eventStoreConnectionMock.Object);
 
@@ -63,9 +63,9 @@ namespace Aggregator.Persistence.EventStore.Tests
         {
             // Arrange
             var identifier = Guid.NewGuid().ToString("N");
-            var eventStoreConnectionMock = NewEventStoreConnectionMock;
+            var eventStoreConnectionMock = new Mock<IEventStoreConnection>();
             eventStoreConnectionMock
-                .Setup(x => x.ReadEventAsync(identifier, 0, false, null))
+                .Setup(x => x.ReadEventAsync(identifier, 0, It.IsAny<bool>(), It.IsAny<UserCredentials>()))
                 .ReturnsAsync(CreateEventReadResult(EventReadStatus.Success));
             var eventStore = new EventStore(eventStoreConnectionMock.Object);
 
@@ -82,14 +82,14 @@ namespace Aggregator.Persistence.EventStore.Tests
             // Arrange
             var identifier = Guid.NewGuid().ToString("N");
             var events = new object[] { new EventB(), new EventA() };
-            var eventStoreConnectionMock = NewEventStoreConnectionMock;
+            var eventStoreConnectionMock = new Mock<IEventStoreConnection>();
             eventStoreConnectionMock
                 .Setup(x => x.ReadStreamEventsForwardAsync(identifier, 4, It.IsAny<int>(), false, null))
                 .ReturnsAsync(CreateStreamEventSlice(events, true));
             var eventStore = new EventStore(eventStoreConnectionMock.Object);
 
             // Act
-            var result = await eventStore.GetEvents(identifier, 4);
+            object[] result = await eventStore.GetEvents(identifier, 4);
 
             // Assert
             result.Should().HaveCount(2);
@@ -101,10 +101,10 @@ namespace Aggregator.Persistence.EventStore.Tests
         public void BeginTransaction_ShouldReturnAnEventStoreTransactionInstance()
         {
             // Arrange
-            var eventStore = new EventStore(NewEventStoreConnectionMock.Object);
+            var eventStore = new EventStore(Mock.Of<IEventStoreConnection>());
 
             // Act
-            var transaction = eventStore.BeginTransaction(null);
+            IEventStoreTransaction<string, object> transaction = eventStore.BeginTransaction(null);
 
             // Assert
             transaction.Should().NotBeNull();
