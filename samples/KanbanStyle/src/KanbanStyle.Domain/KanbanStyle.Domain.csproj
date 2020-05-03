@@ -13,4 +13,8 @@
       <ProjectReference Include="..\KanbanStyle.Messages\KanbanStyle.Messages.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="CommandHandlers\User" />
+    </ItemGroup>
+
 </Project>

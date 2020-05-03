@@ -21,4 +21,8 @@
       <ProjectReference Include="..\..\src\KanbanStyle.Domain\KanbanStyle.Domain.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="CommandHandlers\User" />
+    </ItemGroup>
+
 </Project>
