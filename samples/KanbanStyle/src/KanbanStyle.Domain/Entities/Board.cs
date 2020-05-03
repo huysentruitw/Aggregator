@@ -1,7 +1,6 @@
 ﻿using System;
 using Aggregator;
 using KanbanStyle.Domain.Exceptions;
-using KanbanStyle.Domain.Identifiers;
 using KanbanStyle.Domain.Messages;
 
 namespace KanbanStyle.Domain.Entities

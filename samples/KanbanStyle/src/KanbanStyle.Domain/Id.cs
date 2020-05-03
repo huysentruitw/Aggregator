@@ -1,7 +1,7 @@
 ﻿using System;
 using Aggregator;
 
-namespace KanbanStyle.Domain.Identifiers
+namespace KanbanStyle.Domain
 {
     internal sealed class Id<TAggregateRoot>
         where TAggregateRoot : AggregateRoot

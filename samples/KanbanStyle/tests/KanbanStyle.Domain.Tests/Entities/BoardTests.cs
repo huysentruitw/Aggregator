@@ -2,7 +2,6 @@
 using Aggregator.Testing;
 using KanbanStyle.Domain.Entities;
 using KanbanStyle.Domain.Exceptions;
-using KanbanStyle.Domain.Identifiers;
 using KanbanStyle.Domain.Messages;
 using Xunit;
 

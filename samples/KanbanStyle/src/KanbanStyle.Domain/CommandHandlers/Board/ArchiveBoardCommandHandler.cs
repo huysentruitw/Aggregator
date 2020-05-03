@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using Aggregator.Persistence;
 using FluentValidation;
 using KanbanStyle.Domain.Entities;
-using KanbanStyle.Domain.Identifiers;
 using KanbanStyle.Domain.Messages;
 
 namespace KanbanStyle.Domain.CommandHandlers

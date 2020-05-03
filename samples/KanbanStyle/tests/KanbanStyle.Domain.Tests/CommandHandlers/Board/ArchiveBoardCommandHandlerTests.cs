@@ -5,7 +5,6 @@ using FluentAssertions;
 using FluentValidation;
 using KanbanStyle.Domain.CommandHandlers;
 using KanbanStyle.Domain.Entities;
-using KanbanStyle.Domain.Identifiers;
 using KanbanStyle.Domain.Messages;
 using Moq;
 using Xunit;

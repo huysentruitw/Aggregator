@@ -2,7 +2,6 @@
 using System.Linq;
 using Aggregator;
 using FluentAssertions;
-using KanbanStyle.Domain.Identifiers;
 using Xunit;
 
 namespace KanbanStyle.Domain.Tests.Identifiers
