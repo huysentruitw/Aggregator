@@ -85,7 +85,7 @@ namespace KanbanStyle.Domain.Tests.CommandHandlers
 
         private static class Model
         {
-            public static readonly BoardId Id = BoardId.New();
+            public static readonly Id<Board> Id = Id<Board>.New();
 
             public const string NewName = "New board name";
 

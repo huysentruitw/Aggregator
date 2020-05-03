@@ -90,7 +90,7 @@ namespace KanbanStyle.Domain.Tests.Entities
 
         private static class Model
         {
-            public static readonly BoardId Id = BoardId.New();
+            public static readonly Id<Board> Id = Id<Board>.New();
 
             public const string Name = "My board";
 

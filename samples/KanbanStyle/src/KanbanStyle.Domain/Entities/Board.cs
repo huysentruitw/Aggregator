@@ -8,7 +8,7 @@ namespace KanbanStyle.Domain.Entities
 {
     internal class Board : AggregateRoot
     {
-        private BoardId _id;
+        private Id<Board> _id;
         private string _name;
         private bool _archived;
 
@@ -38,7 +38,7 @@ namespace KanbanStyle.Domain.Entities
             Apply(boardCreated);
         }
 
-        public static Board Create(BoardId id, string name, DateTime dateCreatedUtc)
+        public static Board Create(Id<Board> id, string name, DateTime dateCreatedUtc)
             => new Board(new BoardCreated
             {
                 Id = id,

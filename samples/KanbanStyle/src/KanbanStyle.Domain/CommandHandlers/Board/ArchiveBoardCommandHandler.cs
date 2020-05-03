@@ -26,7 +26,7 @@ namespace KanbanStyle.Domain.CommandHandlers
 
         protected override async Task HandleValidatedCommand(ArchiveBoard command, CancellationToken cancellationToken)
         {
-            BoardId id = command.Id;
+            Id<Board> id = command.Id;
 
             Board board = await Repository.Get(id);
 
