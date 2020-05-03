@@ -9,7 +9,7 @@ namespace KanbanStyle.Domain.Entities
     {
         private Id<Board> _id;
         private string _name;
-        private bool _archived;
+        private bool _isArchived;
 
         public Board()
         {
@@ -17,7 +17,7 @@ namespace KanbanStyle.Domain.Entities
             {
                 _id = @event.Id;
                 _name = @event.Name;
-                _archived = false;
+                _isArchived = false;
             });
 
             Register<BoardNameUpdated>(@event =>
@@ -27,7 +27,7 @@ namespace KanbanStyle.Domain.Entities
 
             Register<BoardArchived>(@event =>
             {
-                _archived = true;
+                _isArchived = true;
             });
         }
 
@@ -72,7 +72,7 @@ namespace KanbanStyle.Domain.Entities
 
         private void GuardArchived()
         {
-            if (_archived)
+            if (_isArchived)
                 throw new OperationNotAllowedOnArchivedBoardException();
         }
     }
