@@ -22,15 +22,13 @@ test_script:
 - ps: >-
     .\packages\OpenCover.4.7.922\tools\OpenCover.Console.exe -register -target:"C:/Program Files/dotnet/dotnet.exe" -targetargs:"test --configuration Release --no-build /p:GeneratePackageOnBuild=false /p:DebugType=full --logger:trx;LogFileName=results.trx" -output:"coverage.xml" -excludebyattribute:*.ExcludeFromCodeCoverageAttribute -hideskipped:attribute -filter:"+[Aggregator*]* -[Aggregator.*.Tests*]* -[Aggregator.Tests*]*"
 
-    $env:PATH = 'C:\msys64\usr\bin;' + $env:PATH
+    choco install codecov
 
-    Invoke-WebRequest -Uri 'https://codecov.io/bash' -OutFile codecov.sh
-
-    bash codecov.sh -f "./coverage.xml"
+    codecov.exe -f "./coverage.xml"
 
 artifacts:
   - path: '**\Aggregator*.nupkg'
-  
+
 deploy:
 - provider: NuGet
   api_key:
