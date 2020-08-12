@@ -1,0 +1,46 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KanbanStyle.Host", "src\KanbanStyle.Host\KanbanStyle.Host.csproj", "{1C582DBF-8D5C-4629-B3CF-609D6D317B50}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "01 Host", "01 Host", "{BEEB7BA7-27BB-404A-8CC1-0950B33D2357}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "02 Domain", "02 Domain", "{CAA6EFC3-E825-4A40-A9CA-00A175FC04DA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KanbanStyle.Domain", "src\KanbanStyle.Domain\KanbanStyle.Domain.csproj", "{830756B4-E872-40F8-BAAF-A1CC3D9FE663}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KanbanStyle.Domain.Tests", "tests\KanbanStyle.Domain.Tests\KanbanStyle.Domain.Tests.csproj", "{C8FA3F4E-012B-4CA2-A4FF-456EE43FE637}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KanbanStyle.Messages", "src\KanbanStyle.Messages\KanbanStyle.Messages.csproj", "{0C96431A-5100-4649-8BEA-673C89439512}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "03 Messages", "03 Messages", "{EA0F8774-4DD3-4318-AFEE-FFCB42F0E45B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1C582DBF-8D5C-4629-B3CF-609D6D317B50}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1C582DBF-8D5C-4629-B3CF-609D6D317B50}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1C582DBF-8D5C-4629-B3CF-609D6D317B50}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1C582DBF-8D5C-4629-B3CF-609D6D317B50}.Release|Any CPU.Build.0 = Release|Any CPU
+		{830756B4-E872-40F8-BAAF-A1CC3D9FE663}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{830756B4-E872-40F8-BAAF-A1CC3D9FE663}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{830756B4-E872-40F8-BAAF-A1CC3D9FE663}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{830756B4-E872-40F8-BAAF-A1CC3D9FE663}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C8FA3F4E-012B-4CA2-A4FF-456EE43FE637}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C8FA3F4E-012B-4CA2-A4FF-456EE43FE637}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C8FA3F4E-012B-4CA2-A4FF-456EE43FE637}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C8FA3F4E-012B-4CA2-A4FF-456EE43FE637}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0C96431A-5100-4649-8BEA-673C89439512}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0C96431A-5100-4649-8BEA-673C89439512}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0C96431A-5100-4649-8BEA-673C89439512}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0C96431A-5100-4649-8BEA-673C89439512}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{1C582DBF-8D5C-4629-B3CF-609D6D317B50} = {BEEB7BA7-27BB-404A-8CC1-0950B33D2357}
+		{830756B4-E872-40F8-BAAF-A1CC3D9FE663} = {CAA6EFC3-E825-4A40-A9CA-00A175FC04DA}
+		{C8FA3F4E-012B-4CA2-A4FF-456EE43FE637} = {CAA6EFC3-E825-4A40-A9CA-00A175FC04DA}
+		{0C96431A-5100-4649-8BEA-673C89439512} = {EA0F8774-4DD3-4318-AFEE-FFCB42F0E45B}
+	EndGlobalSection
+EndGlobal

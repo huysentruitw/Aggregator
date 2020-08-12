@@ -18,16 +18,15 @@ namespace Aggregator
     /// </summary>
     /// <typeparam name="TEventBase">The event base type.</typeparam>
     public abstract class AggregateRoot<TEventBase>
-        : IAggregateRootInitializer<TEventBase>
-        , IAggregateRootChangeTracker<TEventBase>
+        : IAggregateRootInitializer<TEventBase>, IAggregateRootChangeTracker<TEventBase>
     {
         private readonly Dictionary<Type, Action<TEventBase>> _handlers = new Dictionary<Type, Action<TEventBase>>();
-        private readonly List<TEventBase> _changes = new List<TEventBase>();
+        private readonly Queue<TEventBase> _changes = new Queue<TEventBase>();
 
         void IAggregateRootInitializer<TEventBase>.Initialize(IEnumerable<TEventBase> events)
         {
             if (events == null) return;
-            foreach (var @event in events)
+            foreach (TEventBase @event in events)
                 Handle(@event);
         }
 
@@ -47,7 +46,7 @@ namespace Aggregator
         {
             if (handler == null) throw new ArgumentNullException(nameof(handler));
 
-            var eventType = typeof(TEvent);
+            Type eventType = typeof(TEvent);
             if (_handlers.ContainsKey(eventType))
                 throw new HandlerForEventAlreadyRegisteredException(eventType);
 
@@ -64,13 +63,13 @@ namespace Aggregator
         {
             if (@event == null) throw new ArgumentNullException(nameof(@event));
             Handle(@event);
-            _changes.Add(@event);
+            _changes.Enqueue(@event);
         }
 
         private void Handle(TEventBase @event)
         {
-            var eventType = @event.GetType();
-            if (!_handlers.TryGetValue(eventType, out var handler))
+            Type eventType = @event.GetType();
+            if (!_handlers.TryGetValue(eventType, out Action<TEventBase> handler))
                 throw new UnhandledEventException(eventType);
 
             handler(@event);

@@ -105,7 +105,7 @@ namespace Aggregator.Tests.Command
             var handlerMocks = new[]
             {
                 new Mock<ICommandHandler<FakeCommand>>(),
-                new Mock<ICommandHandler<FakeCommand>>()
+                new Mock<ICommandHandler<FakeCommand>>(),
             };
             serviceScopeMock
                 .Setup(x => x.GetService(typeof(IEnumerable<ICommandHandler<FakeCommand>>)))
@@ -181,7 +181,7 @@ namespace Aggregator.Tests.Command
             transactionMock
                 .Setup(x => x.StoreEvents("some_id", 5, It.IsAny<IEnumerable<object>>(), default))
 #pragma warning disable IDE1006 // Naming Styles
-                .Callback<string, long, IEnumerable<object>, CancellationToken>((_, __, events, ___) => capturedEvents = events.ToArray())
+                .Callback<string, long, IEnumerable<object>, CancellationToken>((identifier, expectedVersion, events, cancellationToken) => capturedEvents = events.ToArray())
 #pragma warning restore IDE1006 // Naming Styles
                 .Returns(Task.CompletedTask);
             var eventStoreMock = NewEventStoreMock;
@@ -414,7 +414,7 @@ namespace Aggregator.Tests.Command
                 .Returns(transactionMock.Object);
             transactionMock
                 .Setup(x => x.StoreEvents("some_id", 5, It.IsAny<IEnumerable<object>>(), default))
-                .Callback<string, long, IEnumerable<object>, CancellationToken>((_, __, x, ___) => capturedStoredEvents = x)
+                .Callback<string, long, IEnumerable<object>, CancellationToken>((identifier, expectedVersion, storedEvents, cancellationToken) => capturedStoredEvents = storedEvents)
                 .Returns(Task.CompletedTask);
             var command = new FakeCommand();
             var event1 = new FakeEvent1();
@@ -448,9 +448,9 @@ namespace Aggregator.Tests.Command
         }
 #pragma warning restore IDE1006 // Naming Styles
 
-        #region Test infrastructure
-
-        public class FakeCommand { }
+        public class FakeCommand
+        {
+        }
 
         private class FakeCommandHandler : ICommandHandler<FakeCommand>
         {
@@ -494,12 +494,16 @@ namespace Aggregator.Tests.Command
             }
         }
 
-        private class FakeEvent1 { }
+        private class FakeEvent1
+        {
+        }
 
-        private class FakeEvent2 { }
+        private class FakeEvent2
+        {
+        }
 
-        private class BadEvent { }
-
-        #endregion
+        private class BadEvent
+        {
+        }
     }
 }

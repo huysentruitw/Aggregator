@@ -16,12 +16,12 @@ namespace Aggregator.Exceptions
         }
 
         /// <summary>
-        /// The unhandled command.
+        /// Gets the unhandled command.
         /// </summary>
         public object Command { get; }
 
         /// <summary>
-        /// The type of the unhandled command.
+        /// Gets the type of the unhandled command.
         /// </summary>
         public Type CommandType { get; }
     }

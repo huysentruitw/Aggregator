@@ -8,7 +8,7 @@ namespace Aggregator.Exceptions
     public abstract class AggregateRootException : Exception
     {
         /// <summary>
-        /// Constructs a <see cref="AggregateRootException"/> instance with a message.
+        /// Initializes a new instance of the <see cref="AggregateRootException"/> class.
         /// </summary>
         /// <param name="message">The message.</param>
         protected AggregateRootException(string message)
@@ -25,7 +25,7 @@ namespace Aggregator.Exceptions
         where TIdentifier : IEquatable<TIdentifier>
     {
         /// <summary>
-        /// Constructs a <see cref="AggregateRootException{TIdentifier}"/> instance with a message.
+        /// Initializes a new instance of the <see cref="AggregateRootException{TIdentifier}"/> class.
         /// </summary>
         /// <param name="identifier">The identifier.</param>
         /// <param name="message">The message.</param>
@@ -36,7 +36,7 @@ namespace Aggregator.Exceptions
         }
 
         /// <summary>
-        /// The identifier of the aggregate root that threw the exception.
+        /// Gets the identifier of the aggregate root that threw the exception.
         /// </summary>
         public TIdentifier Identifier { get; }
 

@@ -15,7 +15,7 @@ namespace Aggregator.Persistence
         where TAggregateRoot : AggregateRoot, new()
     {
         /// <summary>
-        /// Creates a new <see cref="Repository{TAggregateRoot}"/> instance.
+        /// Initializes a new instance of the <see cref="Repository{TAggregateRoot}"/> class.
         /// </summary>
         /// <param name="eventStore">The event store.</param>
         /// <param name="commandHandlingContext">The command handling context.</param>
@@ -39,7 +39,7 @@ namespace Aggregator.Persistence
         private readonly UnitOfWork<TIdentifier, TEventBase> _unitOfWork;
 
         /// <summary>
-        /// Creates a new <see cref="Repository{TIdentifier, TEventBase, TAggregateRoot}"/> instance.
+        /// Initializes a new instance of the <see cref="Repository{TIdentifier, TEventBase, TAggregateRoot}"/> class.
         /// </summary>
         /// <param name="eventStore">The event store.</param>
         /// <param name="commandHandlingContext">The command handling context.</param>
@@ -67,7 +67,7 @@ namespace Aggregator.Persistence
         /// </summary>
         /// <param name="identifier">The identifier.</param>
         /// <returns>The aggregate root.</returns>
-        /// <exception cref="AggregateRootNotFoundException{TIdentifier}"></exception>
+        /// <exception cref="AggregateRootNotFoundException{TIdentifier}">Thrown when the aggregate root was not found.</exception>
         public async Task<TAggregateRoot> Get(TIdentifier identifier)
         {
             if (_unitOfWork.TryGet(identifier, out var aggregateRootEntity))
@@ -89,7 +89,7 @@ namespace Aggregator.Persistence
         /// <param name="identifier">The aggregate root identifier.</param>
         /// <param name="aggregateRoot">The aggregate root.</param>
         /// <returns>An awaitable <see cref="Task"/>.</returns>
-        /// <exception cref="AggregateRootAlreadyExistsException{TIdentifier}"></exception>
+        /// <exception cref="AggregateRootAlreadyExistsException{TIdentifier}">Thrown when the aggregate root already exists.</exception>
         public async Task Add(TIdentifier identifier, TAggregateRoot aggregateRoot)
         {
             if (aggregateRoot == null) throw new ArgumentNullException(nameof(aggregateRoot));

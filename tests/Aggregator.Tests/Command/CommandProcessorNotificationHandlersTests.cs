@@ -14,7 +14,7 @@ namespace Aggregator.Tests.Command
             // Arrange
             var handlers = new CommandProcessorNotificationHandlers
             {
-                PrepareContext = null
+                PrepareContext = null,
             };
 
             // Act & Assert
@@ -45,7 +45,7 @@ namespace Aggregator.Tests.Command
             // Arrange
             var handlers = new CommandProcessorNotificationHandlers
             {
-                EnrichEvent = null
+                EnrichEvent = null,
             };
 
             // Act & Assert

@@ -12,7 +12,7 @@ namespace Aggregator.Autofac
         private readonly ILifetimeScope _lifetimeScope;
 
         /// <summary>
-        /// Creates a new <see cref="ServiceScopeFactory"/> instance.
+        /// Initializes a new instance of the <see cref="ServiceScopeFactory"/> class.
         /// </summary>
         /// <param name="lifetimeScope">The parent lifetime scope.</param>
         public ServiceScopeFactory(ILifetimeScope lifetimeScope)

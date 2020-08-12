@@ -49,10 +49,8 @@ namespace Aggregator.Persistence.EventStore
         {
             while (_pendingTransactions.Any())
             {
-                using (var transaction = _pendingTransactions.Dequeue())
-                {
-                    await transaction.CommitAsync().ConfigureAwait(false);
-                }
+                using IWrappedTransaction transaction = _pendingTransactions.Dequeue();
+                await transaction.CommitAsync().ConfigureAwait(false);
             }
         }
 
@@ -64,10 +62,8 @@ namespace Aggregator.Persistence.EventStore
         {
             while (_pendingTransactions.Any())
             {
-                using (var transaction = _pendingTransactions.Dequeue())
-                {
-                    transaction.Rollback();
-                }
+                using IWrappedTransaction transaction = _pendingTransactions.Dequeue();
+                transaction.Rollback();
             }
 
             return Task.CompletedTask;
@@ -84,10 +80,10 @@ namespace Aggregator.Persistence.EventStore
         public async Task StoreEvents(TIdentifier identifier, long expectedVersion, IEnumerable<TEventBase> events, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            var transaction = await _createTransaction(_connection, identifier.ToString(), expectedVersion - 1).ConfigureAwait(false);
+            IWrappedTransaction transaction = await _createTransaction(_connection, identifier.ToString(), expectedVersion - 1).ConfigureAwait(false);
             _pendingTransactions.Enqueue(transaction);
 
-            var eventData = events
+            EventData[] eventData = events
                 .Select(@event => new EventData(
                     eventId: Guid.NewGuid(),
                     type: @event.GetType().FullName,
@@ -103,7 +99,7 @@ namespace Aggregator.Persistence.EventStore
 
         private static async Task<IWrappedTransaction> CreateTransaction(IEventStoreConnection connection, string identifier, long expectedVersion)
         {
-            var transaction = await connection.StartTransactionAsync(identifier, expectedVersion).ConfigureAwait(false);
+            EventStoreTransaction transaction = await connection.StartTransactionAsync(identifier, expectedVersion).ConfigureAwait(false);
             return new WrappedTransaction(transaction);
         }
     }
@@ -111,7 +107,9 @@ namespace Aggregator.Persistence.EventStore
     internal interface IWrappedTransaction : IDisposable
     {
         Task WriteAsync(EventData[] eventData);
+
         Task CommitAsync();
+
         void Rollback();
     }
 

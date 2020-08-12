@@ -4,7 +4,6 @@ using Aggregator.Internal;
 
 namespace Aggregator.Command
 {
-    [SuppressMessage("ReSharper", "InconsistentlySynchronizedField")]
     internal static class CommandHandlingContextExtensions
     {
         internal static readonly string UnitOfWorkKey = $"UnitOfWork.{Guid.NewGuid():N}";

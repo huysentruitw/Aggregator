@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.1</TargetFramework>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Aggregator" Version="3.1.0-alpha0019" />
+      <PackageReference Include="FluentValidation" Version="8.6.2" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\KanbanStyle.Messages\KanbanStyle.Messages.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="CommandHandlers\User" />
+    </ItemGroup>
+
+</Project>

@@ -10,7 +10,7 @@ namespace Aggregator.Testing
     {
         private static readonly JsonSerializerSettings JsonSettings = new JsonSerializerSettings
         {
-            ContractResolver = new ExceptionContractResolver()
+            ContractResolver = new ExceptionContractResolver(),
         };
 
         private readonly TAggregateRoot _aggregateRoot;

@@ -11,7 +11,7 @@ namespace Aggregator.Exceptions
         where TIdentifier : IEquatable<TIdentifier>
     {
         /// <summary>
-        /// Constructs a new <see cref="AggregateRootAlreadyExistsException{TIdentifier}"/> instance.
+        /// Initializes a new instance of the <see cref="AggregateRootAlreadyExistsException{TIdentifier}"/> class.
         /// </summary>
         /// <param name="identifier">The aggregate root identifier.</param>
         public AggregateRootAlreadyExistsException(TIdentifier identifier)

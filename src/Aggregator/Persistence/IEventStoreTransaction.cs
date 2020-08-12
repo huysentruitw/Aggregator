@@ -8,17 +8,21 @@ namespace Aggregator.Persistence
     /// <summary>
     /// Interface for an event store transaction.
     /// </summary>
+    /// <typeparam name="TIdentifier">The type of the aggregate identifier.</typeparam>
+    /// <typeparam name="TEventBase">The event base type.</typeparam>
     public interface IEventStoreTransaction<in TIdentifier, in TEventBase> : IDisposable
         where TIdentifier : IEquatable<TIdentifier>
     {
         /// <summary>
         /// Commit the transaction.
         /// </summary>
+        /// <returns>An awaitable <see cref="Task"/>.</returns>
         Task Commit();
 
         /// <summary>
         /// Rollback the transaction.
         /// </summary>
+        /// <returns>An awaitable <see cref="Task"/>.</returns>
         Task Rollback();
 
         /// <summary>

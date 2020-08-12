@@ -8,6 +8,8 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>keyfile.snk</AssemblyOriginatorKeyFile>
+    <CodeAnalysisRuleSet>..\..\ca.ruleset</CodeAnalysisRuleSet>
+    <LangVersion>8</LangVersion>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -18,6 +20,10 @@
 
   <ItemGroup>
     <PackageReference Include="Autofac" Version="5.1.2" />
+    <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>

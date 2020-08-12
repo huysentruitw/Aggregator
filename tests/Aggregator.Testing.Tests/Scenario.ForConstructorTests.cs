@@ -37,7 +37,7 @@ namespace Aggregator.Testing.Tests
                     .ForConstructor(() => Person.Register("Kenny Di Tunnel"))
                     .Then(new PersonRegisteredEvent
                     {
-                        Name = "Kenny Di Tunnel"
+                        Name = "Kenny Di Tunnel",
                     })
                     .Assert();
 
@@ -57,7 +57,7 @@ namespace Aggregator.Testing.Tests
                     .ForConstructor(() => Person.Register("Kenny Di Tunnel"))
                     .Then(new PersonRegisteredEvent
                     {
-                        Name = "Marieke Rechte"
+                        Name = "Marieke Rechte",
                     })
                     .Assert();
 
@@ -78,7 +78,7 @@ namespace Aggregator.Testing.Tests
                     .ForConstructor(() => Person.Register("Kenny Di Tunnel"))
                     .Then(new PersonNameUpdatedEvent
                     {
-                        Name = new UpdatedInfo<string>("A", "B")
+                        Name = new UpdatedInfo<string>("A", "B"),
                     })
                     .Assert();
 
