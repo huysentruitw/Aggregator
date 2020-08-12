@@ -1,6 +1,9 @@
 # Aggregator
 
-[![Build status](https://ci.appveyor.com/api/projects/status/7uac3qe1fpcl973y/branch/develop?svg=true)](https://ci.appveyor.com/project/huysentruitw/aggregator/branch/develop) [![codecov](https://codecov.io/gh/huysentruitw/Aggregator/branch/develop/graph/badge.svg)](https://codecov.io/gh/huysentruitw/Aggregator) ![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/Aggregator)
+[![Build status](https://ci.appveyor.com/api/projects/status/7uac3qe1fpcl973y/branch/develop?svg=true)](https://ci.appveyor.com/project/huysentruitw/aggregator/branch/develop)
+[![codecov](https://codecov.io/gh/huysentruitw/Aggregator/branch/develop/graph/badge.svg)](https://codecov.io/gh/huysentruitw/Aggregator)
+![Nuget (with prereleases)](https://img.shields.io/nuget/v/Aggregator)
+![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/Aggregator)
 
 Aggregator contains some fundamental base classes and interfaces for building a CQRS/ES based application.
 
